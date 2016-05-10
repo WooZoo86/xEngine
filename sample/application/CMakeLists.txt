@@ -1,0 +1,3 @@
+add_executable(ApplicationSample ApplicationSample.cc)
+
+target_link_libraries(ApplicationSample xEngine EASTL)

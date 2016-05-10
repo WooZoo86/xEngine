@@ -1,0 +1,55 @@
+if (CMAKE_CL_64)
+	message("Target Platform: Windows 64-bit")
+    set(SAM_PLATFORM WIN64)
+    set(SAM_PLATFORM_NAME "win64")
+    set(SAM_WINDOWS_PLATFORM_NAME "x64")
+else ()
+	message("Target Platform: Windows 32-bit")
+    set(SAM_PLATFORM WIN32)
+    set(SAM_PLATFORM_NAME "win32")
+    set(SAM_WINDOWS_PLATFORM_NAME "x86")
+endif ()
+
+set(SAM_WINDOWS 1)
+
+set(CMAKE_CONFIGURATION_TYPES Debug Release)
+
+set(CMAKE_CXX_STANDARD_LIBRARIES "kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib dbghelp.lib wsock32.lib ws2_32.lib rpcrt4.lib wininet.lib")
+set(CMAKE_C_STANDARD_LIBRARIES "kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib dbghelp.lib wsock32.lib ws2_32.lib rpcrt4.lib wininet.lib")
+
+if (SAM_RTTI)
+    message("C++ RTTI are enabled")
+    set(SAM_VS_RTTI_FLAGS "/GR")
+else ()
+    message("C++ RTTI are disabled")
+    set(SAM_VS_RTTI_FLAGS "/GR-")
+endif ()
+
+set(CMAKE_CXX_FLAGS "${SAM_VS_RTTI_FLAGS} /EHa /MP /WX /TP /DWIN32 /DSAM_WINDOWS=1")
+set(CMAKE_CXX_FLAGS_DEBUG "/Zi /Od /Oy- /MTd /D_DEBUG /D_DEBUG_ /DSAM_DEBUG=1")
+set(CMAKE_CXX_FLAGS_RELEASE "/Ox /MT /DNDEBUG")
+
+set(CMAKE_C_FLAGS "/MP /WX /TC /errorReport:queue /DWIN32 /DSAM_WINDOWS=1")
+set(CMAKE_C_FLAGS_DEBUG "/Zi /Od /Oy- /MTd /D_DEBUG /D_DEBUG_ /DSAM_DEBUG=1")
+set(CMAKE_C_FLAGS_RELEASE "/Ox /MT /GS- /DNDEBUG ")
+
+set(CMAKE_EXE_LINKER_FLAGS "/STACK:5000000 /machine:${SAM_WINDOWS_PLATFORM_NAME}")
+set(CMAKE_EXE_LINKER_FLAGS_DEBUG "/DEBUG")
+set(CMAKE_EXE_LINKER_FLAGS_RELEASE "")
+
+set(CMAKE_CONFIGURATION_TYPES "${CMAKE_CONFIGURATION_TYPES}" CACHE STRING "Config Type" FORCE)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}" CACHE STRING "Generic C++ Compiler Flags" FORCE)
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}" CACHE STRING "C++ Debug Compiler Flags" FORCE)
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}" CACHE STRING "C++ Release Compiler Flags" FORCE)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}" CACHE STRING "Generic C Compiler Flags" FORCE)
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}" CACHE STRING "C Debug Compiler Flags" FORCE)
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}" CACHE STRING "C Release Compiler Flags" FORCE)
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}" CACHE STRING "Generic Linker Flags" FORCE)
+set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG}" CACHE STRING "Debug Linker Flags" FORCE)
+set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE}" CACHE STRING "Release Linker Flags" FORCE)
+
+if (NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Compile Type" FORCE)
+endif ()
+
+set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS Debug Release)
