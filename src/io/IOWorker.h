@@ -25,19 +25,23 @@ class IOWorker {
   void Tick();
 
  private:
-  void Loop();
+  void HandleWaitingMessage();
 
-  static void LoopWrap(IOWorker *self) {
-    self->Loop();
-  }
+  void HandleComingMessage();
+
+  void NotifyMessage();
 
  private:
   bool available_{false};
+#if X_HAS_THREADS
   std::thread thread_;
   std::atomic_bool running_{false};
   std::mutex waiting_queue_lock_;
   std::mutex forwarding_queue_lock_;
   std::condition_variable condition_variable_;
+#else
+  bool running_{false};
+#endif
   eastl::queue<IOMessagePtr> coming_messages_;
   eastl::queue<IOMessagePtr> waiting_messages_;
   eastl::queue<IOMessagePtr> pending_messages_;

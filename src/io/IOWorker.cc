@@ -8,14 +8,22 @@ namespace xEngine {
 void IOWorker::Initialize() {
   x_assert(!available_);
   running_ = true;
-  thread_ = std::thread(IOWorker::LoopWrap, this);
+#if X_HAS_THREADS
+  thread_ = std::thread([this](){
+    this->HandleWaitingMessage();
+  });
+#endif
 }
 
 void IOWorker::Finalize() {
   x_assert(available_);
   running_ = false;
+#if X_HAS_THREADS
   condition_variable_.notify_one();
   thread_.join();
+#else
+  Tick();
+#endif
 }
 
 void IOWorker::Handle(IOMessagePtr message) {
@@ -23,50 +31,26 @@ void IOWorker::Handle(IOMessagePtr message) {
 }
 
 void IOWorker::Tick() {
-  forwarding_queue_lock_.lock();
-  notify_messages_ = std::move(forwarding_messages_);
-  forwarding_queue_lock_.unlock();
-  while (!notify_messages_.empty()) {
-    auto message = notify_messages_.front();
-    switch (message->type()) {
-      case IOMessageType::kRead: {
-        auto read_message = eastl::static_pointer_cast<IOReadMessage>(message);
-        read_message->Notify();
-        break;
-      }
-      case IOMessageType::kWrite: {
-        auto write_message = eastl::static_pointer_cast<IOWriteMessage>(message);
-        write_message->Notify();
-        break;
-      }
-      default: break;
-    }
-    notify_messages_.pop();
-  }
-  if (!coming_messages_.empty()) {
-    waiting_queue_lock_.lock();
-    if (waiting_messages_.empty()) {
-      waiting_messages_ = std::move(coming_messages_);
-    } else {
-      while (!coming_messages_.empty()) {
-        waiting_messages_.push(coming_messages_.front());
-        coming_messages_.pop();
-      }
-    }
-    waiting_queue_lock_.unlock();
-    condition_variable_.notify_one();
-  }
+  HandleComingMessage();
+#if !X_HAS_THREADS
+  HandleWaitingMessage();
+#endif
+  NotifyMessage();
 }
 
-void IOWorker::Loop() {
-  while (running_) {
+void IOWorker::HandleWaitingMessage() {
+  do {
+#if X_HAS_THREADS
     std::mutex mutex;
     std::unique_lock<std::mutex> lock(mutex);
     condition_variable_.wait(lock);
     lock.unlock();
     waiting_queue_lock_.lock();
+#endif
     pending_messages_ = std::move(waiting_messages_);
+#if X_HAS_THREADS
     waiting_queue_lock_.unlock();
+#endif
     while (!pending_messages_.empty()) {
       auto message = pending_messages_.front();
       switch (message->type()) {
@@ -102,7 +86,9 @@ void IOWorker::Loop() {
       pending_messages_.pop();
     }
     if (!done_messages_.empty()) {
+#if X_HAS_THREADS
       forwarding_queue_lock_.lock();
+#endif
       if (forwarding_messages_.empty()) {
         forwarding_messages_ = std::move(done_messages_);
       } else {
@@ -111,8 +97,57 @@ void IOWorker::Loop() {
           done_messages_.pop();
         }
       }
+#if X_HAS_THREADS
       forwarding_queue_lock_.unlock();
+#endif
     }
+  } while (running_);
+}
+
+void IOWorker::HandleComingMessage() {
+  if (!coming_messages_.empty()) {
+#if X_HAS_THREADS
+    waiting_queue_lock_.lock();
+#endif
+    if (waiting_messages_.empty()) {
+      waiting_messages_ = std::move(coming_messages_);
+    } else {
+      while (!coming_messages_.empty()) {
+        waiting_messages_.push(coming_messages_.front());
+        coming_messages_.pop();
+      }
+    }
+#if X_HAS_THREADS
+    waiting_queue_lock_.unlock();
+    condition_variable_.notify_one();
+#endif
+  }
+}
+
+void IOWorker::NotifyMessage() {
+#if X_HAS_THREADS
+  forwarding_queue_lock_.lock();
+#endif
+  notify_messages_ = std::move(forwarding_messages_);
+#if X_HAS_THREADS
+  forwarding_queue_lock_.unlock();
+#endif
+  while (!notify_messages_.empty()) {
+    auto message = notify_messages_.front();
+    switch (message->type()) {
+      case IOMessageType::kRead: {
+        auto read_message = eastl::static_pointer_cast<IOReadMessage>(message);
+        read_message->Notify();
+        break;
+      }
+      case IOMessageType::kWrite: {
+        auto write_message = eastl::static_pointer_cast<IOWriteMessage>(message);
+        write_message->Notify();
+        break;
+      }
+      default: break;
+    }
+    notify_messages_.pop();
   }
 }
 
