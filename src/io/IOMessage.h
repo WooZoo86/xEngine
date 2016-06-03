@@ -39,6 +39,8 @@ typedef eastl::shared_ptr<IOMessage> IOMessagePtr;
 
 class IOReadMessage : public IOMessage {
  public:
+  CREATE_FUNC_DECLARE(IOReadMessage)
+
   IOReadMessage(Location location, IOCallbackFunction callback) :
     IOMessage(IOMessageType::kRead),
     location_(location),
@@ -67,6 +69,8 @@ typedef eastl::shared_ptr<IOReadMessage> IOReadMessagePtr;
 
 class IOWriteMessage : public IOMessage {
  public:
+  CREATE_FUNC_DECLARE(IOWriteMessage)
+
   IOWriteMessage(Location location, DataPtr data, IOCallbackFunction callback) :
     IOMessage(IOMessageType::kWrite),
     location_(location),
@@ -94,6 +98,8 @@ typedef eastl::shared_ptr<IOWriteMessage> IOWriteMessagePtr;
 
 class IORegisterFilesystemMessage : public IOMessage {
  public:
+  CREATE_FUNC_DECLARE(IORegisterFilesystemMessage)
+
   IORegisterFilesystemMessage(eastl::string name) : IOMessage(IOMessageType::kRegisterFilesystem), name_(name) {}
 
   const eastl::string &name() const { return name_; }

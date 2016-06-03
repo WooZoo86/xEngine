@@ -8,7 +8,7 @@ void IO::Initialize(int32 threadCount) {
   x_assert(!available_);
   available_ = true;
   for (auto i = 0; i < threadCount; ++i) {
-    auto worker = eastl::make_shared<IOWorker>();
+    auto worker = IOWorker::Create();
     worker->Initialize();
     workers_.push_back(worker);
   }
@@ -30,12 +30,12 @@ void IO::Tick() {
 }
 
 void IO::Read(const eastl::string &file, IOCallbackFunction callback) {
-  auto message = eastl::make_shared<IOReadMessage>(location_placeholder_manager_.ResolveLocation(file), callback);
+  auto message = IOReadMessage::Create(location_placeholder_manager_.ResolveLocation(file), callback);
   workers_[++last_worker_ % workers_.size()]->Handle(message);
 }
 
 void IO::Write(const eastl::string &file, DataPtr data, IOCallbackFunction callback) {
-  auto message = eastl::make_shared<IOWriteMessage>(location_placeholder_manager_.ResolveLocation(file), data, callback);
+  auto message = IOWriteMessage::Create(location_placeholder_manager_.ResolveLocation(file), data, callback);
   workers_[++last_worker_ % workers_.size()]->Handle(message);
 }
 

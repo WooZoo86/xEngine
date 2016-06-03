@@ -28,6 +28,13 @@
 #    define x_error(...) do { exit(-1); } while(0)
 #endif // X_DEBUG
 
+#define CREATE_FUNC_DECLARE(clazz) \
+    template<typename... ARGS> \
+    static eastl::shared_ptr<clazz> Create(ARGS &&... args) \
+    { \
+        return eastl::make_shared<clazz>(eastl::forward<ARGS>(args)...); \
+    }
+
 #define DISALLOW_ASSIGN(clazz) void operator=(const clazz &) = delete;
 
 #define DISALLOW_COPY_AND_ASSIGN(clazz) \

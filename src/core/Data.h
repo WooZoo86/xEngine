@@ -1,6 +1,8 @@
 #ifndef XENGINE_CORE_DATA_H
 #define XENGINE_CORE_DATA_H
 
+#include "Core.h"
+
 #include <EASTL/allocator.h>
 #include <EASTL/shared_ptr.h>
 
@@ -8,7 +10,9 @@ namespace xEngine {
 
 class Data final {
  public:
-  Data() { }
+  CREATE_FUNC_DECLARE(Data)
+
+  Data() {}
 
   explicit Data(size_t size) : size_(size) { if (size_ > 0) buffer_ = static_cast<char *>(eastl::GetDefaultAllocator()->allocate(size_)); }
 
@@ -41,6 +45,8 @@ class Data final {
   void set_size(size_t size);
 
   const char *buffer() const { return buffer_; }
+
+  char *buffer() { return buffer_; }
 
  private:
   size_t size_{0};

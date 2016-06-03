@@ -6,7 +6,7 @@
 namespace xEngine {
 
 void IOWorker::Initialize() {
-  x_assert(!available_);
+  x_assert(!running_);
   running_ = true;
 #if X_HAS_THREADS
   thread_ = std::thread([this](){
@@ -16,7 +16,7 @@ void IOWorker::Initialize() {
 }
 
 void IOWorker::Finalize() {
-  x_assert(available_);
+  x_assert(running_);
   running_ = false;
 #if X_HAS_THREADS
   condition_variable_.notify_one();
@@ -39,8 +39,8 @@ void IOWorker::Tick() {
 }
 
 void IOWorker::HandleWaitingMessage() {
-  do {
 #if X_HAS_THREADS
+  while (running_) {
     std::mutex mutex;
     std::unique_lock<std::mutex> lock(mutex);
     condition_variable_.wait(lock);
@@ -101,7 +101,9 @@ void IOWorker::HandleWaitingMessage() {
       forwarding_queue_lock_.unlock();
 #endif
     }
-  } while (running_);
+#if X_HAS_THREADS
+  }
+#endif
 }
 
 void IOWorker::HandleComingMessage() {

@@ -52,7 +52,7 @@ class IO {
 
   void RegisterFilesystem(const eastl::string &name, Filesystem::Creator function) {
     filesystem_manager_.RegisterFilesystem(name, function);
-    for (auto &worker : workers_) worker->Handle(eastl::make_shared<IORegisterFilesystemMessage>(name));
+    for (auto &worker : workers_) worker->Handle(IORegisterFilesystemMessage::Create(name));
   }
 
   FilesystemPtr CreateFilesystem(const eastl::string &name) {

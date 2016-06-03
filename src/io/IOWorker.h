@@ -16,6 +16,8 @@ namespace xEngine {
 
 class IOWorker {
  public:
+  CREATE_FUNC_DECLARE(IOWorker)
+
   void Initialize();
 
   void Finalize();
@@ -32,7 +34,6 @@ class IOWorker {
   void NotifyMessage();
 
  private:
-  bool available_{false};
 #if X_HAS_THREADS
   std::thread thread_;
   std::atomic_bool running_{false};
