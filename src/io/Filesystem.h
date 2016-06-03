@@ -17,6 +17,8 @@ class Filesystem {
  public:
   typedef eastl::function<eastl::shared_ptr<Filesystem>()> Creator;
 
+  virtual ~Filesystem() {}
+
   virtual DataPtr Read(Location location) = 0;
 
   virtual void Write(Location location, DataPtr data) = 0;

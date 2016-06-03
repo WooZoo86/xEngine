@@ -4,7 +4,7 @@
 
 using namespace xEngine;
 
-class ApplicationSample : public Application {
+class WindowSample : public Application {
  public:
   virtual ApplicationStatus Initialize() override {
     Log::GetInstance().Info("Initialize\n");
@@ -28,4 +28,4 @@ class ApplicationSample : public Application {
   Window *window{nullptr};
 };
 
-XENGINE_APPLICATION(ApplicationSample)
+XENGINE_APPLICATION(WindowSample)

@@ -5,7 +5,7 @@
 
 using namespace xEngine;
 
-class ApplicationSample : public Application {
+class StorageSample : public Application {
  public:
   virtual ApplicationStatus Initialize() override {
     Log::GetInstance().Info("Initialize\n");
@@ -43,4 +43,4 @@ class ApplicationSample : public Application {
   bool complete{false};
 };
 
-XENGINE_APPLICATION(ApplicationSample)
+XENGINE_APPLICATION(StorageSample)
