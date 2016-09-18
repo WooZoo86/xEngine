@@ -5,6 +5,8 @@
 
 #include "core/Types.h"
 
+#include <resource/ResourceIdentity.h>
+
 #include <EASTL/string.h>
 
 namespace xEngine {
@@ -13,6 +15,8 @@ struct WindowConfig {
   static WindowConfig ForWindow(int32 width, int32 height, const eastl::string &title);
 
   static WindowConfig ForFullScreen(const eastl::string &title);
+
+  ResourceIdentity identity{ResourceIdentity::Unique()};
 
   int32 width{1024};
 

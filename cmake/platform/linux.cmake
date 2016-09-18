@@ -1,27 +1,27 @@
 message("Target Platform: LINUX")
 
-set(SAM_PLATFORM LINUX)
-set(SAM_PLATFORM_NAME "linux")
+set(X_PLATFORM LINUX)
+set(X_PLATFORM_NAME "linux")
 
-set(SAM_LINUX 1)
+set(X_LINUX 1)
 
 set(CMAKE_CONFIGURATION_TYPES Debug Release)
 
-if (SAM_RTTI)
+if (X_RTTI)
     message("C++ RTTI is enabled")
-    set(SAM_LINUX_RTTI_FLAGS "")
+    set(X_LINUX_RTTI_FLAGS "")
 else()
     message("C++ RTTI is disabled")
-    set(SAM_LINUX_RTTI_FLAGS "-fno-rtti")
+    set(X_LINUX_RTTI_FLAGS "-fno-rtti")
 endif()
 
-set(CMAKE_CXX_FLAGS "${SAM_LINUX_RTTI_FLAGS} -std=c++11 -Wall -Wextra -Wno-multichar -Wno-unused-parameter -Wno-unused-function -Wno-sign-compare -DSAM_LINUX=1")
+set(CMAKE_CXX_FLAGS "${X_LINUX_RTTI_FLAGS} -std=c++11 -Wall -Wextra -Wno-multichar -Wno-unused-parameter -Wno-unused-function -Wno-sign-compare -DX_LINUX=1")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -ftree-vectorize -msse3 -ffast-math -DNDEBUG")
-set(CMAKE_CXX_FLAGS_DEBUG "-O0 -D_DEBUG_ -D_DEBUG -DSAM_DEBUG=1 -ggdb")
+set(CMAKE_CXX_FLAGS_DEBUG "-O0 -D_DEBUG_ -D_DEBUG -DX_DEBUG=1 -ggdb")
 
-set(CMAKE_C_FLAGS "-Wall -Wextra -Wno-unused-parameter -Wno-unused-function -Wno-sign-compare -DSAM_LINUX=1")
+set(CMAKE_C_FLAGS "-Wall -Wextra -Wno-unused-parameter -Wno-unused-function -Wno-sign-compare -DX_LINUX=1")
 set(CMAKE_C_FLAGS_RELEASE "-O3 -ftree-vectorize -msse3 -ffast-math -DNDEBUG")
-set(CMAKE_C_FLAGS_DEBUG "-O0 -D_DEBUG_ -D_DEBUG -DSAM_DEBUG=1 -ggdb")
+set(CMAKE_C_FLAGS_DEBUG "-O0 -D_DEBUG_ -D_DEBUG -DX_DEBUG=1 -ggdb")
 
 set(CMAKE_EXE_LINKER_FLAGS "")
 set(CMAKE_EXE_LINKER_FLAGS_RELEASE "")

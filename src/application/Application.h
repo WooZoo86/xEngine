@@ -27,7 +27,7 @@ enum class ApplicationStatus {
 
 class Application {
  public:
-  static Application *getInstance() {
+  static Application *GetInstance() {
     return instance_;
   }
 

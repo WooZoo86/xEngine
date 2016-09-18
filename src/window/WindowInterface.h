@@ -11,15 +11,15 @@ class WindowInterface {
  public:
   virtual ~WindowInterface() { }
 
-  virtual void Initialize(const WindowConfig &config) = 0;
+  virtual void Create(const WindowConfig &config) = 0;
 
-  virtual void Finalize() = 0;
+  virtual void Destroy() = 0;
 
   virtual bool Available() = 0;
 
-  virtual bool ShouldClose() = 0;
+  virtual void MakeCurrent() = 0;
 
-  virtual void PollEvent() = 0;
+  virtual bool ShouldClose() = 0;
 
   virtual void Present() = 0;
 

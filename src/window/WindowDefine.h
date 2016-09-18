@@ -6,20 +6,20 @@
 namespace xEngine {
 
 enum class PixelChannel: uint8 {
-  NONE = 0,
+  kNone = 0,
 
-  ALPHA = 1 << 0,
-  RED = 1 << 1,
-  GREEN = 1 << 2,
-  BLUE = 1 << 3,
-  DEPTH = 1 << 4,
-  STENCIL = 1 << 5,
+  kAlpha = 1 << 0,
+  kRed = 1 << 1,
+  kGreen = 1 << 2,
+  kBlue = 1 << 3,
+  kDepth = 1 << 4,
+  kStencil = 1 << 5,
 
-  DEPTH_STENTIL = DEPTH | STENCIL,
+  kDepthStentil = kDepth | kStencil,
 
-  RGBA = ALPHA | RED | GREEN | BLUE,
+  kRGBA = kAlpha | kRed | kGreen | kBlue,
 
-  ALL = ALPHA | RED | GREEN | BLUE | DEPTH | STENCIL,
+  kAll = kAlpha | kRed | kGreen | kBlue | kDepth | kStencil,
 };
 
 enum class PixelFormat: uint8 {
@@ -47,18 +47,16 @@ enum class PixelFormat: uint8 {
 };
 
 enum class MouseCursorMode: uint8 {
-  NORMAL,
-  HIDDEN,
-  DISABLE,
+  kNormal,
+  kHidden,
+  kDisable,
 };
 
 enum class MouseButtonType: uint8 {
-  UNKNOWN,
-  LEFT,
-  RIGHT,
-  MIDDLE,
-
-  COUNT,
+  kUnknown,
+  kLeft,
+  kRight,
+  kMiddle,
 };
 
 enum class KeyboardButtonType: uint8 {
@@ -181,70 +179,70 @@ inline int8 ChannelBitOfPixelFormat(PixelFormat format, PixelChannel channel) {
   int8 count = 0;
   switch (format) {
     case PixelFormat::RGBA32F:
-      if ((PixelChannel::RED == channel) || (PixelChannel::GREEN == channel) || (PixelChannel::BLUE == channel)
-          || (PixelChannel::ALPHA == channel)) {
+      if ((PixelChannel::kRed == channel) || (PixelChannel::kGreen == channel) || (PixelChannel::kBlue == channel)
+          || (PixelChannel::kAlpha == channel)) {
         count = 32;
       }
       break;
     case PixelFormat::RGBA16F:
-      if ((PixelChannel::RED == channel) || (PixelChannel::GREEN == channel) || (PixelChannel::BLUE == channel)
-          || (PixelChannel::ALPHA == channel)) {
+      if ((PixelChannel::kRed == channel) || (PixelChannel::kGreen == channel) || (PixelChannel::kBlue == channel)
+          || (PixelChannel::kAlpha == channel)) {
         count = 16;
       }
       break;
     case PixelFormat::RGBA8:
-      if ((PixelChannel::RED == channel) || (PixelChannel::GREEN == channel) || (PixelChannel::BLUE == channel)
-          || (PixelChannel::ALPHA == channel)) {
+      if ((PixelChannel::kRed == channel) || (PixelChannel::kGreen == channel) || (PixelChannel::kBlue == channel)
+          || (PixelChannel::kAlpha == channel)) {
         count = 8;
       }
       break;
     case PixelFormat::RGB8:
-      if ((PixelChannel::RED == channel) || (PixelChannel::GREEN == channel) || (PixelChannel::BLUE == channel)) {
+      if ((PixelChannel::kRed == channel) || (PixelChannel::kGreen == channel) || (PixelChannel::kBlue == channel)) {
         count = 8;
       }
       break;
     case PixelFormat::R5G6B5:
-      if ((PixelChannel::RED == channel) || (PixelChannel::BLUE == channel)) {
+      if ((PixelChannel::kRed == channel) || (PixelChannel::kBlue == channel)) {
         count = 5;
       }
-      else if (PixelChannel::GREEN == channel) {
+      else if (PixelChannel::kGreen == channel) {
         count = 6;
       }
       break;
     case PixelFormat::R5G5B5A1:
-      if ((PixelChannel::RED == channel) || (PixelChannel::GREEN == channel) || (PixelChannel::BLUE == channel)) {
+      if ((PixelChannel::kRed == channel) || (PixelChannel::kGreen == channel) || (PixelChannel::kBlue == channel)) {
         count = 5;
       }
-      else if (PixelChannel::ALPHA == channel) {
+      else if (PixelChannel::kAlpha == channel) {
         count = 1;
       }
       break;
     case PixelFormat::RGBA4:
-      if ((PixelChannel::RED == channel) || (PixelChannel::GREEN == channel) || (PixelChannel::BLUE == channel)
-          || (PixelChannel::ALPHA == channel)) {
+      if ((PixelChannel::kRed == channel) || (PixelChannel::kGreen == channel) || (PixelChannel::kBlue == channel)
+          || (PixelChannel::kAlpha == channel)) {
         count = 4;
       }
       break;
     case PixelFormat::L8:
-      if (PixelChannel::RED == channel) {
+      if (PixelChannel::kRed == channel) {
         count = 8;
       }
       break;
     case PixelFormat::D16:
-      if (PixelChannel::DEPTH == channel) {
+      if (PixelChannel::kDepth == channel) {
         count = 16;
       }
       break;
     case PixelFormat::D32:
-      if (PixelChannel::DEPTH == channel) {
+      if (PixelChannel::kDepth == channel) {
         count = 32;
       }
       break;
     case PixelFormat::D24S8:
-      if (PixelChannel::DEPTH == channel) {
+      if (PixelChannel::kDepth == channel) {
         count = 24;
       }
-      else if (PixelChannel::STENCIL == channel) {
+      else if (PixelChannel::kStencil == channel) {
         count = 8;
       }
       break;

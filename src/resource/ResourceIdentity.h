@@ -11,57 +11,57 @@ namespace xEngine {
 
 typedef uint32 ResourceSignature;
 
-enum: ResourceSignature {
+enum : ResourceSignature {
   kDefaultSignature = 0x7fffffff,
   kUniqueSignature = 0xffffffff,
 };
 
-class ResourceName {
+class ResourceIdentity {
  public:
-  static ResourceName Unique() {
-    ResourceName instance;
+  static ResourceIdentity Unique() {
+    ResourceIdentity instance;
     instance.signature_ = kUniqueSignature;
     return instance;
   }
 
-  static ResourceName Unique(const eastl::string &name) {
-    ResourceName instance;
-    instance.name_ = name;
-    instance.signature_ = kUniqueSignature;
-    return instance;
-  }
-
-  static ResourceName Unique(const char *name) {
-    ResourceName instance;
+  static ResourceIdentity Unique(const eastl::string &name) {
+    ResourceIdentity instance;
     instance.name_ = name;
     instance.signature_ = kUniqueSignature;
     return instance;
   }
 
-  static ResourceName Shared(ResourceSignature signature = kDefaultSignature) {
+  static ResourceIdentity Unique(const char *name) {
+    ResourceIdentity instance;
+    instance.name_ = name;
+    instance.signature_ = kUniqueSignature;
+    return instance;
+  }
+
+  static ResourceIdentity Shared(ResourceSignature signature = kDefaultSignature) {
     x_assert(signature != kUniqueSignature);
-    ResourceName instance;
+    ResourceIdentity instance;
     instance.signature_ = signature;
     return instance;
   }
 
-  static ResourceName Shared(const eastl::string &name, ResourceSignature signature = kDefaultSignature) {
+  static ResourceIdentity Shared(const eastl::string &name, ResourceSignature signature = kDefaultSignature) {
     x_assert(signature != kUniqueSignature);
-    ResourceName instance;
+    ResourceIdentity instance;
     instance.name_ = name;
     instance.signature_ = signature;
     return instance;
   }
 
-  static ResourceName Shared(const char *name, ResourceSignature signature = kDefaultSignature) {
+  static ResourceIdentity Shared(const char *name, ResourceSignature signature = kDefaultSignature) {
     x_assert(signature != kUniqueSignature);
-    ResourceName instance;
+    ResourceIdentity instance;
     instance.name_ = name;
     instance.signature_ = signature;
     return instance;
   }
 
-  void operator=(const ResourceName &other) {
+  void operator=(const ResourceIdentity &other) {
     name_ = other.name_;
     signature_ = other.signature_;
   }
@@ -70,15 +70,15 @@ class ResourceName {
     return signature_ == kUniqueSignature;
   }
 
-  bool operator<(const ResourceName &other) const {
+  bool operator<(const ResourceIdentity &other) const {
     return signature_ < other.signature_ || name_ < other.name_;
   }
 
-  bool operator==(const ResourceName &other) const {
+  bool operator==(const ResourceIdentity &other) const {
     return signature_ == other.signature_ && name_ == other.name_;
   }
 
-  bool operator!=(const ResourceName &other) const {
+  bool operator!=(const ResourceIdentity &other) const {
     return signature_ != other.signature_ || name_ != other.name_;
   }
 
@@ -96,9 +96,15 @@ class ResourceName {
 namespace eastl {
 
 template<>
-struct hash<xEngine::ResourceName> {
-  size_t operator()(const xEngine::ResourceName &other) const { return other.Hash(); }
+struct hash<xEngine::ResourceIdentity> {
+  size_t operator()(const xEngine::ResourceIdentity &other) const { return other.Hash(); }
 };
+
+struct ResourceSignatureCounter {};
+
+#define GetResourceSignature() COUNTER_READ(ResourceSignatureCounter)
+
+#define IncreaseResourceSignatureCounter() COUNTER_INC(ResourceSignatureCounter)
 
 } // namespace eastl
 

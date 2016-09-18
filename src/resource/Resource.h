@@ -1,6 +1,7 @@
 #ifndef XENGINE_RESOURCE_RESOURCE_H
 #define XENGINE_RESOURCE_RESOURCE_H
 
+#include "core/Counter.h"
 #include "core/Types.h"
 
 namespace xEngine {
@@ -64,7 +65,7 @@ inline ResourceUniqueID GetUniqueIDOfResourceID(ResourceID rid) {
 template<class CONFIG>
 class Resource {
  public:
-  virtual ~Resource() { }
+  virtual ~Resource() {}
 
   void Initialize(ResourceID id, const CONFIG &config) {
     id_ = id;
@@ -72,11 +73,15 @@ class Resource {
     config_ = config;
   }
 
-  virtual void Finalize() {
+  void Finalize() {
     id_ = kInvalidResourceID;
     status_ = ResourceStatus::kInvalid;
     config_ = CONFIG();
   }
+
+  void Loading() { x_assert(status_ == ResourceStatus::kPending); status_ = ResourceStatus::kLoading; }
+
+  void Complete() { x_assert(status_ == ResourceStatus::kLoading); status_ = ResourceStatus::kCompleted; }
 
   ResourceID id() const { return id_; }
 
@@ -89,6 +94,12 @@ class Resource {
   ResourceStatus status_{ResourceStatus::kInvalid};
   CONFIG config_;
 };
+
+struct ResourcePoolIDCounter {};
+
+#define GetResourcePoolID() COUNTER_READ(ResourcePoolIDCounter)
+
+#define IncreaseResourcePoolIDCounter() COUNTER_INC(ResourcePoolIDCounter)
 
 } // namespace xEngine
 

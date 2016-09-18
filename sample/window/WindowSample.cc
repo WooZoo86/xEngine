@@ -8,24 +8,28 @@ class WindowSample : public Application {
  public:
   virtual ApplicationStatus Initialize() override {
     Log::GetInstance().Info("Initialize\n");
-    window = new Window;
-    window->Initialize(WindowConfig::ForWindow(1024, 768, "WindowSample"));
+    Window::GetInstance().Initialize();
+    window_id_ = Window::GetInstance().Create(WindowConfig::ForWindow(1024, 768, "WindowSample"));
+    Window::GetInstance().MakeCurrent(window_id_);
     return Application::Initialize();
   }
   virtual ApplicationStatus Finalize() override {
     Log::GetInstance().Info("Finalize\n");
-    window->Finalize();
-    delete window;
+    Window::GetInstance().Finalize();
     return Application::Finalize();
   }
   virtual ApplicationStatus Loop() override {
-    window->PollEvent();
-    window->Present();
-    return window->ShouldClose() ? ApplicationStatus::kFinalize : ApplicationStatus::kLoop;
+    Window::GetInstance().PollEvent();
+    Window::GetInstance().PresentAllWindow();
+    if (Window::GetInstance().ShouldClose(window_id_)) {
+      Window::GetInstance().Destroy(window_id_);
+      window_id_ = kInvalidResourceID;
+    }
+    return Window::GetInstance().IsAllClosed() ? ApplicationStatus::kFinalize : ApplicationStatus::kLoop;
   }
 
  private:
-  Window *window{nullptr};
+  ResourceID window_id_{kInvalidResourceID};
 };
 
 XENGINE_APPLICATION(WindowSample)

@@ -1,4 +1,4 @@
-#if X_WINDOWS || X_OSX || X_LINUX
+#if X_WINDOWS || X_MACOS || X_LINUX
 
 #include "GLFWWindow.h"
 
@@ -8,20 +8,31 @@ namespace xEngine {
 
 GLFWWindow *GLFWWindow::self_ = nullptr;
 
-void GLFWWindow::Initialize(const WindowConfig &config) {
-  self_ = this;
-  x_assert(!Available());
-  config_ = config;
+void GLFWWindow::Initialize() {
   if (glfwInit() != GL_TRUE) {
     x_error("GLFW init error!\n");
   }
+}
+
+void GLFWWindow::Finalize(){
+  glfwTerminate();
+}
+
+void GLFWWindow::PollEvent() {
+  glfwPollEvents();
+}
+
+void GLFWWindow::Create(const WindowConfig &config){
+  self_ = this;
+  x_assert(!Available());
+  config_ = config;
   glfwSetErrorCallback(ErrorCallback);
-  glfwWindowHint(GLFW_RED_BITS, ChannelBitOfPixelFormat(config_.color_format, PixelChannel::RED));
-  glfwWindowHint(GLFW_GREEN_BITS, ChannelBitOfPixelFormat(config_.color_format, PixelChannel::GREEN));
-  glfwWindowHint(GLFW_BLUE_BITS, ChannelBitOfPixelFormat(config_.color_format, PixelChannel::BLUE));
-  glfwWindowHint(GLFW_ALPHA_BITS, ChannelBitOfPixelFormat(config_.color_format, PixelChannel::ALPHA));
-  glfwWindowHint(GLFW_DEPTH_BITS, ChannelBitOfPixelFormat(config_.depth_format, PixelChannel::DEPTH));
-  glfwWindowHint(GLFW_STENCIL_BITS, ChannelBitOfPixelFormat(config_.depth_format, PixelChannel::STENCIL));
+  glfwWindowHint(GLFW_RED_BITS, ChannelBitOfPixelFormat(config_.color_format, PixelChannel::kRed));
+  glfwWindowHint(GLFW_GREEN_BITS, ChannelBitOfPixelFormat(config_.color_format, PixelChannel::kGreen));
+  glfwWindowHint(GLFW_BLUE_BITS, ChannelBitOfPixelFormat(config_.color_format, PixelChannel::kBlue));
+  glfwWindowHint(GLFW_ALPHA_BITS, ChannelBitOfPixelFormat(config_.color_format, PixelChannel::kAlpha));
+  glfwWindowHint(GLFW_DEPTH_BITS, ChannelBitOfPixelFormat(config_.depth_format, PixelChannel::kDepth));
+  glfwWindowHint(GLFW_STENCIL_BITS, ChannelBitOfPixelFormat(config_.depth_format, PixelChannel::kStencil));
   glfwWindowHint(GLFW_SAMPLES, config_.sample_count > 1 ? config_.sample_count : 0);
 #if X_DEBUG
   glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
@@ -36,11 +47,10 @@ void GLFWWindow::Initialize(const WindowConfig &config) {
   glfwSwapInterval(config_.swap_interval);
 }
 
-void GLFWWindow::Finalize() {
+void GLFWWindow::Destroy(){
   x_assert(Available());
   glfwDestroyWindow(window_);
   window_ = nullptr;
-  glfwTerminate();
   self_ = nullptr;
 }
 
@@ -48,14 +58,14 @@ bool GLFWWindow::Available() {
   return window_ != nullptr;
 }
 
+void GLFWWindow::MakeCurrent() {
+  x_assert(Available());
+  glfwMakeContextCurrent(window_);
+}
+
 bool GLFWWindow::ShouldClose() {
   x_assert(Available());
   return glfwWindowShouldClose(window_) == GL_TRUE;
-}
-
-void GLFWWindow::PollEvent() {
-  x_assert(Available());
-  glfwPollEvents();
 }
 
 void GLFWWindow::Present() {
@@ -78,4 +88,4 @@ const WindowConfig &GLFWWindow::GetConfig() const {
 
 } // namespace xEngine
 
-#endif // X_WINDOWS || X_OSX || X_LINUX
+#endif // X_WINDOWS || X_MACOS || X_LINUX

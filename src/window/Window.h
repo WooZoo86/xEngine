@@ -1,15 +1,51 @@
 #ifndef XENGINE_WINDOW_WINDOW_H
 #define XENGINE_WINDOW_WINDOW_H
 
-#if X_WINDOWS || X_OSX || X_LINUX
-# include "window/glfw/GLFWWindow.h"
-#endif // X_WINDOWS || X_OSX || X_LINUX
+#include "WindowInterface.h"
+#include "WindowFactory.h"
+
+#include <resource/ResourceManager.h>
+#include <resource/ResourcePool.h>
 
 namespace xEngine {
 
-#if X_WINDOWS || X_OSX || X_LINUX
-class Window: public GLFWWindow { };
-#endif // X_WINDOWS || X_OSX || X_LINUX
+typedef ResourcePool<WindowResource, WindowConfig> WindowPool;
+
+class Window : public ResourceManager {
+ public:
+  static Window &GetInstance() {
+    static Window instance;
+    return instance;
+  }
+
+ public:
+  void Initialize(uint16 pool_size = 5);
+
+  void Finalize();
+
+  bool Available();
+
+  ResourceID Create(const WindowConfig &config);
+
+  void Destroy(ResourceID id);
+
+  const eastl::unique_ptr<WindowInterface> &Get(ResourceID id);
+
+  void MakeCurrent(ResourceID id);
+
+  bool ShouldClose(ResourceID id);
+
+  bool IsAllClosed();
+
+  void PollEvent();
+
+  void PresentAllWindow();
+
+ private:
+  bool available_{false};
+  WindowFactory factory_;
+  WindowPool pool_;
+};
 
 } // namespace xEngine
 

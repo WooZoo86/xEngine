@@ -9,30 +9,30 @@ class HTTPSample : public Application {
  public:
   virtual ApplicationStatus Initialize() override {
     Log::GetInstance().Info("Initialize\n");
-    IO::getInstance().Initialize();
-    IO::getInstance().AddPlaceholder("web", "http://leafnsand.com/");
-    IO::getInstance().RegisterFilesystem("http", HTTPFilesystem::Creator);
+    IO::GetInstance().Initialize();
+    IO::GetInstance().AddPlaceholder("web", "http://leafnsand.com/");
+    IO::GetInstance().RegisterFilesystem("http", HTTPFilesystem::Creator);
 
-    IO::getInstance().Read("web:index.html", [&](Location location, IOStatus status, DataPtr data) {
+    IO::GetInstance().Read("web:index.html", [&](Location location, IOStatus status, DataPtr data) {
       if (status == IOStatus::kSuccess) {
         Log::GetInstance().Debug("read complete: %s\n", data->buffer());
-        complete = true;
+        complete_ = true;
       }
     });
     return Application::Initialize();
   }
   virtual ApplicationStatus Finalize() override {
     Log::GetInstance().Info("Finalize\n");
-    IO::getInstance().Finalize();
+    IO::GetInstance().Finalize();
     return Application::Finalize();
   }
   virtual ApplicationStatus Loop() override {
-    IO::getInstance().Tick();
-    return complete ? ApplicationStatus::kFinalize : ApplicationStatus::kLoop;
+    IO::GetInstance().Tick();
+    return complete_ ? ApplicationStatus::kFinalize : ApplicationStatus::kLoop;
   }
 
  private:
-  bool complete{false};
+  bool complete_{false};
 };
 
 XENGINE_APPLICATION(HTTPSample)

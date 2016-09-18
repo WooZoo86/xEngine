@@ -4,11 +4,11 @@
 
 namespace xEngine {
 
-void ResourceManager::Add(const ResourceName &name, ResourceID id) {
+void ResourceManager::Add(const ResourceIdentity &identity, ResourceID id) {
   resource_id_cache_.push_back(id);
-  if (!name.IsUnique()) {
-    name_to_id_.insert({name, id});
-    id_to_name_.insert({id, name});
+  if (!identity.IsUnique()) {
+    identity_to_id_.insert({identity, id});
+    id_to_identity_.insert({id, identity});
   }
 }
 
@@ -16,24 +16,25 @@ void ResourceManager::Remove(ResourceID id) {
   auto cache = eastl::find(resource_id_cache_.begin(), resource_id_cache_.end(), id);
   if (cache != resource_id_cache_.end()) {
     resource_id_cache_.erase(cache);
-    auto node = id_to_name_.find(id);
-    if (node != id_to_name_.end()) {
-      name_to_id_.erase(node->second);
-      id_to_name_.erase(id);
+    auto node = id_to_identity_.find(id);
+    if (node != id_to_identity_.end()) {
+      identity_to_id_.erase(node->second);
+      id_to_identity_.erase(id);
     }
   }
 }
 
 void ResourceManager::RemoveAll() {
   resource_id_cache_.clear();
-  name_to_id_.clear();
+  identity_to_id_.clear();
+  id_to_identity_.clear();
 }
 
-ResourceID ResourceManager::Find(const ResourceName &name) const {
+ResourceID ResourceManager::Find(const ResourceIdentity &identity) const {
   ResourceID id = kInvalidResourceID;
-  if (!name.IsUnique()) {
-    auto node = name_to_id_.find(name);
-    if (node != name_to_id_.end()) {
+  if (!identity.IsUnique()) {
+    auto node = identity_to_id_.find(identity);
+    if (node != identity_to_id_.end()) {
       id = node->second;
     }
   }

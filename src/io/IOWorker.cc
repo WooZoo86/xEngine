@@ -78,7 +78,7 @@ void IOWorker::HandleWaitingMessage() {
         }
         case IOMessageType::kRegisterFilesystem: {
           auto register_filesystem_message = eastl::static_pointer_cast<IORegisterFilesystemMessage>(message);
-          filesystems_[register_filesystem_message->name()] = IO::getInstance().CreateFilesystem(register_filesystem_message->name());
+          filesystems_[register_filesystem_message->name()] = IO::GetInstance().CreateFilesystem(register_filesystem_message->name());
           break;
         }
         default: break;

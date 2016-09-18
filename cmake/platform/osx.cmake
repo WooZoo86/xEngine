@@ -1,24 +1,24 @@
-message("Target Platform: OSX")
+message("Target Platform: MACOS")
 
-set(X_OSX 1)
+set(X_MACOS 1)
 
 set(CMAKE_CONFIGURATION_TYPES Debug Release)
 
 if (X_ENGINE_OPTION_RTTI)
     message("C++ RTTI is enabled")
     set(CMAKE_XCODE_ATTRIBUTE_GCC_ENABLE_CPP_RTTI "YES")
-    set(X_OSX_RTTI_FLAGS "")
+    set(X_MACOS_RTTI_FLAGS "")
 else()
     message("C++ RTTI is disabled")
     set(CMAKE_XCODE_ATTRIBUTE_GCC_ENABLE_CPP_RTTI "NO")
-    set(X_OSX_RTTI_FLAGS "-fno-rtti")
+    set(X_MACOS_RTTI_FLAGS "-fno-rtti")
 endif()
 
-set(CMAKE_CXX_FLAGS "${X_OSX_RTTI_FLAGS} -Wall -Wextra -Wno-multichar -Wno-unused-parameter -Wno-unused-function -Wno-sign-compare -DX_OSX=1")
+set(CMAKE_CXX_FLAGS "${X_MACOS_RTTI_FLAGS} -Wall -Wextra -Wno-multichar -Wno-unused-parameter -Wno-unused-function -Wno-sign-compare -DX_MACOS=1")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -ftree-vectorize -msse3 -ffast-math -DNDEBUG")
 set(CMAKE_CXX_FLAGS_DEBUG "-O0 -D_DEBUG_ -D_DEBUG -DX_DEBUG=1 -ggdb")
 
-set(CMAKE_C_FLAGS "-Wall -Wextra -Wno-unused-parameter -Wno-unused-function -Wno-sign-compare -DX_OSX=1")
+set(CMAKE_C_FLAGS "-Wall -Wextra -Wno-unused-parameter -Wno-unused-function -Wno-sign-compare -DX_MACOS=1")
 set(CMAKE_C_FLAGS_RELEASE "-O3 -ftree-vectorize -msse3 -ffast-math -DNDEBUG")
 set(CMAKE_C_FLAGS_DEBUG "-O0 -D_DEBUG_ -D_DEBUG -DX_DEBUG=1 -ggdb")        	
 

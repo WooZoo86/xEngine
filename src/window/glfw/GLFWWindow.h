@@ -1,7 +1,7 @@
 #ifndef XENGINE_WINDOW_GLFW_GLFWWINDOW_H
 #define XENGINE_WINDOW_GLFW_GLFWWINDOW_H
 
-#if X_WINDOWS || X_OSX || X_LINUX
+#if X_WINDOWS || X_MACOS || X_LINUX
 
 #include "window/WindowInterface.h"
 
@@ -11,15 +11,22 @@ namespace xEngine {
 
 class GLFWWindow : public WindowInterface {
  public:
-  virtual void Initialize(const WindowConfig &config) override;
+  static void Initialize();
 
-  virtual void Finalize() override;
+  static void Finalize();
+
+  static void PollEvent();
+
+ public:
+  virtual void Create(const WindowConfig &config) override;
+
+  virtual void Destroy() override;
 
   virtual bool Available() override;
 
-  virtual bool ShouldClose() override;
+  virtual void MakeCurrent() override;
 
-  virtual void PollEvent() override;
+  virtual bool ShouldClose() override;
 
   virtual void Present() override;
 
@@ -38,6 +45,6 @@ class GLFWWindow : public WindowInterface {
 
 } // namespace xEngine
 
-#endif // X_WINDOWS || X_OSX || X_LINUX
+#endif // X_WINDOWS || X_MACOS || X_LINUX
 
 #endif // XENGINE_WINDOW_GLFW_GLFWWINDOW_H

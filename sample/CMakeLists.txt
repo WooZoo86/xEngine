@@ -1,11 +1,25 @@
-include_directories(
-    ${PROJECT_SOURCE_DIR}/src
-    ${PROJECT_SOURCE_DIR}/third_party/EASTL/include
-    ${PROJECT_SOURCE_DIR}/third_party/EASTL/test/packages/EABase/include/Common
-    ${PROJECT_SOURCE_DIR}/third_party/mongoose
-)
+if(X_ENGINE_OPTION_GLAD_DEBUG)
+    include_directories(
+        ${PROJECT_SOURCE_DIR}/src
+        ${PROJECT_SOURCE_DIR}/third_party/EASTL/include
+        ${PROJECT_SOURCE_DIR}/third_party/EASTL/test/packages/EABase/include/Common
+        ${PROJECT_SOURCE_DIR}/third_party/mongoose
+        ${PROJECT_SOURCE_DIR}/third_party/glm/glm
+        ${PROJECT_SOURCE_DIR}/third_party/glad-debug/include
+    )
+else()
+    include_directories(
+        ${PROJECT_SOURCE_DIR}/src
+        ${PROJECT_SOURCE_DIR}/third_party/EASTL/include
+        ${PROJECT_SOURCE_DIR}/third_party/EASTL/test/packages/EABase/include/Common
+        ${PROJECT_SOURCE_DIR}/third_party/mongoose
+        ${PROJECT_SOURCE_DIR}/third_party/glm/glm
+        ${PROJECT_SOURCE_DIR}/third_party/glad/include
+    )
+endif()
 
 add_subdirectory(application)
+add_subdirectory(graphics)
 add_subdirectory(http)
 add_subdirectory(storage)
 add_subdirectory(window)

@@ -4,6 +4,7 @@ project(xEngine)
 
 set(CMAKE_CXX_STANDARD 11)
 
+option(X_ENGINE_OPTION_GLAD_DEBUG "OpenGL Loader Debug Mode" ON)
 option(X_ENGINE_OPTION_DEBUG "Debug Mode" ON)
 option(X_ENGINE_OPTION_RTTI "Enable RTTI" OFF)
 

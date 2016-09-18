@@ -2,7 +2,7 @@
 #define XENGINE_RESOURCE_RESOURCEMANAGER_H
 
 #include "Resource.h"
-#include "ResourceName.h"
+#include "ResourceIdentity.h"
 
 #include <EASTL/hash_map.h>
 #include <EASTL/vector.h>
@@ -11,13 +11,13 @@ namespace xEngine {
 
 class ResourceManager {
  public:
-  void Add(const ResourceName &name, ResourceID id);
+  void Add(const ResourceIdentity &identity, ResourceID id);
 
   void Remove(ResourceID id);
 
   void RemoveAll();
 
-  ResourceID Find(const ResourceName &name) const;
+  ResourceID Find(const ResourceIdentity &identity) const;
 
   bool Contains(ResourceID id) const;
 
@@ -25,8 +25,8 @@ class ResourceManager {
 
  protected:
   eastl::vector<ResourceID> resource_id_cache_;
-  eastl::hash_map<ResourceName, ResourceID> name_to_id_;
-  eastl::hash_map<ResourceID, ResourceName> id_to_name_;
+  eastl::hash_map<ResourceIdentity, ResourceID> identity_to_id_;
+  eastl::hash_map<ResourceID, ResourceIdentity> id_to_identity_;
 };
 
 } // namespace xEngine

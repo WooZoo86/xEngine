@@ -18,7 +18,7 @@ namespace xEngine {
 
 class IO {
  public:
-  static IO &getInstance() {
+  static IO &GetInstance() {
     static IO instance;
     return instance;
   }

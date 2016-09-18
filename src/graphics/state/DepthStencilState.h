@@ -1,0 +1,12 @@
+#ifndef XENGINE_GRAPHICS_STATE_DEPTHSTENCILSTATE_H
+#define XENGINE_GRAPHICS_STATE_DEPTHSTENCILSTATE_H
+
+namespace xEngine {
+
+struct DepthStencilState {
+
+};
+
+} // namespace xEngine
+
+#endif // XENGINE_GRAPHICS_STATE_DEPTHSTENCILSTATE_H
