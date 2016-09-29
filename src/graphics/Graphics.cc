@@ -1,6 +1,6 @@
 #include "Graphics.h"
 
-#if X_WINDOWS || X_MACOS || X_LINUX
+#if X_OPENGL
 #include "graphics/impl/OpenGL/OpenGLRenderer.h"
 #include "graphics/impl/OpenGL/resource/OpenGLGraphicsResourceManager.h"
 #endif
@@ -12,8 +12,10 @@ void Graphics::Initialize(const GraphicsConfig &config) {
   config_ = config;
   switch (config_.type) {
     case GraphicsType::kOpenGL3:
+#if X_OPENGL
       renderer_.reset(new OpenGLRenderer);
       resource_manager_.reset(new OpenGLGraphicsResourceManager);
+#endif
       break;
     default:
       Log::GetInstance().Error("[Graphics::Initialize] unsupported graphics type!\n");

@@ -1,6 +1,8 @@
 #ifndef XENGINE_GRAPHICS_IMPL_OPENGL_OPENGLRENDERER_H
 #define XENGINE_GRAPHICS_IMPL_OPENGL_OPENGLRENDERER_H
 
+#if X_OPENGL
+
 #include "graphics/RendererInterface.h"
 
 #include <glad/glad.h>
@@ -28,5 +30,7 @@ class OpenGLRenderer : public RendererInterface {
 };
 
 }
+
+#endif // X_OPENGL
 
 #endif // XENGINE_GRAPHICS_IMPL_OPENGL_OPENGLRENDERER_H

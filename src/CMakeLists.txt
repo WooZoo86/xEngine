@@ -1,13 +1,25 @@
-if(X_ENGINE_OPTION_DEBUG)
-    add_definitions("-DX_DEBUG=1")
-endif()
-
 if(MSVC)
     include(${PROJECT_SOURCE_DIR}/cmake/platform/windows.cmake)
 elseif(APPLE)
     include(${PROJECT_SOURCE_DIR}/cmake/platform/osx.cmake)
 else()
     include(${PROJECT_SOURCE_DIR}/cmake/platform/linux.cmake)
+endif()
+
+if(X_ENGINE_OPTION_DEBUG)
+    add_definitions("-DX_DEBUG=1")
+endif()
+
+if(X_ENGINE_OPTION_USE_GLFW)
+    add_definitions("-DX_USE_GLFW=1")
+endif()
+
+if(X_ENGINE_OPTION_OPENGL)
+    add_definitions("-DX_OPENGL=1")
+endif()
+
+if(X_ENGINE_OPTION_DX11 AND X_WINDOWS)
+    add_definitions("-DX_DX11=1")
 endif()
 
 if(X_ENGINE_OPTION_GLAD_DEBUG)
@@ -33,3 +45,10 @@ endif()
 file(GLOB_RECURSE src *.h *.cc)
 
 add_library(xEngine ${src})
+
+foreach(file ${src}) 
+    get_filename_component(group ${file} PATH)
+    string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/" "" group ${group})
+    string(REPLACE "/" "\\" group ${group})
+    source_group(${group} FILES ${file})
+endforeach()

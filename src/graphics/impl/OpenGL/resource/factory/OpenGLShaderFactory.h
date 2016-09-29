@@ -1,6 +1,8 @@
 #ifndef XENGINE_GRAPHICS_IMPL_OPENGL_RESOURCE_FACTORY_OPENGLSHADERFACTORY_H
 #define XENGINE_GRAPHICS_IMPL_OPENGL_RESOURCE_FACTORY_OPENGLSHADERFACTORY_H
 
+#if X_OPENGL
+
 #include "graphics/impl/OpenGL/resource/OpenGLGraphicsResource.h"
 
 #include <resource/ResourceFactory.h>
@@ -15,5 +17,7 @@ class OpenGLShaderFactory : public ResourceFactory<OpenGLShader> {
 };
 
 }
+
+#endif // X_OPENGL
 
 #endif // XENGINE_GRAPHICS_IMPL_OPENGL_RESOURCE_FACTORY_OPENGLSHADERFACTORY_H

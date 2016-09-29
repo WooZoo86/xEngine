@@ -1,6 +1,8 @@
 #ifndef XENGINE_GRAPHICS_IMPL_OPENGL_RESOURCE_OPENGLGRAPHICSRESOURCE_H
 #define XENGINE_GRAPHICS_IMPL_OPENGL_RESOURCE_OPENGLGRAPHICSRESOURCE_H
 
+#if X_OPENGL
+
 #include "graphics/config/ShaderConfig.h"
 
 #include <resource/Resource.h>
@@ -14,5 +16,7 @@ struct OpenGLShader : public Resource<ShaderConfig> {
 };
 
 }
+
+#endif // X_OPENGL
 
 #endif // XENGINE_GRAPHICS_IMPL_OPENGL_RESOURCE_OPENGLGRAPHICSRESOURCE_H

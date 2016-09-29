@@ -3,6 +3,16 @@
 
 #if X_WINDOWS
 
+#include <Windows.h>
+
+#define XENGINE_APPLICATION(clazz) \
+  int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, LPSTR lpCmdLine, int nShowCmd) { \
+    auto app = new clazz; \
+    app->Run(); \
+    delete app; \
+    return 0; \
+  }
+
 #else
 
 #define XENGINE_APPLICATION(clazz) \

@@ -1,3 +1,5 @@
+#if X_OPENGL
+
 #include "OpenGLRenderer.h"
 
 void xEngine::OpenGLRenderer::Initialize(const xEngine::GraphicsConfig &config) {
@@ -48,3 +50,5 @@ void xEngine::OpenGLRenderer::PostOpenGLCallback(const char *name, void *funcptr
     X_TRAP();
   }
 }
+
+#endif // X_OPENGL

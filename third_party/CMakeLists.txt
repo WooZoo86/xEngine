@@ -10,3 +10,8 @@ else()
     include_directories(glad/include)
     add_library(glad glad/src/glad.c)
 endif()
+
+set_target_properties(EABase_ide PROPERTIES FOLDER "third_party")
+set_target_properties(EASTL PROPERTIES FOLDER "third_party")
+set_target_properties(mongoose PROPERTIES FOLDER "third_party")
+set_target_properties(glad PROPERTIES FOLDER "third_party")

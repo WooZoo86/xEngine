@@ -1,8 +1,10 @@
 #include "Window.h"
 
-#if X_WINDOWS || X_MACOS || X_LINUX
+#if X_USE_GLFW
 # include "window/glfw/GLFWWindow.h"
-#endif // X_WINDOWS || X_MACOS || X_LINUX
+#elif X_WINDOWS
+# include "window/win32/Win32Window.h"
+#endif
 
 namespace xEngine {
 
@@ -11,8 +13,10 @@ static const ResourcePoolID g_window_pool_resource_id = GetResourcePoolID();
 
 void Window::Initialize(uint16 pool_size) {
   x_assert(!Available());
-#if X_WINDOWS || X_MACOS || X_LINUX
+#if X_USE_GLFW
   GLFWWindow::Initialize();
+#elif X_WINDOWS
+	Win32Window::Initialize();
 #endif
   pool_.Initialize(pool_size, g_window_pool_resource_id);
   available_ = true;
@@ -29,8 +33,10 @@ void Window::Finalize() {
   }
   pool_.Finalize();
   RemoveAll();
-#if X_WINDOWS || X_MACOS || X_LINUX
+#if X_USE_GLFW
   GLFWWindow::Finalize();
+#elif X_WINDOWS
+	Win32Window::Finalize();
 #endif
 }
 
@@ -94,8 +100,10 @@ bool Window::IsAllClosed() {
 
 void Window::PollEvent() {
   x_assert(Available());
-#if X_WINDOWS || X_MACOS || X_LINUX
+#if X_USE_GLFW
   GLFWWindow::PollEvent();
+#elif X_WINDOWS
+	Win32Window::PollEvent();
 #endif
 }
 

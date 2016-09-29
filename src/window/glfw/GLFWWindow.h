@@ -1,7 +1,7 @@
 #ifndef XENGINE_WINDOW_GLFW_GLFWWINDOW_H
 #define XENGINE_WINDOW_GLFW_GLFWWINDOW_H
 
-#if X_WINDOWS || X_MACOS || X_LINUX
+#if X_USE_GLFW
 
 #include "window/WindowInterface.h"
 
@@ -32,7 +32,7 @@ class GLFWWindow : public WindowInterface {
 
   virtual void SetTitle(const eastl::string &name) override;
 
-  virtual const WindowConfig &GetConfig() const override;
+  virtual const WindowConfig &GetConfig() const override { return config_; }
 
  private:
   static void ErrorCallback(int error, const char *desc);
@@ -45,6 +45,6 @@ class GLFWWindow : public WindowInterface {
 
 } // namespace xEngine
 
-#endif // X_WINDOWS || X_MACOS || X_LINUX
+#endif // X_USE_GLFW
 
 #endif // XENGINE_WINDOW_GLFW_GLFWWINDOW_H

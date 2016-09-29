@@ -1,3 +1,5 @@
+#if X_OPENGL
+
 #include "OpenGLShaderFactory.h"
 #include "graphics/impl/OpenGL/OpenGLDefine.h"
 
@@ -49,3 +51,5 @@ void OpenGLShaderFactory::Destroy(OpenGLShader &resource) {
 }
 
 }
+
+#endif // X_OPENGL

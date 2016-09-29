@@ -1,3 +1,5 @@
+#if X_OPENGL
+
 #include "OpenGLGraphicsResourceManager.h"
 
 namespace xEngine {
@@ -49,3 +51,5 @@ void OpenGLGraphicsResourceManager::Destroy(ResourceID id) {
 }
 
 }
+
+#endif // X_OPENGL

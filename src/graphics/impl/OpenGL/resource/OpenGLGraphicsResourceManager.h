@@ -1,6 +1,8 @@
 #ifndef XENGINE_GRAPHICS_IMPL_OPENGL_RESOURCE_OPENGLGRAPHICSRESOURCEMANAGER_H
 #define XENGINE_GRAPHICS_IMPL_OPENGL_RESOURCE_OPENGLGRAPHICSRESOURCEMANAGER_H
 
+#if X_OPENGL
+
 #include "OpenGLGraphicsResource.h"
 #include "graphics/GraphicsResourceManagerInterface.h"
 
@@ -28,5 +30,7 @@ class OpenGLGraphicsResourceManager : public GraphicsResourceManagerInterface {
 };
 
 }
+
+#endif // X_OPENGL
 
 #endif // XENGINE_GRAPHICS_IMPL_OPENGL_RESOURCE_OPENGLGRAPHICSRESOURCEMANAGER_H

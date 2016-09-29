@@ -1,4 +1,4 @@
-#if X_WINDOWS || X_MACOS || X_LINUX
+#if X_USE_GLFW
 
 #include "GLFWWindow.h"
 
@@ -82,10 +82,6 @@ void GLFWWindow::ErrorCallback(int error, const char *desc) {
   Log::GetInstance().Error("glfw error[%d]: %s\n", error, desc);
 }
 
-const WindowConfig &GLFWWindow::GetConfig() const {
-  return config_;
-}
-
 } // namespace xEngine
 
-#endif // X_WINDOWS || X_MACOS || X_LINUX
+#endif // X_USE_GLFW

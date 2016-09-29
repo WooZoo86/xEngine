@@ -1,6 +1,8 @@
 #ifndef XENGINE_GRAPHICS_IMPL_OPENGL_OPENGLDEFINE_H
 #define XENGINE_GRAPHICS_IMPL_OPENGL_OPENGLDEFINE_H
 
+#if X_OPENGL
+
 #include "graphics/GraphicsDefine.h"
 #include "graphics/config/GraphicsConfig.h"
 #include "graphics/state/BlendState.h"
@@ -522,5 +524,7 @@ inline GLenum GLEnumFromFaceSide(FaceSide face) {
 }
 
 }
+
+#endif // X_OPENGL
 
 #endif // XENGINE_GRAPHICS_IMPL_OPENGL_OPENGLDEFINE_H

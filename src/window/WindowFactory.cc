@@ -1,17 +1,22 @@
 #include "WindowFactory.h"
 
-#if X_WINDOWS || X_MACOS || X_LINUX
+#if X_USE_GLFW
 # include "window/glfw/GLFWWindow.h"
-#endif // X_WINDOWS || X_MACOS || X_LINUX
+#elif X_WINDOWS
+# include "window/win32/Win32Window.h"
+#endif
 
 namespace xEngine {
 
 void WindowFactory::Create(WindowResource &resource, DataPtr /*data*/) {
   x_assert(resource.status() == ResourceStatus::kPending);
   resource.Loading();
-#if X_WINDOWS || X_MACOS || X_LINUX
+#if X_USE_GLFW
   resource.window_.reset(new GLFWWindow);
+#elif X_WINDOWS
+	resource.window_.reset(new Win32Window);
 #endif
+	x_assert(resource.window());
   resource.window()->Create(resource.config());
   resource.Complete();
 }
