@@ -35,12 +35,6 @@ void Win32Window::PollEvent() {
 LRESULT CALLBACK Win32Window::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
 	auto self = static_cast<Win32Window *>(GetProp(hwnd, "xEngine"));
 	switch (message) {
-	case WM_PAINT: {
-		PAINTSTRUCT paint_struct;
-		BeginPaint(hwnd, &paint_struct);
-		EndPaint(hwnd, &paint_struct);
-		break;
-	}
 	case WM_CLOSE: {
 		if (self) {
 			self->CloseEvent();
