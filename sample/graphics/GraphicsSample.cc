@@ -26,6 +26,7 @@ class GraphicsSample : public Application {
       state_.clear_color = glm::mod(state_.clear_color, 1.0f);
       Window::GetInstance().GetGraphics(window_id_)->renderer()->ApplyTarget();
       Window::GetInstance().GetGraphics(window_id_)->renderer()->ApplyClearState(state_);
+			Window::GetInstance().GetGraphics(window_id_)->renderer()->Render();
     }
     Window::GetInstance().PollEvent();
     Window::GetInstance().PresentAllWindow();
