@@ -32,14 +32,10 @@ class GLFWWindow : public WindowInterface {
 
   virtual void SetTitle(const eastl::string &name) override;
 
-  virtual const WindowConfig &GetConfig() const override { return config_; }
-
  private:
   static void ErrorCallback(int error, const char *desc);
 
  private:
-  static GLFWWindow *self_;
-  WindowConfig config_;
   GLFWwindow *window_{nullptr};
 };
 

@@ -3,13 +3,17 @@
 
 #include "graphics/GraphicsDefine.h"
 
+#include <resource/Resource.h>
+
 namespace xEngine {
 
 struct GraphicsConfig {
 
-  GraphicsType type{ GraphicsType::kOpenGL3 };
+  ResourceID window{kInvalidResourceID};
 
-  uint16 shader_pool_size{ 256 };
+  GraphicsType type{GraphicsType::kOpenGL3};
+
+  uint16 shader_pool_size{256};
 
 };
 

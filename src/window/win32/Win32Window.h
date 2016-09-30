@@ -35,13 +35,10 @@ class Win32Window : public WindowInterface {
 
 	virtual void SetTitle(const eastl::string &name) override;
 
-	virtual const WindowConfig &GetConfig() const override { return config_; }
-
  private:
 	 void CloseEvent() { closed_ = true; };
 
  private:
-	WindowConfig config_;
 	HWND window_{nullptr};
 	bool closed_{false};
 };

@@ -93,6 +93,18 @@ bool Window::ShouldClose(ResourceID id) {
   return false;
 }
 
+const eastl::unique_ptr<Graphics> &Window::GetGraphics(ResourceID id) {
+  x_assert(Available());
+
+  static const eastl::unique_ptr<Graphics> invalid = nullptr;
+
+  auto &resource = pool_.Find(id);
+  if (resource.status() != ResourceStatus::kInvalid) {
+    return resource.window()->graphics();
+  }
+  return invalid;
+}
+
 bool Window::IsAllClosed() {
   x_assert(Available());
   return resource_id_cache_.empty();

@@ -3,7 +3,10 @@
 
 #include "WindowConfig.h"
 
+#include <graphics/Graphics.h>
+
 #include <EASTL/string.h>
+#include <EASTL/unique_ptr.h>
 
 namespace xEngine {
 
@@ -25,7 +28,13 @@ class WindowInterface {
 
   virtual void SetTitle(const eastl::string &name) = 0;
 
-  virtual const WindowConfig &GetConfig() const = 0;
+  const WindowConfig &config() const { return config_; }
+
+  const eastl::unique_ptr<Graphics> &graphics() const { return graphics_; }
+
+ protected:
+  WindowConfig config_;
+  eastl::unique_ptr<Graphics> graphics_{new Graphics};
 };
 
 } // namespace xEngine

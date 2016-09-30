@@ -6,8 +6,6 @@
 
 namespace xEngine {
 
-GLFWWindow *GLFWWindow::self_ = nullptr;
-
 void GLFWWindow::Initialize() {
   if (glfwInit() != GL_TRUE) {
     x_error("GLFW init error!\n");
@@ -23,7 +21,6 @@ void GLFWWindow::PollEvent() {
 }
 
 void GLFWWindow::Create(const WindowConfig &config){
-  self_ = this;
   x_assert(!Available());
   config_ = config;
   glfwSetErrorCallback(ErrorCallback);
@@ -51,7 +48,6 @@ void GLFWWindow::Destroy(){
   x_assert(Available());
   glfwDestroyWindow(window_);
   window_ = nullptr;
-  self_ = nullptr;
 }
 
 bool GLFWWindow::Available() {

@@ -11,12 +11,6 @@ namespace xEngine {
 
 class Graphics {
  public:
-  static Graphics &GetInstance() {
-    static Graphics instance;
-    return instance;
-  }
-
- public:
   void Initialize(const GraphicsConfig &config);
 
   void Finalize();

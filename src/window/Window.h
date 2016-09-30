@@ -35,6 +35,8 @@ class Window : public ResourceManager {
 
   bool ShouldClose(ResourceID id);
 
+  const eastl::unique_ptr<Graphics> &GetGraphics(ResourceID id);
+
   bool IsAllClosed();
 
   void PollEvent();

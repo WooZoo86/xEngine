@@ -10,6 +10,7 @@ namespace xEngine {
 void Graphics::Initialize(const GraphicsConfig &config) {
   x_assert(!Available());
   config_ = config;
+  x_assert(config.window != kInvalidResourceID);
   switch (config_.type) {
     case GraphicsType::kOpenGL3:
 #if X_OPENGL
