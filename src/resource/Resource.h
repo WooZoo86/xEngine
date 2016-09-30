@@ -83,6 +83,8 @@ class Resource {
 
   void Complete() { x_assert(status_ == ResourceStatus::kLoading); status_ = ResourceStatus::kCompleted; }
 
+  void Failed() { x_assert(status_ == ResourceStatus::kLoading); status_ = ResourceStatus::kFailed; }
+
   ResourceID id() const { return id_; }
 
   ResourceStatus status() const { return status_; }

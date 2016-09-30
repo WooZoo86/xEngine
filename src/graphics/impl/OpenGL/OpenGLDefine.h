@@ -267,18 +267,6 @@ inline GLenum GLEnumFromPixelFormatAsFormat(PixelFormat format) {
   }
 }
 
-inline GLenum GLEnumFromShaderType(ShaderType type) {
-  switch (type) {
-    case ShaderType::kVertexShader:
-      return GL_VERTEX_SHADER;
-    case ShaderType::kFragmentShader:
-      return GL_FRAGMENT_SHADER;
-    default:
-      x_error("unknown ShaderType\n");
-      return 0;
-  }
-}
-
 inline GLint VertexCountFromVertexAttributeFormat(VertexAttributeFormat format) {
   switch (format) {
     case VertexAttributeFormat::kFloat1:

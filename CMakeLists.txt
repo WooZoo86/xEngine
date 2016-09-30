@@ -4,10 +4,10 @@ project(xEngine)
 
 set(CMAKE_CXX_STANDARD 11)
 
-option(X_ENGINE_OPTION_OPENGL "Use OpenGL" OFF)
+option(X_ENGINE_OPTION_OPENGL "Use OpenGL" ON)
 option(X_ENGINE_OPTION_D3D11 "Use DirectX3D 11" OFF)
 
-option(X_ENGINE_OPTION_USE_GLFW "Use GLFW for window module" OFF)
+option(X_ENGINE_OPTION_USE_GLFW "Use GLFW for window module" ON)
 
 option(X_ENGINE_OPTION_GLAD_DEBUG "OpenGL Loader Debug Mode" ON)
 option(X_ENGINE_OPTION_DEBUG "Debug Mode" ON)

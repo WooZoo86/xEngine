@@ -49,7 +49,7 @@ ResourceID Window::Create(const WindowConfig &config) {
   auto id = pool_.Create(config);
   Add(config.identity, id);
   auto &resource = pool_.Find(id);
-  factory_.Create(resource, nullptr);
+  factory_.Create(resource);
   return id;
 }
 

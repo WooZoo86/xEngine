@@ -26,7 +26,7 @@ class WindowResource : public Resource<WindowConfig> {
  private:
   eastl::unique_ptr<WindowInterface> window_{nullptr};
 
-  friend void WindowFactory::Create(WindowResource &resource, DataPtr data);
+  friend void WindowFactory::Create(WindowResource &resource);
 };
 
 }

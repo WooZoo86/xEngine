@@ -16,13 +16,14 @@ void WindowFactory::Create(WindowResource &resource) {
 #elif X_WINDOWS
 	resource.window_.reset(new Win32Window);
 #endif
-	x_assert(resource.window());
-  resource.window()->Create(resource.config());
-  resource.Complete();
+  if (resource.window() != nullptr) {
+    resource.window()->Create(resource.config());
+  }
+  resource.window() == nullptr ? resource.Failed() : resource.Complete();
 }
 
 void WindowFactory::Destroy(WindowResource &resource) {
-  x_assert(resource.status() == ResourceStatus::kCompleted);
+  x_assert(resource.status() == ResourceStatus::kCompleted || resource.status() == ResourceStatus::kFailed);
   resource.window()->Destroy();
 }
 

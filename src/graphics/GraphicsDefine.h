@@ -303,11 +303,6 @@ static bool IsTextureFilterModeUseMipmap(TextureFilterMode mode) {
   return !(mode == TextureFilterMode::kNearest || mode == TextureFilterMode::kLinear);
 }
 
-enum class ShaderType : uint8 {
-  kVertexShader,
-  kFragmentShader,
-};
-
 enum class ClearType : uint8 {
   kNone = 0,
   kColor = 1 << 0,
