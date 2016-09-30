@@ -32,4 +32,4 @@ class WindowSample : public Application {
   ResourceID window_id_{kInvalidResourceID};
 };
 
-XENGINE_APPLICATION(WindowSample)
+XENGINE_WINDOW_APPLICATION(WindowSample)

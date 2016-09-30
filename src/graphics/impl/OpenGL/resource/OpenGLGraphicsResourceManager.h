@@ -20,7 +20,7 @@ class OpenGLGraphicsResourceManager : public GraphicsResourceManagerInterface {
 
   virtual void Finalize() override;
 
-  virtual ResourceID Create(const ShaderConfig &config, DataPtr data) override;
+  virtual ResourceID Create(const ShaderConfig &config) override;
 
   virtual void Destroy(ResourceID id) override;
 

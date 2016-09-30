@@ -28,11 +28,11 @@ void OpenGLGraphicsResourceManager::Finalize() {
   RemoveAll();
 }
 
-ResourceID OpenGLGraphicsResourceManager::Create(const ShaderConfig &config, DataPtr data) {
+ResourceID OpenGLGraphicsResourceManager::Create(const ShaderConfig &config) {
   auto id = shader_pool_.Create(config);
   Add(config.identity, id);
   auto &resource = shader_pool_.Find(id);
-  shader_factory_.Create(resource, data);
+  shader_factory_.Create(resource);
   return id;
 }
 

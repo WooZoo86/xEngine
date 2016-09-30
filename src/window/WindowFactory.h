@@ -14,7 +14,7 @@ class WindowResource;
 
 class WindowFactory : public ResourceFactory<WindowResource> {
  public:
-  virtual void Create(WindowResource &resource, DataPtr data) override;
+  virtual void Create(WindowResource &resource) override;
 
   virtual void Destroy(WindowResource &resource) override;
 };

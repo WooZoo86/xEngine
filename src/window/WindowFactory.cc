@@ -8,7 +8,7 @@
 
 namespace xEngine {
 
-void WindowFactory::Create(WindowResource &resource, DataPtr /*data*/) {
+void WindowFactory::Create(WindowResource &resource) {
   x_assert(resource.status() == ResourceStatus::kPending);
   resource.Loading();
 #if X_USE_GLFW

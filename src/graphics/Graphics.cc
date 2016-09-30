@@ -21,6 +21,7 @@ void Graphics::Initialize(const GraphicsConfig &config) {
       Log::GetInstance().Error("[Graphics::Initialize] unsupported graphics type!\n");
       break;
   }
+	x_assert(renderer_ && resource_manager_);
   renderer_->Initialize(config_);
   resource_manager_->Initialize(config_);
 }

@@ -4,7 +4,6 @@
 #include "config/GraphicsConfig.h"
 #include "config/ShaderConfig.h"
 
-#include <core/Data.h>
 #include <resource/Resource.h>
 #include <resource/ResourceManager.h>
 
@@ -18,7 +17,7 @@ class GraphicsResourceManagerInterface : public ResourceManager {
 
   virtual void Finalize() = 0;
 
-  virtual ResourceID Create(const ShaderConfig &config, DataPtr data) = 0;
+  virtual ResourceID Create(const ShaderConfig &config) = 0;
 
   virtual void Destroy(ResourceID id) = 0;
 };

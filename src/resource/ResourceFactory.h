@@ -12,7 +12,7 @@ class ResourceFactory {
  public:
   virtual ~ResourceFactory() { }
 
-  virtual void Create(RESOURCE &resource, DataPtr data) = 0;
+  virtual void Create(RESOURCE &resource) = 0;
 
   virtual void Destroy(RESOURCE &resource) = 0;
 };

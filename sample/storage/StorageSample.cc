@@ -10,7 +10,11 @@ class StorageSample : public Application {
   virtual ApplicationStatus Initialize() override {
     Log::GetInstance().Info("Initialize\n");
     IO::GetInstance().Initialize();
+#if X_MACOS
     IO::GetInstance().AddPlaceholder("local", "storage:///Users/leafnsand/Desktop/");
+#elif X_WINDOWS
+		IO::GetInstance().AddPlaceholder("local", "storage://C:\\Users\\leafnsand\\Desktop\\");
+#endif
     IO::GetInstance().RegisterFilesystem("storage", StorageFilesystem::Creator);
 
     auto hello = "hello world!";

@@ -1,11 +1,3 @@
-if(MSVC)
-    include(${PROJECT_SOURCE_DIR}/cmake/platform/windows.cmake)
-elseif(APPLE)
-    include(${PROJECT_SOURCE_DIR}/cmake/platform/osx.cmake)
-else()
-    include(${PROJECT_SOURCE_DIR}/cmake/platform/linux.cmake)
-endif()
-
 if(X_ENGINE_OPTION_DEBUG)
     add_definitions("-DX_DEBUG=1")
 endif()
@@ -18,8 +10,8 @@ if(X_ENGINE_OPTION_OPENGL)
     add_definitions("-DX_OPENGL=1")
 endif()
 
-if(X_ENGINE_OPTION_DX11 AND X_WINDOWS)
-    add_definitions("-DX_DX11=1")
+if(X_ENGINE_OPTION_D3D11 AND X_WINDOWS)
+    add_definitions("-DX_D3D11=1")
 endif()
 
 if(X_ENGINE_OPTION_GLAD_DEBUG)

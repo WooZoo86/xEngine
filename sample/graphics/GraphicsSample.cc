@@ -41,4 +41,4 @@ class GraphicsSample : public Application {
   ClearState state_;
 };
 
-XENGINE_APPLICATION(GraphicsSample)
+XENGINE_WINDOW_APPLICATION(GraphicsSample)

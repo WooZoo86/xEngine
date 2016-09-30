@@ -5,12 +5,10 @@
 
 #include <resource/ResourceIdentity.h>
 
-#include <EASTL/string.h>
-
 namespace xEngine {
 
-//IncreaseResourceSignatureCounter();
-//static const ResourceSignature ShaderSignature = GetResourceSignature();
+IncreaseResourceSignatureCounter();
+static const ResourceSignature ShaderSignature = GetResourceSignature();
 
 struct ShaderConfig {
   static ShaderConfig ForType(ShaderType type);

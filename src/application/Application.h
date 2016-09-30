@@ -6,6 +6,14 @@
 #include <Windows.h>
 
 #define XENGINE_APPLICATION(clazz) \
+	int wmain(int argc, wchar_t *argv[]) { \
+    auto app = new clazz; \
+    app->Run(); \
+    delete app; \
+    return 0; \
+  }
+
+#define XENGINE_WINDOW_APPLICATION(clazz) \
   int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, LPSTR lpCmdLine, int nShowCmd) { \
     auto app = new clazz; \
     app->Run(); \
@@ -22,6 +30,8 @@
     delete app; \
     return 0; \
   }
+
+#define XENGINE_WINDOW_APPLICATION(clazz) XENGINE_APPLICATION(clazz)
 
 #endif // X_WINDOWS
 

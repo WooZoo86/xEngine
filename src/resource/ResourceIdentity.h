@@ -91,6 +91,12 @@ class ResourceIdentity {
   ResourceSignature signature_{kDefaultSignature};
 };
 
+struct ResourceSignatureCounter {};
+
+#define GetResourceSignature() COUNTER_READ(ResourceSignatureCounter)
+
+#define IncreaseResourceSignatureCounter() COUNTER_INC(ResourceSignatureCounter)
+
 } // namespace xEngine
 
 namespace eastl {
@@ -99,12 +105,6 @@ template<>
 struct hash<xEngine::ResourceIdentity> {
   size_t operator()(const xEngine::ResourceIdentity &other) const { return other.Hash(); }
 };
-
-struct ResourceSignatureCounter {};
-
-#define GetResourceSignature() COUNTER_READ(ResourceSignatureCounter)
-
-#define IncreaseResourceSignatureCounter() COUNTER_INC(ResourceSignatureCounter)
 
 } // namespace eastl
 

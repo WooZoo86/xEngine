@@ -7,7 +7,7 @@
 
 namespace xEngine {
 
-void OpenGLShaderFactory::Create(OpenGLShader &resource, DataPtr data) {
+void OpenGLShaderFactory::Create(OpenGLShader &resource) {
   x_assert(resource.status() == ResourceStatus::kInvalid);
   resource.Loading();
 
