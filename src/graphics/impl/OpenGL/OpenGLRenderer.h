@@ -15,6 +15,8 @@ class OpenGLRenderer : public RendererInterface {
 
   virtual void Finalize() override;
 
+	virtual void Render() override;
+
   virtual void ApplyTarget(ResourceID id) override;
 
   virtual void ApplyClearState(const ClearState &state) override;

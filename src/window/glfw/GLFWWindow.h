@@ -22,7 +22,7 @@ class GLFWWindow : public WindowInterface {
 
   virtual void Destroy() override;
 
-  virtual bool Available() override;
+  virtual bool Available() const override;
 
   virtual void MakeCurrent() override;
 
@@ -31,6 +31,8 @@ class GLFWWindow : public WindowInterface {
   virtual void Present() override;
 
   virtual void SetTitle(const eastl::string &name) override;
+
+	virtual void *GetNativeHandle() override { return window_; }
 
  private:
   static void ErrorCallback(int error, const char *desc);

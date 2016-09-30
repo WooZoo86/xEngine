@@ -23,7 +23,7 @@ class Window : public ResourceManager {
 
   void Finalize();
 
-  bool Available();
+  bool Available() const;
 
   ResourceID Create(const WindowConfig &config);
 

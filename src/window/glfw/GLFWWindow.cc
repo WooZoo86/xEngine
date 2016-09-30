@@ -50,7 +50,7 @@ void GLFWWindow::Destroy(){
   window_ = nullptr;
 }
 
-bool GLFWWindow::Available() {
+bool GLFWWindow::Available() const {
   return window_ != nullptr;
 }
 

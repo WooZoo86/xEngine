@@ -18,6 +18,9 @@ void xEngine::OpenGLRenderer::Finalize() {
   Reset();
 }
 
+void xEngine::OpenGLRenderer::Render() {
+}
+
 void xEngine::OpenGLRenderer::ApplyTarget(xEngine::ResourceID id) {
 
 }

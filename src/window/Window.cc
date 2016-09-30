@@ -40,7 +40,7 @@ void Window::Finalize() {
 #endif
 }
 
-bool Window::Available() {
+bool Window::Available() const {
   return available_;
 }
 

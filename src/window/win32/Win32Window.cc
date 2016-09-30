@@ -35,6 +35,12 @@ void Win32Window::PollEvent() {
 LRESULT CALLBACK Win32Window::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
 	auto self = static_cast<Win32Window *>(GetProp(hwnd, "xEngine"));
 	switch (message) {
+	case WM_PAINT: {
+		PAINTSTRUCT paint_struct;
+		BeginPaint(hwnd, &paint_struct);
+		EndPaint(hwnd, &paint_struct);
+		break;
+	}
 	case WM_CLOSE: {
 		if (self) {
 			self->CloseEvent();
@@ -49,10 +55,10 @@ LRESULT CALLBACK Win32Window::WndProc(HWND hwnd, UINT message, WPARAM wParam, LP
 
 void Win32Window::Create(const WindowConfig &config) {
 	config_ = config;
-	auto window_ = CreateWindow(
+	window_ = CreateWindow(
 		"xEngine",
 		config_.title.c_str(),
-		WS_OVERLAPPEDWINDOW,
+		config_.is_full_screen ? WS_POPUP : WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT,
 		CW_USEDEFAULT,
 		config_.width,
@@ -72,7 +78,7 @@ void Win32Window::Destroy() {
 	window_ = nullptr;
 }
 
-bool Win32Window::Available() {
+bool Win32Window::Available() const {
 	return window_ != nullptr;
 }
 

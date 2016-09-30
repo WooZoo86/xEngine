@@ -18,7 +18,7 @@ class WindowInterface {
 
   virtual void Destroy() = 0;
 
-  virtual bool Available() = 0;
+  virtual bool Available() const = 0;
 
   virtual void MakeCurrent() = 0;
 
@@ -27,6 +27,8 @@ class WindowInterface {
   virtual void Present() = 0;
 
   virtual void SetTitle(const eastl::string &name) = 0;
+
+	virtual void *GetNativeHandle() = 0;
 
   const WindowConfig &config() const { return config_; }
 

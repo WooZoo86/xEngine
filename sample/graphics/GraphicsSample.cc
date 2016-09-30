@@ -12,7 +12,7 @@ class GraphicsSample : public Application {
     Window::GetInstance().Initialize();
     window_id_ = Window::GetInstance().Create(WindowConfig::ForWindow(1024, 768, "GraphicsSample"));
     Window::GetInstance().MakeCurrent(window_id_);
-    Window::GetInstance().GetGraphics(window_id_)->Initialize(GraphicsConfig());
+    Window::GetInstance().GetGraphics(window_id_)->Initialize(GraphicsConfig::ForWindow(window_id_));
     return Application::Initialize();
   }
   virtual ApplicationStatus Finalize() override {

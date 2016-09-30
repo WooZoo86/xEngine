@@ -15,7 +15,7 @@ class Graphics {
 
   void Finalize();
 
-  bool Available();
+  bool Available() const;
 
   const eastl::unique_ptr<RendererInterface> &renderer() const { return renderer_; }
 
