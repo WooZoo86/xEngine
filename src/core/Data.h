@@ -14,19 +14,30 @@ class Data final {
 
   Data() {}
 
-  explicit Data(size_t size) : size_(size) { if (size_ > 0) buffer_ = static_cast<char *>(eastl::GetDefaultAllocator()->allocate(size_)); }
+  explicit Data(size_t size) : size_(size) {
+    if (size_ > 0)
+      buffer_ = static_cast<char *>(eastl::GetDefaultAllocator()->allocate(size_));
+  }
 
   Data(const char *buffer, size_t size) { Copy(buffer, size); }
 
   Data(Data &other) { Copy(other.buffer_, other.size_); }
 
-  Data(Data &&other) { Assign(other.buffer_, other.size_); other.buffer_ = nullptr; other.size_ = 0; }
+  Data(Data &&other) {
+    Assign(other.buffer_, other.size_);
+    other.buffer_ = nullptr;
+    other.size_ = 0;
+  }
 
   ~Data() { if (buffer_ != nullptr) free(buffer_); }
 
   void operator=(Data &other) { Copy(other.buffer_, other.size_); }
 
-  void operator=(Data &&other) { Assign(other.buffer_, other.size_); other.buffer_ = nullptr; other.size_ = 0; }
+  void operator=(Data &&other) {
+    Assign(other.buffer_, other.size_);
+    other.buffer_ = nullptr;
+    other.size_ = 0;
+  }
 
   bool operator==(const Data &other) { return size_ == other.size_ && buffer_ == other.buffer_; }
 

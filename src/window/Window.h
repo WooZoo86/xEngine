@@ -11,7 +11,7 @@ namespace xEngine {
 
 typedef ResourcePool<WindowResource, WindowConfig> WindowPool;
 
-class Window : public ResourceManager {
+class Window: public ResourceManager {
  public:
   static Window &GetInstance() {
     static Window instance;

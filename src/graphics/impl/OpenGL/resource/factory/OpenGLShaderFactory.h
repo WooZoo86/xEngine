@@ -9,7 +9,7 @@
 
 namespace xEngine {
 
-class OpenGLShaderFactory : public ResourceFactory<OpenGLShader> {
+class OpenGLShaderFactory: public ResourceFactory<OpenGLShader> {
  public:
   virtual void Create(OpenGLShader &resource) override;
 

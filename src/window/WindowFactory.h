@@ -12,14 +12,14 @@ namespace xEngine {
 
 class WindowResource;
 
-class WindowFactory : public ResourceFactory<WindowResource> {
+class WindowFactory: public ResourceFactory<WindowResource> {
  public:
   virtual void Create(WindowResource &resource) override;
 
   virtual void Destroy(WindowResource &resource) override;
 };
 
-class WindowResource : public Resource<WindowConfig> {
+class WindowResource: public Resource<WindowConfig> {
  public:
   const eastl::unique_ptr<WindowInterface> &window() const { return window_; }
 

@@ -14,7 +14,7 @@ void WindowFactory::Create(WindowResource &resource) {
 #if X_USE_GLFW
   resource.window_.reset(new GLFWWindow);
 #elif X_WINDOWS
-	resource.window_.reset(new Win32Window);
+  resource.window_.reset(new Win32Window);
 #endif
   if (resource.window() != nullptr) {
     resource.window()->Create(resource.config());

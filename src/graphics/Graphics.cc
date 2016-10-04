@@ -21,17 +21,17 @@ void Graphics::Initialize(const GraphicsConfig &config) {
       resource_manager_.reset(new OpenGLGraphicsResourceManager);
 #endif
       break;
-		case GraphicsType::kD3D11:
+    case GraphicsType::kD3D11:
 #if X_D3D11
-			renderer_.reset(new D3D11Renderer);
-			resource_manager_.reset(new D3D11GraphicsResourceManager);
+      renderer_.reset(new D3D11Renderer);
+      resource_manager_.reset(new D3D11GraphicsResourceManager);
 #endif
-			break;
+      break;
     default:
       Log::GetInstance().Error("[Graphics::Initialize] unsupported graphics type!\n");
       break;
   }
-	x_assert(renderer_ && resource_manager_);
+  x_assert(renderer_ && resource_manager_);
   renderer_->Initialize(config_);
   resource_manager_->Initialize(config_);
 }

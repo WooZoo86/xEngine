@@ -5,7 +5,7 @@
 
 namespace xEngine {
 
-class StorageFilesystem : public Filesystem {
+class StorageFilesystem: public Filesystem {
  public:
   FS_CREATOR_DECLARE(StorageFilesystem)
 

@@ -9,7 +9,7 @@
 
 namespace xEngine {
 
-class GLFWWindow : public WindowInterface {
+class GLFWWindow: public WindowInterface {
  public:
   static void Initialize();
 
@@ -32,7 +32,7 @@ class GLFWWindow : public WindowInterface {
 
   virtual void SetTitle(const eastl::string &name) override;
 
-	virtual void *GetNativeHandle() override { return window_; }
+  virtual void *GetNativeHandle() override { return window_; }
 
  private:
   static void ErrorCallback(int error, const char *desc);

@@ -13,14 +13,14 @@ typedef glm::vec4 Color;
 
 typedef glm::highp_ivec4 IntColor;
 
-enum class GraphicsMaxDefine : uint16 {
+enum class GraphicsMaxDefine: uint16 {
   kMaxTextureCount = 16,
 };
 
 enum class GraphicsType: uint8 {
   kNone,
   kOpenGL3,
-	kD3D11,
+  kD3D11,
 };
 
 enum class GraphicsResourceType: uint16 {
@@ -275,7 +275,7 @@ static int32 SizeOfUniformAttributeFormat(UniformAttributeFormat format) {
   }
 }
 
-enum class DrawType : uint8 {
+enum class DrawType: uint8 {
   kPoints,
   kLines,
   kLineStrip,
@@ -285,13 +285,13 @@ enum class DrawType : uint8 {
   kTriangleFan,
 };
 
-enum class TextureWrapMode : uint8 {
+enum class TextureWrapMode: uint8 {
   kClampToEdge,
   kRepeat,
   kMirroredRepeat,
 };
 
-enum class TextureFilterMode : uint8 {
+enum class TextureFilterMode: uint8 {
   kNearest,
   kLinear,
   kNearestMipmapNearest,
@@ -304,7 +304,7 @@ static bool IsTextureFilterModeUseMipmap(TextureFilterMode mode) {
   return !(mode == TextureFilterMode::kNearest || mode == TextureFilterMode::kLinear);
 }
 
-enum class ClearType : uint8 {
+enum class ClearType: uint8 {
   kNone = 0,
   kColor = 1 << 0,
   kDepth = 1 << 1,

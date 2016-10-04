@@ -6,7 +6,7 @@
 #include <Windows.h>
 
 #define XENGINE_APPLICATION(clazz) \
-	int wmain(int argc, wchar_t *argv[]) { \
+  int wmain(int argc, wchar_t *argv[]) { \
     auto app = new clazz; \
     app->Run(); \
     delete app; \

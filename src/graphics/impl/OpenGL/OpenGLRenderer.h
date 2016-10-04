@@ -9,13 +9,13 @@
 
 namespace xEngine {
 
-class OpenGLRenderer : public RendererInterface {
+class OpenGLRenderer: public RendererInterface {
  public:
   virtual void Initialize(const GraphicsConfig &config) override;
 
   virtual void Finalize() override;
 
-	virtual void Render() override;
+  virtual void Render() override;
 
   virtual void ApplyTarget(ResourceID id) override;
 

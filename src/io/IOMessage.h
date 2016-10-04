@@ -37,14 +37,14 @@ class IOMessage {
 
 typedef eastl::shared_ptr<IOMessage> IOMessagePtr;
 
-class IOReadMessage : public IOMessage {
+class IOReadMessage: public IOMessage {
  public:
   CREATE_FUNC_DECLARE(IOReadMessage)
 
   IOReadMessage(Location location, IOCallbackFunction callback) :
-    IOMessage(IOMessageType::kRead),
-    location_(location),
-    callback_(callback) {}
+      IOMessage(IOMessageType::kRead),
+      location_(location),
+      callback_(callback) {}
 
   void Notify() { if (callback_) callback_(location_, status_, data_); }
 
@@ -67,15 +67,15 @@ class IOReadMessage : public IOMessage {
 
 typedef eastl::shared_ptr<IOReadMessage> IOReadMessagePtr;
 
-class IOWriteMessage : public IOMessage {
+class IOWriteMessage: public IOMessage {
  public:
   CREATE_FUNC_DECLARE(IOWriteMessage)
 
   IOWriteMessage(Location location, DataPtr data, IOCallbackFunction callback) :
-    IOMessage(IOMessageType::kWrite),
-    location_(location),
-    data_(data),
-    callback_(callback) {}
+      IOMessage(IOMessageType::kWrite),
+      location_(location),
+      data_(data),
+      callback_(callback) {}
 
   void Notify() { if (callback_) callback_(location_, status_, data_); }
 
@@ -96,7 +96,7 @@ class IOWriteMessage : public IOMessage {
 
 typedef eastl::shared_ptr<IOWriteMessage> IOWriteMessagePtr;
 
-class IORegisterFilesystemMessage : public IOMessage {
+class IORegisterFilesystemMessage: public IOMessage {
  public:
   CREATE_FUNC_DECLARE(IORegisterFilesystemMessage)
 

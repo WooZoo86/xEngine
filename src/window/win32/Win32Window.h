@@ -11,38 +11,38 @@ namespace xEngine {
 
 class Win32Window : public WindowInterface {
  public:
-	static void Initialize();
+  static void Initialize();
 
-	static void Finalize();
+  static void Finalize();
 
-	static void PollEvent();
+  static void PollEvent();
 
  private:
-	static LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+  static LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
  public:
-	virtual void Create(const WindowConfig &config) override;
+  virtual void Create(const WindowConfig &config) override;
 
-	virtual void Destroy() override;
+  virtual void Destroy() override;
 
-	virtual bool Available() const override;
+  virtual bool Available() const override;
 
-	virtual void MakeCurrent() override;
+  virtual void MakeCurrent() override;
 
-	virtual bool ShouldClose() override;
+  virtual bool ShouldClose() override;
 
-	virtual void Present() override;
+  virtual void Present() override;
 
-	virtual void SetTitle(const eastl::string &name) override;
+  virtual void SetTitle(const eastl::string &name) override;
 
-	virtual void *GetNativeHandle() override { return window_; }
-
- private:
-	 void CloseEvent() { closed_ = true; };
+  virtual void *GetNativeHandle() override { return window_; }
 
  private:
-	HWND window_{nullptr};
-	bool closed_{false};
+   void CloseEvent() { closed_ = true; };
+
+ private:
+  HWND window_{nullptr};
+  bool closed_{false};
 };
 
 } // namespace xEngine

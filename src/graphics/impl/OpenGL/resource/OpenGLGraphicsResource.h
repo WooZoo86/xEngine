@@ -11,8 +11,8 @@
 
 namespace xEngine {
 
-struct OpenGLShader : public Resource<ShaderConfig> {
-  GLuint program_id{ 0 };
+struct OpenGLShader: public Resource<ShaderConfig> {
+  GLuint program_id{0};
 };
 
 }

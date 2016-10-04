@@ -12,7 +12,7 @@ namespace xEngine {
 
 class WindowInterface {
  public:
-  virtual ~WindowInterface() { }
+  virtual ~WindowInterface() {}
 
   virtual void Create(const WindowConfig &config) = 0;
 
@@ -28,7 +28,7 @@ class WindowInterface {
 
   virtual void SetTitle(const eastl::string &name) = 0;
 
-	virtual void *GetNativeHandle() = 0;
+  virtual void *GetNativeHandle() = 0;
 
   const WindowConfig &config() const { return config_; }
 

@@ -38,7 +38,7 @@ file(GLOB_RECURSE src *.h *.cc)
 
 add_library(xEngine ${src})
 
-foreach(file ${src}) 
+foreach(file ${src})
     get_filename_component(group ${file} PATH)
     string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/" "" group ${group})
     string(REPLACE "/" "\\" group ${group})

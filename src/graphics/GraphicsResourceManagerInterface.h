@@ -9,7 +9,7 @@
 
 namespace xEngine {
 
-class GraphicsResourceManagerInterface : public ResourceManager {
+class GraphicsResourceManagerInterface: public ResourceManager {
  public:
   virtual ~GraphicsResourceManagerInterface() {}
 

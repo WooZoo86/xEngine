@@ -14,7 +14,7 @@ namespace xEngine {
 
 typedef ResourcePool<OpenGLShader, ShaderConfig> OpenGLShaderPool;
 
-class OpenGLGraphicsResourceManager : public GraphicsResourceManagerInterface {
+class OpenGLGraphicsResourceManager: public GraphicsResourceManagerInterface {
  public:
   virtual void Initialize(const GraphicsConfig &config) override;
 

@@ -16,7 +16,7 @@ void Window::Initialize(uint16 pool_size) {
 #if X_USE_GLFW
   GLFWWindow::Initialize();
 #elif X_WINDOWS
-	Win32Window::Initialize();
+  Win32Window::Initialize();
 #endif
   pool_.Initialize(pool_size, g_window_pool_resource_id);
   available_ = true;
@@ -36,7 +36,7 @@ void Window::Finalize() {
 #if X_USE_GLFW
   GLFWWindow::Finalize();
 #elif X_WINDOWS
-	Win32Window::Finalize();
+  Win32Window::Finalize();
 #endif
 }
 
@@ -115,7 +115,7 @@ void Window::PollEvent() {
 #if X_USE_GLFW
   GLFWWindow::PollEvent();
 #elif X_WINDOWS
-	Win32Window::PollEvent();
+  Win32Window::PollEvent();
 #endif
 }
 

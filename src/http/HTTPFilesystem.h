@@ -7,7 +7,7 @@
 
 namespace xEngine {
 
-class HTTPFilesystem : public Filesystem {
+class HTTPFilesystem: public Filesystem {
  public:
   FS_CREATOR_DECLARE(HTTPFilesystem)
 

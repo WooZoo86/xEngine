@@ -204,16 +204,14 @@ inline int8 ChannelBitOfPixelFormat(PixelFormat format, PixelChannel channel) {
     case PixelFormat::R5G6B5:
       if ((PixelChannel::kRed == channel) || (PixelChannel::kBlue == channel)) {
         count = 5;
-      }
-      else if (PixelChannel::kGreen == channel) {
+      } else if (PixelChannel::kGreen == channel) {
         count = 6;
       }
       break;
     case PixelFormat::R5G5B5A1:
       if ((PixelChannel::kRed == channel) || (PixelChannel::kGreen == channel) || (PixelChannel::kBlue == channel)) {
         count = 5;
-      }
-      else if (PixelChannel::kAlpha == channel) {
+      } else if (PixelChannel::kAlpha == channel) {
         count = 1;
       }
       break;
@@ -241,8 +239,7 @@ inline int8 ChannelBitOfPixelFormat(PixelFormat format, PixelChannel channel) {
     case PixelFormat::D24S8:
       if (PixelChannel::kDepth == channel) {
         count = 24;
-      }
-      else if (PixelChannel::kStencil == channel) {
+      } else if (PixelChannel::kStencil == channel) {
         count = 8;
       }
       break;

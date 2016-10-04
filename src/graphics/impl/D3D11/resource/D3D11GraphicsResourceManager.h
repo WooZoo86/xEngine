@@ -7,16 +7,16 @@
 
 namespace xEngine {
 
-class D3D11GraphicsResourceManager : public GraphicsResourceManagerInterface {
+class D3D11GraphicsResourceManager: public GraphicsResourceManagerInterface {
 
-public:
-	virtual void Initialize(const GraphicsConfig &config) override;
+ public:
+  virtual void Initialize(const GraphicsConfig &config) override;
 
-	virtual void Finalize() override;
+  virtual void Finalize() override;
 
-	virtual ResourceID Create(const ShaderConfig &config) override;
+  virtual ResourceID Create(const ShaderConfig &config) override;
 
-	virtual void Destroy(ResourceID id) override;
+  virtual void Destroy(ResourceID id) override;
 };
 
 } // namespace xEngine

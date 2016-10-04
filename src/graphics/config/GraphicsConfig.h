@@ -9,12 +9,12 @@ namespace xEngine {
 
 struct GraphicsConfig {
 
-	static GraphicsConfig ForWindow(ResourceID id);
+  static GraphicsConfig ForWindow(ResourceID id);
 
   ResourceID window{kInvalidResourceID};
 
 #if X_WINDOWS
-	GraphicsType type{GraphicsType::kD3D11};
+  GraphicsType type{GraphicsType::kD3D11};
 #else
   GraphicsType type{GraphicsType::kOpenGL3};
 #endif
@@ -24,9 +24,9 @@ struct GraphicsConfig {
 };
 
 inline GraphicsConfig GraphicsConfig::ForWindow(ResourceID id) {
-	GraphicsConfig config;
-	config.window = id;
-	return config;
+  GraphicsConfig config;
+  config.window = id;
+  return config;
 }
 
 }

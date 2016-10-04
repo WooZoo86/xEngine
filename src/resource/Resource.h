@@ -79,11 +79,20 @@ class Resource {
     config_ = CONFIG();
   }
 
-  void Loading() { x_assert(status_ == ResourceStatus::kPending); status_ = ResourceStatus::kLoading; }
+  void Loading() {
+    x_assert(status_ == ResourceStatus::kPending);
+    status_ = ResourceStatus::kLoading;
+  }
 
-  void Complete() { x_assert(status_ == ResourceStatus::kLoading); status_ = ResourceStatus::kCompleted; }
+  void Complete() {
+    x_assert(status_ == ResourceStatus::kLoading);
+    status_ = ResourceStatus::kCompleted;
+  }
 
-  void Failed() { x_assert(status_ == ResourceStatus::kLoading); status_ = ResourceStatus::kFailed; }
+  void Failed() {
+    x_assert(status_ == ResourceStatus::kLoading);
+    status_ = ResourceStatus::kFailed;
+  }
 
   ResourceID id() const { return id_; }
 

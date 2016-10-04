@@ -3,8 +3,7 @@
 #include "OpenGLRenderer.h"
 
 void xEngine::OpenGLRenderer::Initialize(const xEngine::GraphicsConfig &config) {
-  if (gladLoadGL() == 0)
-  {
+  if (gladLoadGL() == 0) {
     x_error("OpenGL init error!\n");
   }
 #ifdef GLAD_DEBUG
@@ -37,8 +36,7 @@ void xEngine::OpenGLRenderer::Reset() {
 void xEngine::OpenGLRenderer::PreOpenGLCallback(const char *name, void *funcptr, int len_args, ...) {
   GLenum errorCode;
   errorCode = glad_glGetError();
-  if (errorCode != GL_NO_ERROR)
-  {
+  if (errorCode != GL_NO_ERROR) {
     Log::GetInstance().Error("[OpenGLRenderer::PreOpenGLCallback] ERROR 0x%04x in %s\n", errorCode, name);
     X_TRAP();
   }
@@ -47,8 +45,7 @@ void xEngine::OpenGLRenderer::PreOpenGLCallback(const char *name, void *funcptr,
 void xEngine::OpenGLRenderer::PostOpenGLCallback(const char *name, void *funcptr, int len_args, ...) {
   GLenum errorCode;
   errorCode = glad_glGetError();
-  if (errorCode != GL_NO_ERROR)
-  {
+  if (errorCode != GL_NO_ERROR) {
     Log::GetInstance().Error("[OpenGLRenderer::PostOpenGLCallback] ERROR 0x%04x in %s\n", errorCode, name);
     X_TRAP();
   }

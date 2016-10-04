@@ -12,7 +12,7 @@ void GLFWWindow::Initialize() {
   }
 }
 
-void GLFWWindow::Finalize(){
+void GLFWWindow::Finalize() {
   glfwTerminate();
 }
 
@@ -20,7 +20,7 @@ void GLFWWindow::PollEvent() {
   glfwPollEvents();
 }
 
-void GLFWWindow::Create(const WindowConfig &config){
+void GLFWWindow::Create(const WindowConfig &config) {
   x_assert(!Available());
   config_ = config;
   glfwSetErrorCallback(ErrorCallback);
@@ -44,7 +44,7 @@ void GLFWWindow::Create(const WindowConfig &config){
   glfwSwapInterval(config_.swap_interval);
 }
 
-void GLFWWindow::Destroy(){
+void GLFWWindow::Destroy() {
   x_assert(Available());
   glfwDestroyWindow(window_);
   window_ = nullptr;

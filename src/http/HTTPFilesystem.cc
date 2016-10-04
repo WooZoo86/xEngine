@@ -31,7 +31,7 @@ void HTTPFilesystem::Write(Location location, DataPtr data) {
 }
 
 void HTTPFilesystem::Handle(mg_connection *connection, int event, void *eventData) {
-  auto self = static_cast<HTTPFilesystem*>(connection->user_data);
+  auto self = static_cast<HTTPFilesystem *>(connection->user_data);
   switch (event) {
     case MG_EV_CONNECT: {
       auto connectStatus = static_cast<int *>(eventData);
@@ -47,8 +47,7 @@ void HTTPFilesystem::Handle(mg_connection *connection, int event, void *eventDat
       if (message->resp_code == 200) {
         self->last_status_ = IOStatus::kSuccess;
         self->data_->Copy(message->body.p, message->body.len);
-      }
-      else if (message->resp_code == 301) {
+      } else if (message->resp_code == 301) {
         auto location = mg_get_http_header(message, "Location");
         if (location) {
           eastl::string path(location->p, location->len);
@@ -56,8 +55,7 @@ void HTTPFilesystem::Handle(mg_connection *connection, int event, void *eventDat
           redirect->user_data = self;
           self->polling_ = true;
         }
-      }
-      else {
+      } else {
         Log::GetInstance().Warning("HTTP response of status(%d).\n", message->resp_code);
       }
       break;

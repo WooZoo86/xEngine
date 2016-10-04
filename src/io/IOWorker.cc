@@ -47,60 +47,62 @@ void IOWorker::HandleWaitingMessage() {
     lock.unlock();
     waiting_queue_lock_.lock();
 #endif
-    pending_messages_ = std::move(waiting_messages_);
+  pending_messages_ = std::move(waiting_messages_);
 #if X_HAS_THREADS
-    waiting_queue_lock_.unlock();
+  waiting_queue_lock_.unlock();
 #endif
-    while (!pending_messages_.empty()) {
-      auto message = pending_messages_.front();
-      switch (message->type()) {
-        case IOMessageType::kRead: {
-          auto read_message = eastl::static_pointer_cast<IOReadMessage>(message);
-          auto location = read_message->location();
-          auto filesystem = filesystems_[location.filesystem_name()];
-          if (filesystem) {
-            read_message->set_data(filesystem->Read(location));
-            read_message->set_status(filesystem->last_status());
-          }
-          done_messages_.push(read_message);
-          break;
+  while (!pending_messages_.empty()) {
+    auto message = pending_messages_.front();
+    switch (message->type()) {
+      case IOMessageType::kRead: {
+        auto read_message = eastl::static_pointer_cast<IOReadMessage>(message);
+        auto location = read_message->location();
+        auto filesystem = filesystems_[location.filesystem_name()];
+        if (filesystem) {
+          read_message->set_data(filesystem->Read(location));
+          read_message->set_status(filesystem->last_status());
         }
-        case IOMessageType::kWrite: {
-          auto write_message = eastl::static_pointer_cast<IOWriteMessage>(message);
-          auto location = write_message->location();
-          auto filesystem = filesystems_[location.filesystem_name()];
-          if (filesystem) {
-            filesystem->Write(location, write_message->data());
-            write_message->set_status(filesystem->last_status());
-          }
-          done_messages_.push(write_message);
-          break;
-        }
-        case IOMessageType::kRegisterFilesystem: {
-          auto register_filesystem_message = eastl::static_pointer_cast<IORegisterFilesystemMessage>(message);
-          filesystems_[register_filesystem_message->name()] = IO::GetInstance().CreateFilesystem(register_filesystem_message->name());
-          break;
-        }
-        default: break;
+        done_messages_.push(read_message);
+        break;
       }
-      pending_messages_.pop();
-    }
-    if (!done_messages_.empty()) {
-#if X_HAS_THREADS
-      forwarding_queue_lock_.lock();
-#endif
-      if (forwarding_messages_.empty()) {
-        forwarding_messages_ = std::move(done_messages_);
-      } else {
-        while (!done_messages_.empty()) {
-          forwarding_messages_.push(done_messages_.front());
-          done_messages_.pop();
+      case IOMessageType::kWrite: {
+        auto write_message = eastl::static_pointer_cast<IOWriteMessage>(message);
+        auto location = write_message->location();
+        auto filesystem = filesystems_[location.filesystem_name()];
+        if (filesystem) {
+          filesystem->Write(location, write_message->data());
+          write_message->set_status(filesystem->last_status());
         }
+        done_messages_.push(write_message);
+        break;
       }
-#if X_HAS_THREADS
-      forwarding_queue_lock_.unlock();
-#endif
+      case IOMessageType::kRegisterFilesystem: {
+        auto register_filesystem_message = eastl::static_pointer_cast<IORegisterFilesystemMessage>(message);
+        filesystems_[register_filesystem_message->name()] =
+            IO::GetInstance().CreateFilesystem(register_filesystem_message->name());
+        break;
+      }
+      default:
+        break;
     }
+    pending_messages_.pop();
+  }
+  if (!done_messages_.empty()) {
+#if X_HAS_THREADS
+    forwarding_queue_lock_.lock();
+#endif
+    if (forwarding_messages_.empty()) {
+      forwarding_messages_ = std::move(done_messages_);
+    } else {
+      while (!done_messages_.empty()) {
+        forwarding_messages_.push(done_messages_.front());
+        done_messages_.pop();
+      }
+    }
+#if X_HAS_THREADS
+    forwarding_queue_lock_.unlock();
+#endif
+  }
 #if X_HAS_THREADS
   }
 #endif
@@ -147,7 +149,8 @@ void IOWorker::NotifyMessage() {
         write_message->Notify();
         break;
       }
-      default: break;
+      default:
+        break;
     }
     notify_messages_.pop();
   }

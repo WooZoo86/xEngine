@@ -22,12 +22,12 @@
 #define COUNTER_LINK_NAMESPACE(NS) using NS::counter_crumb;
 
 #define REGISTERED_CLASS(TAG, KEY, NAME) KEY NAME &register_type(TAG, decltype(COUNTER_READ(TAG))); \
-    COUNTER_INC(TAG) KEY NAME /* class definition follows */
+  COUNTER_INC(TAG) KEY NAME /* class definition follows */
 
 #include <utility>
 
 template<std::size_t n>
-struct constant_index : std::integral_constant<std::size_t, n> {};
+struct constant_index: std::integral_constant<std::size_t, n> {};
 
 template<typename id, std::size_t rank, std::size_t acc>
 constexpr constant_index<acc>

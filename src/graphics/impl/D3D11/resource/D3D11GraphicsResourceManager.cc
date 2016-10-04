@@ -9,7 +9,7 @@ void D3D11GraphicsResourceManager::Initialize(const GraphicsConfig &config) {}
 void D3D11GraphicsResourceManager::Finalize() {}
 
 ResourceID D3D11GraphicsResourceManager::Create(const ShaderConfig &config) {
-	return kInvalidResourceID;
+  return kInvalidResourceID;
 }
 
 void D3D11GraphicsResourceManager::Destroy(ResourceID id) {}

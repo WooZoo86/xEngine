@@ -10,7 +10,7 @@ namespace xEngine {
 template<class RESOURCE>
 class ResourceFactory {
  public:
-  virtual ~ResourceFactory() { }
+  virtual ~ResourceFactory() {}
 
   virtual void Create(RESOURCE &resource) = 0;
 
