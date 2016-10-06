@@ -37,6 +37,8 @@ void OpenGLIndexDataFactory::Create(OpenGLIndexData &resource) {
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLuint>(current_buffer));
 
+  resource.config().data.reset();
+
   resource.buffer_id = buffer;
 
   resource.Complete();

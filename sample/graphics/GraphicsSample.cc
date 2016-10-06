@@ -77,10 +77,10 @@ class GraphicsSample : public Application {
 
   void load_vertex_data() {
     float32 vertices[] = {
-        -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, // Top-left
-         0.5f,  0.5f, 0.0f, 1.0f, 0.0f, // Top-right
-         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, // Bottom-right
-        -0.5f, -0.5f, 1.0f, 1.0f, 1.0f  // Bottom-left
+        -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // Top-left
+         0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // Top-right
+         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, // Bottom-right
+        -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f  // Bottom-left
     };
     uint16 indices[] = {
         0, 1, 2,
@@ -93,14 +93,20 @@ class GraphicsSample : public Application {
     VertexElementConfig position_element;
     position_element.type = VertexElementType::kPosition;
     position_element.format = VertexElementFormat::kFloat2;
-    position_element.is_normalized = true;
+    position_element.normalized = false;
     vertex_config.element[0] = position_element;
     VertexElementConfig color_element;
     color_element.type = VertexElementType::kColor;
     color_element.format = VertexElementFormat::kFloat3;
-    color_element.is_normalized = true;
+    color_element.normalized = false;
     color_element.offset = 2 * sizeof(float32);
     vertex_config.element[1] = color_element;
+    VertexElementConfig texcoord_element;
+    texcoord_element.type = VertexElementType::kTexcoord;
+    texcoord_element.format = VertexElementFormat::kFloat2;
+    texcoord_element.normalized = false;
+    texcoord_element.offset = 5 * sizeof(float32);
+    vertex_config.element[2] = texcoord_element;
     vertex_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(vertex_config);
     IndexDataConfig index_config;
     index_config.buffer_usage = BufferUsage::kStatic;
@@ -140,6 +146,7 @@ class GraphicsSample : public Application {
   }
 
   void draw() {
+    static const auto texture_index = 0;
     if (window_id_ != kInvalidResourceID) {
       state_.clear_color += Color(0.01f, 0.005f, 0.0025f, 0.0f);
       state_.clear_color = glm::mod(state_.clear_color, 1.0f);
@@ -150,7 +157,8 @@ class GraphicsSample : public Application {
       renderer->ApplyShader(shader_);
       renderer->ApplyVertexData(vertex_);
       renderer->ApplyIndexData(index_);
-      renderer->ApplyTexture(texture_);
+      renderer->ApplyTexture(texture_, texture_index);
+      renderer->UpdateShaderUniform(shader_, "tex", UniformFormat::kTexture, &texture_index);
       renderer->DrawTopology(VertexTopology::kTriangles, 0, 6);
     }
   }

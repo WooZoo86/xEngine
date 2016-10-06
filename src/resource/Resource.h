@@ -101,7 +101,7 @@ class Resource {
 
   ResourceStatus status() const { return status_; }
 
-  const CONFIG &config() const { return config_; }
+  CONFIG &config() { return config_; }
 
  private:
   ResourceID id_{kInvalidResourceID};

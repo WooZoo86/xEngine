@@ -122,6 +122,9 @@ void OpenGLShaderFactory::Create(OpenGLShader &resource) {
     }
   }
 
+  resource.config().vertex.reset();
+  resource.config().fragment.reset();
+
   resource.program_id = program;
 
   resource.program_id == 0 ? resource.Failed() : resource.Complete();

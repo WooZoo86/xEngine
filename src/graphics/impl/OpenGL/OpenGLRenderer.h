@@ -51,6 +51,8 @@ class OpenGLRenderer: public RendererInterface {
 
   virtual void ApplyShader(ResourceID id) override;
 
+  virtual void UpdateShaderUniform(ResourceID id, eastl::string name, UniformFormat format, const void *buffer) override;
+
   virtual void ResetShader() override;
 
   virtual void ApplyVertexData(ResourceID id) override;
@@ -65,7 +67,7 @@ class OpenGLRenderer: public RendererInterface {
 
   virtual void ResetIndexData() override;
 
-  virtual void ApplyTexture(ResourceID id) override;
+  virtual void ApplyTexture(ResourceID id, int32 index) override;
 
   virtual void ResetTexture() override;
 

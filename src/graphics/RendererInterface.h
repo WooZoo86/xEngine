@@ -11,6 +11,8 @@
 #include "core/Data.h"
 #include "resource/Resource.h"
 
+#include <EASTL/string.h>
+
 namespace xEngine {
 
 class RendererInterface {
@@ -45,6 +47,8 @@ class RendererInterface {
 
   virtual void ApplyShader(ResourceID id) = 0;
 
+  virtual void UpdateShaderUniform(ResourceID id, eastl::string name, UniformFormat format, const void *buffer) = 0;
+
   virtual void ResetShader() = 0;
 
   virtual void ApplyVertexData(ResourceID id) = 0;
@@ -59,7 +63,7 @@ class RendererInterface {
 
   virtual void ResetIndexData() = 0;
 
-  virtual void ApplyTexture(ResourceID id) = 0;
+  virtual void ApplyTexture(ResourceID id, int32 index) = 0;
 
   virtual void ResetTexture() = 0;
 

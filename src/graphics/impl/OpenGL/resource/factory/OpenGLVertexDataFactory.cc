@@ -33,7 +33,9 @@ void OpenGLVertexDataFactory::Create(OpenGLVertexData &resource) {
                GLEnumForBufferUsage(resource.config().buffer_usage));
 
   glBindBuffer(GL_ARRAY_BUFFER, static_cast<GLuint>(current_buffer));
-  
+
+  resource.config().data.reset();
+
   resource.buffer_id = buffer;
 
   resource.Complete();

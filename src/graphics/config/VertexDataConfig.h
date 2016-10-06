@@ -22,7 +22,7 @@ struct VertexElementConfig {
 
   VertexElementFormat format;
 
-  bool is_normalized{false};
+  bool normalized{false};
 
   size_t offset{0};
 

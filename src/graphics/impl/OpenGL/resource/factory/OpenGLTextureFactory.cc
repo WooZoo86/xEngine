@@ -132,6 +132,8 @@ void OpenGLTextureFactory::Create(OpenGLTexture &resource) {
     }
   }
 
+  resource.config().data.reset();
+
   resource.texture_id = texture_id;
 
   resource.Complete();

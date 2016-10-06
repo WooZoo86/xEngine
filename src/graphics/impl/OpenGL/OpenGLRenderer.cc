@@ -331,6 +331,52 @@ void OpenGLRenderer::ApplyShader(ResourceID id) {
   }
 }
 
+void OpenGLRenderer::UpdateShaderUniform(ResourceID id, eastl::string name, UniformFormat format, const void *buffer) {
+  auto &shader = resource_manager_->shader_pool_.Find(id);
+  if (shader.status() == ResourceStatus::kCompleted) {
+    if (shader.program_id != cache_.shader.program_id) {
+      glUseProgram(shader.program_id);
+      cache_.shader = shader;
+      UpdateVertexAttributePointer();
+    }
+    cache_.prepared_mask |= OpenGLRendererCache::PrepareMask::kShader;
+    auto pair = shader.uniform_info.find(name);
+    if (pair != shader.uniform_info.end()) {
+      auto &info = pair->second;
+      switch (format) {
+        case UniformFormat::kInt:
+        case UniformFormat::kTexture:
+        case UniformFormat::kBool:
+          glUniform1iv(info.location, 1, reinterpret_cast<const GLint *>(buffer));
+          break;
+        case UniformFormat::kVector1:
+          glUniform1fv(info.location, 1, reinterpret_cast<const GLfloat *>(buffer));
+          break;
+        case UniformFormat::kVector2:
+          glUniform2fv(info.location, 1, reinterpret_cast<const GLfloat *>(buffer));
+          break;
+        case UniformFormat::kVector3:
+          glUniform3fv(info.location, 1, reinterpret_cast<const GLfloat *>(buffer));
+          break;
+        case UniformFormat::kVector4:
+          glUniform4fv(info.location, 1, reinterpret_cast<const GLfloat *>(buffer));
+          break;
+        case UniformFormat::kMatrix2:
+          glUniformMatrix2fv(info.location, 1, GL_FALSE, reinterpret_cast<const GLfloat *>(buffer));
+          break;
+        case UniformFormat::kMatrix3:
+          glUniformMatrix3fv(info.location, 1, GL_FALSE, reinterpret_cast<const GLfloat *>(buffer));
+          break;
+        case UniformFormat::kMatrix4:
+          glUniformMatrix4fv(info.location, 1, GL_FALSE, reinterpret_cast<const GLfloat *>(buffer));
+          break;
+        default:
+          break;
+      }
+    }
+  }
+}
+
 void OpenGLRenderer::ResetShader() {
   cache_.shader = OpenGLShader();
   glUseProgram(0);
@@ -350,7 +396,18 @@ void OpenGLRenderer::ApplyVertexData(ResourceID id) {
 }
 
 void OpenGLRenderer::UpdateVertexData(ResourceID id, int32 offset, DataPtr data) {
-
+  auto &vertex_data = resource_manager_->vertex_data_pool_.Find(id);
+  if (vertex_data.id() != kInvalidResourceID) {
+    if (vertex_data.status() == ResourceStatus::kCompleted) {
+      if (vertex_data.buffer_id != cache_.vertex_buffer) {
+        glBindBuffer(GL_ARRAY_BUFFER, vertex_data.buffer_id);
+        cache_.vertex_buffer = vertex_data.buffer_id;
+        cache_.vertex_resource_id = id;
+        UpdateVertexAttributePointer();
+      }
+      glBufferSubData(GL_ARRAY_BUFFER, offset, data->size(), data->buffer());
+    }
+  }
 }
 
 void OpenGLRenderer::ResetVertexData() {
@@ -371,7 +428,17 @@ void OpenGLRenderer::ApplyIndexData(ResourceID id) {
 }
 
 void OpenGLRenderer::UpdateIndexData(ResourceID id, int32 offset, DataPtr data) {
-
+  auto &index_data = resource_manager_->index_data_pool_.Find(id);
+  if (index_data.id() != kInvalidResourceID) {
+    if (index_data.status() == ResourceStatus::kCompleted) {
+      if (index_data.buffer_id != cache_.index_buffer) {
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_data.buffer_id);
+        cache_.index_buffer = index_data.buffer_id;
+        cache_.index_format = index_data.config().type;
+      }
+      glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, data->size(), data->buffer());
+    }
+  }
 }
 
 void OpenGLRenderer::ResetIndexData() {
@@ -380,12 +447,38 @@ void OpenGLRenderer::ResetIndexData() {
   cache_.index_format = IndexFormat::kNone;
 }
 
-void OpenGLRenderer::ApplyTexture(ResourceID id) {
-
+void OpenGLRenderer::ApplyTexture(ResourceID id, int32 index) {
+  auto &texture = resource_manager_->texture_pool_.Find(id);
+  if (texture.status() == ResourceStatus::kCompleted) {
+    if (texture.config().type == TextureType::kTexture2d) {
+      if (texture.texture_id != cache_.texture_2d[index]) {
+        glActiveTexture(static_cast<GLenum>(GL_TEXTURE0 + index));
+        glBindTexture(GL_TEXTURE_2D, texture.texture_id);
+        cache_.texture_2d[index] = texture.texture_id;
+      }
+    } else if (texture.config().type == TextureType::kTextureCube) {
+      if (texture.texture_id != cache_.texture_cube[index]) {
+        glActiveTexture(static_cast<GLenum>(GL_TEXTURE0 + index));
+        glBindTexture(GL_TEXTURE_CUBE_MAP, texture.texture_id);
+        cache_.texture_cube[index] = texture.texture_id;
+      }
+    }
+  }
 }
 
 void OpenGLRenderer::ResetTexture() {
-
+  for (auto index = 0; index < static_cast<uint16>(OpenGLMaxDefine::kMaxTextureCount); ++index) {
+    if (cache_.texture_2d[index] != 0) {
+      glActiveTexture(static_cast<GLenum>(GL_TEXTURE0 + index));
+      glBindTexture(GL_TEXTURE_2D, 0);
+    }
+    if (cache_.texture_cube[index] != 0) {
+      glActiveTexture(static_cast<GLenum>(GL_TEXTURE0 + index));
+      glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+    }
+  }
+  memset(cache_.texture_2d, 0, sizeof(cache_.texture_2d));
+  memset(cache_.texture_cube, 0, sizeof(cache_.texture_cube));
 }
 
 void OpenGLRenderer::DrawTopology(VertexTopology topology, int32 first, int32 count) {
@@ -437,7 +530,7 @@ void OpenGLRenderer::UpdateVertexAttributePointer() {
       glVertexAttribPointer(info.location,
                             VertexCountForVertexElementFormat(element.format),
                             GLEnumForVertexElementFormat(element.format),
-                            static_cast<GLboolean>(element.is_normalized),
+                            static_cast<GLboolean>(element.normalized),
                             config.vertex_size,
                             reinterpret_cast<GLvoid *>(element.offset));
     }
