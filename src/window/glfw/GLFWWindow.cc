@@ -42,6 +42,7 @@ void GLFWWindow::Create(const WindowConfig &config) {
   x_assert(Available());
   glfwMakeContextCurrent(window_);
   glfwSwapInterval(config_.swap_interval);
+  glfwGetFramebufferSize(window_, &config_.frame_buffer_width, &config_.frame_buffer_height);
 }
 
 void GLFWWindow::Destroy() {

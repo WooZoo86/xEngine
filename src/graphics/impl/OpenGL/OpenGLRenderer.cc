@@ -66,7 +66,7 @@ void OpenGLRenderer::ApplyTarget(ResourceID id) {
     }
   }
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
-  ApplyViewPort(0, 0, window_->config().width, window_->config().height);
+  ApplyViewPort(0, 0, window_->config().frame_buffer_width, window_->config().frame_buffer_height);
   cache_.frame_buffer = 0;
   cache_.prepared_mask |= OpenGLRendererCache::PrepareMask::kRenderTarget;
 }

@@ -22,6 +22,10 @@ struct WindowConfig {
 
   int32 height{768};
 
+  int32 frame_buffer_width{1024};
+
+  int32 frame_buffer_height{768};
+
   PixelFormat color_format{PixelFormat::RGBA8};
 
   PixelFormat depth_format{PixelFormat::D24S8};
