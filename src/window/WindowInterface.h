@@ -3,7 +3,7 @@
 
 #include "WindowConfig.h"
 
-#include <graphics/Graphics.h>
+#include "graphics/Graphics.h"
 
 #include <EASTL/string.h>
 #include <EASTL/unique_ptr.h>

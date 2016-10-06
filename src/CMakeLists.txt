@@ -22,6 +22,7 @@ if(X_ENGINE_OPTION_GLAD_DEBUG)
         ${PROJECT_SOURCE_DIR}/third_party/mongoose
         ${PROJECT_SOURCE_DIR}/third_party/glm/glm
         ${PROJECT_SOURCE_DIR}/third_party/glad-debug/include
+        ${PROJECT_SOURCE_DIR}/third_party/stb_image
     )
 else()
     include_directories(
@@ -31,6 +32,7 @@ else()
         ${PROJECT_SOURCE_DIR}/third_party/mongoose
         ${PROJECT_SOURCE_DIR}/third_party/glm/glm
         ${PROJECT_SOURCE_DIR}/third_party/glad/include
+        ${PROJECT_SOURCE_DIR}/third_party/stb_image
     )
 endif()
 

@@ -5,7 +5,7 @@
 
 #include "core/Types.h"
 
-#include <resource/ResourceIdentity.h>
+#include "resource/ResourceIdentity.h"
 
 #include <EASTL/string.h>
 

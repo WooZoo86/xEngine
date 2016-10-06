@@ -3,8 +3,8 @@
 
 #include "graphics/GraphicsDefine.h"
 
-#include <core/Data.h>
-#include <resource/ResourceIdentity.h>
+#include "core/Data.h"
+#include "resource/ResourceIdentity.h"
 
 namespace xEngine {
 
@@ -15,7 +15,7 @@ struct ShaderConfig {
 
   static ShaderConfig FromData(DataPtr vertex, DataPtr fragment);
 
-  ResourceIdentity identity{ResourceIdentity::Unique()};
+  ResourceIdentity identity{ResourceIdentity::Shared(ShaderSignature)};
 
   DataPtr vertex;
 

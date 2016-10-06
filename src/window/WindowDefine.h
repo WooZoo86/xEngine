@@ -15,11 +15,11 @@ enum class PixelChannel: uint8 {
   kDepth = 1 << 4,
   kStencil = 1 << 5,
 
-  kDepthStentil = kDepth | kStencil,
+  kDepthStentil = static_cast<uint8>(kDepth) | static_cast<uint8>(kStencil),
 
-  kRGBA = kAlpha | kRed | kGreen | kBlue,
+  kRGBA = static_cast<uint8>(kAlpha) | static_cast<uint8>(kRed) | static_cast<uint8>(kGreen) | static_cast<uint8>(kBlue),
 
-  kAll = kAlpha | kRed | kGreen | kBlue | kDepth | kStencil,
+  kAll = static_cast<uint8>(kRGBA) | static_cast<uint8>(kDepthStentil),
 };
 
 enum class PixelFormat: uint8 {

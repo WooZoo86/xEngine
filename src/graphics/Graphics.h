@@ -1,13 +1,15 @@
 #ifndef XENGINE_GRAPHICS_GRAPHICS_H
 #define XENGINE_GRAPHICS_GRAPHICS_H
 
-#include "GraphicsResourceManagerInterface.h"
-#include "RendererInterface.h"
 #include "config/GraphicsConfig.h"
 
 #include <EASTL/unique_ptr.h>
+#include <EASTL/hash_map.h>
 
 namespace xEngine {
+
+class RendererInterface;
+class GraphicsResourceManagerInterface;
 
 class Graphics {
  public:
@@ -21,10 +23,13 @@ class Graphics {
 
   const eastl::unique_ptr<GraphicsResourceManagerInterface> &resource_manager() const { return resource_manager_; }
 
+
  private:
   GraphicsConfig config_;
   eastl::unique_ptr<RendererInterface> renderer_{nullptr};
   eastl::unique_ptr<GraphicsResourceManagerInterface> resource_manager_{nullptr};
+
+  friend class RendererInterface;
 };
 
 }

@@ -5,7 +5,7 @@
 
 #include "graphics/impl/OpenGL/resource/OpenGLGraphicsResource.h"
 
-#include <resource/ResourceFactory.h>
+#include "resource/ResourceFactory.h"
 
 namespace xEngine {
 

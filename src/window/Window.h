@@ -4,8 +4,8 @@
 #include "WindowInterface.h"
 #include "WindowFactory.h"
 
-#include <resource/ResourceManager.h>
-#include <resource/ResourcePool.h>
+#include "resource/ResourceManager.h"
+#include "resource/ResourcePool.h"
 
 namespace xEngine {
 

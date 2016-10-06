@@ -1,9 +1,9 @@
 #ifndef XENGINE_GRAPHICS_GRAPHICSDEFINE_H
 #define XENGINE_GRAPHICS_GRAPHICSDEFINE_H
 
-#include <core/Core.h>
-#include <core/Types.h>
-#include <resource/Resource.h>
+#include "core/Core.h"
+#include "core/Types.h"
+#include "resource/Resource.h"
 
 #include <glm.hpp>
 
@@ -14,7 +14,9 @@ typedef glm::vec4 Color;
 typedef glm::highp_ivec4 IntColor;
 
 enum class GraphicsMaxDefine: uint16 {
-  kMaxTextureCount = 16,
+  kMaxVertexElementCount = 16, // OpenGL ES 3.0
+  kMaxCubeTextureFaceCount = 6,
+  kMaxTextureMipMapCount = 12,
 };
 
 enum class GraphicsType: uint8 {
@@ -45,7 +47,7 @@ enum class BlendFactor: uint8 {
   kOneMinusDstColor,
 
   kDstAlpha,
-  kOneMinuxDstAlpha,
+  kOneMinusDstAlpha,
 
   kBlendColor,
   kOneMinusBlendColor,
@@ -58,7 +60,7 @@ enum class BlendFactor: uint8 {
 
 enum class BlendOperation: uint8 {
   kAdd,
-  kSubstract,
+  kSubtract,
   kReverseSubtract,
 };
 
@@ -97,28 +99,33 @@ enum class StencilOperation: uint8 {
   kInvert,
 };
 
+enum class FrontFaceType: uint8 {
+  kClockWise,
+  kCounterClockWise,
+};
+
 enum class FaceSide: uint8 {
   kFront,
   kBack,
   kBoth,
 };
 
-enum class IndexAttributeType: uint8 {
+enum class IndexFormat: uint8 {
   kNone,
   kUint16,
   kUint32,
 };
 
-static int32 SizeOfIndexAttributeType(IndexAttributeType type) {
+static int32 SizeOfIndexFormat(IndexFormat type) {
   auto size = 0;
   switch (type) {
-    case IndexAttributeType::kNone:
+    case IndexFormat::kNone:
       size = 0;
       break;
-    case IndexAttributeType::kUint16:
+    case IndexFormat::kUint16:
       size = 2;
       break;
-    case IndexAttributeType::kUint32:
+    case IndexFormat::kUint32:
       size = 4;
       break;
     default:
@@ -127,68 +134,21 @@ static int32 SizeOfIndexAttributeType(IndexAttributeType type) {
   return size;
 }
 
-enum class VertexAttributeType: uint8 {
-  kPosition,
-  kTexcoord0,
-  kTexcoord1,
-  kTexcorrd2,
-  kTexcorrd3,
-  kColor0,
-  kColor1,
-  kNormal,
-  kTangent,
+enum class VertexElementType: uint8 {
+  kInvalid,
   kBinormal,
-  kWeights,
-  kIndices,
-  kInstance0,
-  kInstance1,
-  kInstance2,
-  kInstance3,
-
-  kMaxCount,
+  kBlendIndices,
+  kBlendWeight,
+  kColor,
+  kNormal,
+  kPosition,
+  kPositionTransformed,
+  kPointSize,
+  kTangent,
+  kTexcoord,
 };
 
-static const char *VertexAttributeNameFromType(VertexAttributeType attribute) {
-  switch (attribute) {
-    case VertexAttributeType::kPosition:
-      return "aPosition";
-    case VertexAttributeType::kTexcoord0:
-      return "aTexcoord0";
-    case VertexAttributeType::kTexcoord1:
-      return "aTexcoord1";
-    case VertexAttributeType::kTexcorrd2:
-      return "aTexcorrd2";
-    case VertexAttributeType::kTexcorrd3:
-      return "aTexcorrd3";
-    case VertexAttributeType::kColor0:
-      return "aColor0";
-    case VertexAttributeType::kColor1:
-      return "aColor1";
-    case VertexAttributeType::kNormal:
-      return "aNormal";
-    case VertexAttributeType::kTangent:
-      return "aTangent";
-    case VertexAttributeType::kBinormal:
-      return "aBinormal";
-    case VertexAttributeType::kWeights:
-      return "aWeights";
-    case VertexAttributeType::kIndices:
-      return "aIndices";
-    case VertexAttributeType::kInstance0:
-      return "aInstance0";
-    case VertexAttributeType::kInstance1:
-      return "aInstance1";
-    case VertexAttributeType::kInstance2:
-      return "aInstance2";
-    case VertexAttributeType::kInstance3:
-      return "aInstance3";
-    default:
-      x_error("unknown VertexAttributeType\n");
-      return nullptr;
-  }
-}
-
-enum class VertexAttributeFormat: uint8 {
+enum class VertexElementFormat: uint8 {
   kFloat1,
   kFloat2,
   kFloat3,
@@ -203,39 +163,39 @@ enum class VertexAttributeFormat: uint8 {
   kShort4Normalized,
 };
 
-static int32 SizeOfVertexAttributeFormat(VertexAttributeFormat format) {
+static int32 SizeOfVertexElementFormat(VertexElementFormat format) {
   switch (format) {
-    case VertexAttributeFormat::kFloat1:
+    case VertexElementFormat::kFloat1:
       return 4;
-    case VertexAttributeFormat::kFloat2:
+    case VertexElementFormat::kFloat2:
       return 8;
-    case VertexAttributeFormat::kFloat3:
+    case VertexElementFormat::kFloat3:
       return 12;
-    case VertexAttributeFormat::kFloat4:
+    case VertexElementFormat::kFloat4:
       return 16;
-    case VertexAttributeFormat::kByte4:
+    case VertexElementFormat::kByte4:
       return 4;
-    case VertexAttributeFormat::kByte4Normalized:
+    case VertexElementFormat::kByte4Normalized:
       return 4;
-    case VertexAttributeFormat::kUnsignedByte4:
+    case VertexElementFormat::kUnsignedByte4:
       return 4;
-    case VertexAttributeFormat::kUnsignedByte4Normalized:
+    case VertexElementFormat::kUnsignedByte4Normalized:
       return 4;
-    case VertexAttributeFormat::kShort2:
+    case VertexElementFormat::kShort2:
       return 4;
-    case VertexAttributeFormat::kShort2Normalized:
+    case VertexElementFormat::kShort2Normalized:
       return 4;
-    case VertexAttributeFormat::kShort4:
+    case VertexElementFormat::kShort4:
       return 8;
-    case VertexAttributeFormat::kShort4Normalized:
+    case VertexElementFormat::kShort4Normalized:
       return 8;
     default:
-      x_error("unknown VertexAttributeFormat\n");
+      x_error("unknown VertexElementFormat\n");
       return 0;
   }
 }
 
-enum class UniformAttributeFormat: uint8 {
+enum class UniformFormat: uint8 {
   kInt,
   kBool,
   kVector1,
@@ -248,34 +208,34 @@ enum class UniformAttributeFormat: uint8 {
   kTexture,
 };
 
-static int32 SizeOfUniformAttributeFormat(UniformAttributeFormat format) {
+static int32 SizeOfUniformFormat(UniformFormat format) {
   switch (format) {
-    case UniformAttributeFormat::kInt:
+    case UniformFormat::kInt:
       return sizeof(int32);
-    case UniformAttributeFormat::kBool:
+    case UniformFormat::kBool:
       return sizeof(int32);
-    case UniformAttributeFormat::kVector1:
+    case UniformFormat::kVector1:
       return sizeof(float32);
-    case UniformAttributeFormat::kVector2:
+    case UniformFormat::kVector2:
       return 2 * sizeof(float32);
-    case UniformAttributeFormat::kVector3:
+    case UniformFormat::kVector3:
       return 3 * sizeof(float32);
-    case UniformAttributeFormat::kVector4:
+    case UniformFormat::kVector4:
       return 4 * sizeof(float32);
-    case UniformAttributeFormat::kMatrix2:
+    case UniformFormat::kMatrix2:
       return 2 * 2 * sizeof(int32);
-    case UniformAttributeFormat::kMatrix3:
+    case UniformFormat::kMatrix3:
       return 3 * 3 * sizeof(int32);
-    case UniformAttributeFormat::kMatrix4:
+    case UniformFormat::kMatrix4:
       return 4 * 4 * sizeof(int32);
-    case UniformAttributeFormat::kTexture:
+    case UniformFormat::kTexture:
     default:
-      x_error("unknown UniformAttributeFormat\n");
+      x_error("unknown UniformFormat\n");
       return 0;
   }
 }
 
-enum class DrawType: uint8 {
+enum class VertexTopology: uint8 {
   kPoints,
   kLines,
   kLineStrip,
@@ -310,8 +270,8 @@ enum class ClearType: uint8 {
   kDepth = 1 << 1,
   kStencil = 1 << 2,
 
-  kDepthAndStencil = kDepth | kStencil,
-  kAll = kColor | kDepthAndStencil,
+  kDepthAndStencil = static_cast<uint8>(kDepth) | static_cast<uint8>(kStencil),
+  kAll = static_cast<uint8>(kColor) | static_cast<uint8>(kDepthAndStencil),
 };
 
 }

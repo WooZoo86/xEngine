@@ -71,7 +71,7 @@ const eastl::unique_ptr<WindowInterface> &Window::Get(ResourceID id) {
 
   auto &resource = pool_.Find(id);
   if (resource.status() != ResourceStatus::kInvalid) {
-    return resource.window();
+    return resource.window;
   }
   return invalid;
 }
@@ -80,7 +80,7 @@ void Window::MakeCurrent(ResourceID id) {
   x_assert(Available());
   auto &resource = pool_.Find(id);
   if (resource.status() != ResourceStatus::kInvalid) {
-    resource.window()->MakeCurrent();
+    resource.window->MakeCurrent();
   }
 }
 
@@ -88,7 +88,7 @@ bool Window::ShouldClose(ResourceID id) {
   x_assert(Available());
   auto &resource = pool_.Find(id);
   if (resource.status() != ResourceStatus::kInvalid) {
-    return resource.window()->ShouldClose();
+    return resource.window->ShouldClose();
   }
   return false;
 }
@@ -100,7 +100,7 @@ const eastl::unique_ptr<Graphics> &Window::GetGraphics(ResourceID id) {
 
   auto &resource = pool_.Find(id);
   if (resource.status() != ResourceStatus::kInvalid) {
-    return resource.window()->graphics();
+    return resource.window->graphics();
   }
   return invalid;
 }
@@ -124,7 +124,7 @@ void Window::PresentAllWindow() {
   for (auto &id : resource_id_cache_) {
     auto &resource = pool_.Find(id);
     if (resource.status() != ResourceStatus::kInvalid) {
-      resource.window()->Present();
+      resource.window->Present();
     }
   }
 }

@@ -3,8 +3,8 @@
 
 #if X_D3D11
 
-#include <core/Core.h>
-#include <window/WindowDefine.h>
+#include "core/Core.h"
+#include "window/WindowDefine.h"
 
 #include <d3d11.h>
 

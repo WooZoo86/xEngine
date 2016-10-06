@@ -77,7 +77,10 @@ class Resource {
     id_ = kInvalidResourceID;
     status_ = ResourceStatus::kInvalid;
     config_ = CONFIG();
+    Reset();
   }
+
+  virtual void Reset() = 0;
 
   void Loading() {
     x_assert(status_ == ResourceStatus::kPending);

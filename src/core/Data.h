@@ -55,9 +55,9 @@ class Data final {
 
   void set_size(size_t size);
 
-  const char *buffer() const { return buffer_; }
+  const char *buffer(const size_t offset = 0) const { x_assert(offset < size_); return buffer_ + offset; }
 
-  char *buffer() { return buffer_; }
+  char *buffer(const size_t offset = 0) { x_assert(offset < size_); return buffer_ + offset; }
 
  private:
   size_t size_{0};

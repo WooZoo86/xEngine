@@ -11,14 +11,14 @@
 
 namespace xEngine {
 
-enum IOStatus {
+enum class IOStatus {
   kSuccess,
   kFailed,
 };
 
 typedef eastl::function<void(Location, IOStatus, DataPtr)> IOCallbackFunction;
 
-enum IOMessageType {
+enum class IOMessageType {
   kInvalid,
   kRead,
   kWrite,

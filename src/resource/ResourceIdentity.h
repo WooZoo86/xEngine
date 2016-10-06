@@ -2,6 +2,7 @@
 #define XENGINE_RESOURCE_RESOURCENAME_H
 
 #include "core/Core.h"
+#include "core/Counter.h"
 #include "core/Types.h"
 
 #include <EASTL/string.h>
