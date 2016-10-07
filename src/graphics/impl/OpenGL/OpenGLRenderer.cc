@@ -36,8 +36,6 @@ void OpenGLRenderer::Initialize(const GraphicsConfig &config) {
   glad_set_pre_callback(PreOpenGLCallback);
   glad_set_post_callback(PostOpenGLCallback);
 #endif
-  glGenVertexArrays(1, &cache_.vao);
-  glBindVertexArray(cache_.vao);
   Reset();
 }
 
@@ -325,7 +323,7 @@ void OpenGLRenderer::ApplyShader(ResourceID id) {
     if (shader.program_id != cache_.shader.program_id) {
       glUseProgram(shader.program_id);
       cache_.shader = shader;
-      UpdateVertexAttributePointer();
+      UpdateVertexAttributePointer(false);
     }
     cache_.prepared_mask |= OpenGLRendererCache::PrepareMask::kShader;
   }
@@ -337,7 +335,7 @@ void OpenGLRenderer::UpdateShaderUniform(ResourceID id, eastl::string name, Unif
     if (shader.program_id != cache_.shader.program_id) {
       glUseProgram(shader.program_id);
       cache_.shader = shader;
-      UpdateVertexAttributePointer();
+      UpdateVertexAttributePointer(false);
     }
     cache_.prepared_mask |= OpenGLRendererCache::PrepareMask::kShader;
     auto pair = shader.uniform_info.find(name);
@@ -382,14 +380,15 @@ void OpenGLRenderer::ResetShader() {
   glUseProgram(0);
 }
 
-void OpenGLRenderer::ApplyVertexData(ResourceID id) {
+void OpenGLRenderer::ApplyVertexData(ResourceID id, bool force_update) {
   auto &vertex_data = resource_manager_->vertex_data_pool_.Find(id);
   if (vertex_data.status() == ResourceStatus::kCompleted) {
     if (vertex_data.buffer_id != cache_.vertex_buffer) {
       glBindBuffer(GL_ARRAY_BUFFER, vertex_data.buffer_id);
+      glBindVertexArray(vertex_data.array_object_id);
       cache_.vertex_buffer = vertex_data.buffer_id;
       cache_.vertex_resource_id = id;
-      UpdateVertexAttributePointer();
+      UpdateVertexAttributePointer(force_update);
     }
     cache_.prepared_mask |= OpenGLRendererCache::PrepareMask::kVertexBuffer;
   }
@@ -401,9 +400,10 @@ void OpenGLRenderer::UpdateVertexData(ResourceID id, int32 offset, DataPtr data)
     if (vertex_data.status() == ResourceStatus::kCompleted) {
       if (vertex_data.buffer_id != cache_.vertex_buffer) {
         glBindBuffer(GL_ARRAY_BUFFER, vertex_data.buffer_id);
+        glBindVertexArray(vertex_data.array_object_id);
         cache_.vertex_buffer = vertex_data.buffer_id;
         cache_.vertex_resource_id = id;
-        UpdateVertexAttributePointer();
+        UpdateVertexAttributePointer(false);
       }
       glBufferSubData(GL_ARRAY_BUFFER, offset, data->size(), data->buffer());
     }
@@ -412,6 +412,7 @@ void OpenGLRenderer::UpdateVertexData(ResourceID id, int32 offset, DataPtr data)
 
 void OpenGLRenderer::ResetVertexData() {
   glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindVertexArray(0);
   cache_.vertex_buffer = 0;
   cache_.vertex_resource_id = kInvalidResourceID;
 }
@@ -505,12 +506,15 @@ void OpenGLRenderer::Reset() {
   ResetTexture();
 }
 
-void OpenGLRenderer::UpdateVertexAttributePointer() {
+void OpenGLRenderer::UpdateVertexAttributePointer(bool force_update) {
   if (cache_.shader.id() == kInvalidResourceID || cache_.vertex_resource_id == kInvalidResourceID) {
     return;
   }
   auto &vertex_data = resource_manager_->vertex_data_pool_.Find(cache_.vertex_resource_id);
   if (vertex_data.id() == kInvalidResourceID) {
+    return;
+  }
+  if (!force_update && vertex_data.vertex_attribute_pointed) {
     return;
   }
   auto &config = vertex_data.config();
@@ -535,6 +539,7 @@ void OpenGLRenderer::UpdateVertexAttributePointer() {
                             reinterpret_cast<GLvoid *>(element.offset));
     }
   }
+  vertex_data.vertex_attribute_pointed = true;
 }
 
 } // namespace xEngine

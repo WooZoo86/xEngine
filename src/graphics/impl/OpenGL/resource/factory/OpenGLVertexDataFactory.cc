@@ -22,6 +22,10 @@ void OpenGLVertexDataFactory::Create(OpenGLVertexData &resource) {
   glGenBuffers(1, &buffer);
   x_assert(buffer != 0);
 
+  GLuint array_object;
+  glGenVertexArrays(1, &array_object);
+  x_assert(array_object != 0);
+
   GLint current_buffer;
   glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &current_buffer);
 
@@ -37,6 +41,7 @@ void OpenGLVertexDataFactory::Create(OpenGLVertexData &resource) {
   resource.config().data.reset();
 
   resource.buffer_id = buffer;
+  resource.array_object_id = array_object;
 
   resource.Complete();
 }

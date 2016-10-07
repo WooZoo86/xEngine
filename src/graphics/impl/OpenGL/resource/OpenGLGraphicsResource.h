@@ -43,8 +43,13 @@ struct OpenGLVertexData: public Resource<VertexDataConfig> {
 
   GLuint buffer_id{0};
 
+  GLuint array_object_id{0};
+
+  bool vertex_attribute_pointed{false};
+
   virtual void Reset() override {
     buffer_id = 0;
+    array_object_id = 0;
   }
 
 };

@@ -55,7 +55,7 @@ class OpenGLRenderer: public RendererInterface {
 
   virtual void ResetShader() override;
 
-  virtual void ApplyVertexData(ResourceID id) override;
+  virtual void ApplyVertexData(ResourceID id, bool force_update = false) override;
 
   virtual void UpdateVertexData(ResourceID id, int32 offset, DataPtr data) override;
 
@@ -76,7 +76,7 @@ class OpenGLRenderer: public RendererInterface {
   virtual void Reset() override;
 
  private:
-  void UpdateVertexAttributePointer();
+  void UpdateVertexAttributePointer(bool force_update);
 
  private:
   GraphicsConfig config_;

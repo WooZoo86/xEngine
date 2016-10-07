@@ -51,7 +51,7 @@ class RendererInterface {
 
   virtual void ResetShader() = 0;
 
-  virtual void ApplyVertexData(ResourceID id) = 0;
+  virtual void ApplyVertexData(ResourceID id, bool force_update = false) = 0;
 
   virtual void UpdateVertexData(ResourceID id, int32 offset, DataPtr data) = 0;
 

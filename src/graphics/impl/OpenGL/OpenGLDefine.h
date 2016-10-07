@@ -52,8 +52,6 @@ struct OpenGLRendererCache {
 
   Color blend_color;
 
-  GLuint vao{0};
-
   GLuint frame_buffer{0};
 
   GLuint vertex_buffer{0};
