@@ -22,8 +22,6 @@ typedef std::int64_t int64;
 
 typedef std::uint64_t uint64;
 
-typedef std::size_t size_t;
-
 typedef unsigned char uchar;
 
 typedef wchar_t wchar;

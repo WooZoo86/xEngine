@@ -23,7 +23,7 @@ class Data final {
 
   Data(Data &other) { Copy(other.buffer_, other.size_); }
 
-  Data(Data &&other) {
+  Data(Data &&other) noexcept {
     Assign(other.buffer_, other.size_);
     other.buffer_ = nullptr;
     other.size_ = 0;
@@ -33,15 +33,15 @@ class Data final {
 
   void operator=(Data &other) { Copy(other.buffer_, other.size_); }
 
-  void operator=(Data &&other) {
+  void operator=(Data &&other) noexcept {
     Assign(other.buffer_, other.size_);
     other.buffer_ = nullptr;
     other.size_ = 0;
   }
 
-  bool operator==(const Data &other) { return size_ == other.size_ && buffer_ == other.buffer_; }
+  bool operator==(const Data &other) const { return size_ == other.size_ && buffer_ == other.buffer_; }
 
-  bool Empty() { return buffer_ == nullptr || size_ == 0; }
+  bool Empty() const { return buffer_ == nullptr || size_ == 0; }
 
   void Assign(char *buffer, size_t size, size_t offset = 0);
 
