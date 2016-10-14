@@ -51,8 +51,6 @@ void OpenGLRenderer::Render() {
 }
 
 void OpenGLRenderer::ApplyTarget(ResourceID id, const ClearState &state) {
-  cache_.prepared_mask |= OpenGLRendererCache::PrepareMask::kRenderTarget;
-
   if (id != kInvalidResourceID) {
     auto &texture = resource_manager_->texture_pool_.Find(id);
     if (texture.status() == ResourceStatus::kCompleted) {
@@ -61,8 +59,6 @@ void OpenGLRenderer::ApplyTarget(ResourceID id, const ClearState &state) {
         ApplyViewPort(0, 0, texture.config().width, texture.config().height);
         cache_.frame_buffer = texture.texture_id;
       }
-    } else {
-      cache_.prepared_mask ^= OpenGLRendererCache::PrepareMask::kRenderTarget;
     }
   } else {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -319,7 +315,6 @@ void OpenGLRenderer::ApplyShader(ResourceID id) {
       glUseProgram(shader.program_id);
       cache_.shader = shader;
     }
-    cache_.prepared_mask |= OpenGLRendererCache::PrepareMask::kShader;
   }
 }
 
@@ -330,7 +325,6 @@ void OpenGLRenderer::UpdateShaderUniform(ResourceID id, eastl::string name, Unif
       glUseProgram(shader.program_id);
       cache_.shader = shader;
     }
-    cache_.prepared_mask |= OpenGLRendererCache::PrepareMask::kShader;
     auto pair = shader.uniform_location.find(name);
     if (pair != shader.uniform_location.end()) {
       switch (format) {
@@ -420,7 +414,6 @@ void OpenGLRenderer::ApplyMesh(ResourceID id) {
     if (mesh.config().index_type != cache_.index_type) {
       cache_.index_type = mesh.config().index_type;
     }
-    cache_.prepared_mask |= OpenGLRendererCache::PrepareMask::kMesh;
   }
 }
 
@@ -450,7 +443,6 @@ void OpenGLRenderer::UpdateMesh(ResourceID id,
     if (index_buffer != nullptr && index_size != 0) {
       glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, index_offset, index_size, index_buffer);
     }
-    cache_.prepared_mask |= OpenGLRendererCache::PrepareMask::kMesh;
   }
 }
 
@@ -461,17 +453,14 @@ void OpenGLRenderer::ResetMesh() {
 }
 
 void OpenGLRenderer::DrawTopology(VertexTopology topology, int32 first, int32 count) {
-  if (cache_.prepared_mask == OpenGLRendererCache::PrepareMask::kPrepared) {
-    if (cache_.index_type == IndexFormat::kNone) {
-      glDrawArrays(GLEnumForVertexTopology(topology), first, count);
-    } else {
-      glDrawElements(GLEnumForVertexTopology(topology),
-                     count,
-                     GLEnumForIndexFormat(cache_.index_type),
-                     reinterpret_cast<GLvoid *>(first * SizeOfIndexFormat(cache_.index_type)));
-    }
+  if (cache_.index_type == IndexFormat::kNone) {
+    glDrawArrays(GLEnumForVertexTopology(topology), first, count);
+  } else {
+    glDrawElements(GLEnumForVertexTopology(topology),
+                   count,
+                   GLEnumForIndexFormat(cache_.index_type),
+                   reinterpret_cast<GLvoid *>(first * SizeOfIndexFormat(cache_.index_type)));
   }
-  cache_.prepared_mask = 0;
 }
 
 void OpenGLRenderer::Reset() {

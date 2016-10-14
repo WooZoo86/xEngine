@@ -25,17 +25,6 @@ enum class OpenGLMaxDefine: uint16 {
 };
 
 struct OpenGLRendererCache {
-
-  enum PrepareMask: uint8 {
-    kRenderTarget = 1,
-    kShader = 2,
-    kMesh = 4,
-
-    kPrepared = kRenderTarget | kShader | kMesh,
-  };
-
-  uint8 prepared_mask{0};
-
   BlendState blend_state;
   DepthStencilState depth_stencil_state;
   RasterizerState rasterizer_state;

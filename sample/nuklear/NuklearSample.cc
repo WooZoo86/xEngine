@@ -33,7 +33,6 @@ class NuklearSample: public Application {
   virtual ApplicationStatus Loop() override {
     if (window_id_ != kInvalidResourceID) {
       auto &renderer = Window::GetInstance().GetGraphics(window_id_)->renderer();
-      renderer->Reset();
       renderer->ApplyTarget(kInvalidResourceID, ClearState::ClearAll());
       NuklearGUI::GetInstance().BeginFrame();
       overview(NuklearGUI::GetInstance().context());

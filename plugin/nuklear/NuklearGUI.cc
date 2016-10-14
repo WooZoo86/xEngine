@@ -145,16 +145,18 @@ void NuklearGUI::BeginFrame() {
 }
 
 void NuklearGUI::EndFrame() {
-  nk_buffer_clear(&vertex_buffer);
-  nk_buffer_clear(&index_buffer);
-  nk_convert(&context_, &command, &vertex_buffer, &index_buffer, &config_);
-  graphics_->renderer()->UpdateMesh(mesh_, vertex_data, 0, vertex_buffer.needed, index_data, 0, index_buffer.needed);
   auto matrix = glm::ortho(0.0f,
                            static_cast<float32>(window_->config().width),
                            static_cast<float32>(window_->config().height),
                            0.0f,
                            -1.0f,
                            1.0f);
+  auto scale_x = static_cast<float32>(window_->config().frame_buffer_width) / window_->config().width;
+  auto scale_y = static_cast<float32>(window_->config().frame_buffer_height) / window_->config().height;
+  nk_buffer_clear(&vertex_buffer);
+  nk_buffer_clear(&index_buffer);
+  nk_convert(&context_, &command, &vertex_buffer, &index_buffer, &config_);
+  graphics_->renderer()->UpdateMesh(mesh_, vertex_data, 0, vertex_buffer.needed, index_data, 0, index_buffer.needed);
   graphics_->renderer()->UpdateShaderUniform(shader_, "uProjectionMatrix", UniformFormat::kMatrix4, glm::value_ptr(matrix));
   graphics_->renderer()->ApplyBlendState(blend_state_);
   graphics_->renderer()->ApplyDepthStencilState(depth_stencil_state);
@@ -168,10 +170,10 @@ void NuklearGUI::EndFrame() {
       current_texture = texture;
       graphics_->renderer()->ApplyTexture(current_texture, 0);
     }
-    graphics_->renderer()->ApplyScissor(static_cast<int32>(cmd->clip_rect.x),
-                                        static_cast<int32>(window_->config().height - (cmd->clip_rect.y + cmd->clip_rect.h)),
-                                        static_cast<int32>(cmd->clip_rect.w),
-                                        static_cast<int32>(cmd->clip_rect.h));
+    graphics_->renderer()->ApplyScissor(static_cast<int32>(cmd->clip_rect.x * scale_x),
+                                        static_cast<int32>((window_->config().height - (cmd->clip_rect.y + cmd->clip_rect.h)) * scale_y),
+                                        static_cast<int32>(cmd->clip_rect.w * scale_x),
+                                        static_cast<int32>(cmd->clip_rect.h * scale_y));
     graphics_->renderer()->DrawTopology(VertexTopology::kTriangles, element_offset, cmd->elem_count);
     element_offset += cmd->elem_count;
   }

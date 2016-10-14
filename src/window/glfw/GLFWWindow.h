@@ -37,6 +37,8 @@ class GLFWWindow: public WindowInterface {
  private:
   static void ErrorCallback(int error, const char *desc);
 
+  static void FrameBufferCallback(GLFWwindow *window, int width, int height);
+
  private:
   GLFWwindow *window_{nullptr};
 };

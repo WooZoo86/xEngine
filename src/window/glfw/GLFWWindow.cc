@@ -40,9 +40,11 @@ void GLFWWindow::Create(const WindowConfig &config) {
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   window_ = glfwCreateWindow(config_.width, config_.height, config_.title.c_str(), nullptr, nullptr);
   x_assert(Available());
+  glfwSetWindowUserPointer(window_, this);
   glfwMakeContextCurrent(window_);
   glfwSwapInterval(config_.swap_interval);
   glfwGetFramebufferSize(window_, &config_.frame_buffer_width, &config_.frame_buffer_height);
+  glfwSetFramebufferSizeCallback(window_, FrameBufferCallback);
 }
 
 void GLFWWindow::Destroy() {
@@ -77,6 +79,12 @@ void GLFWWindow::SetTitle(const eastl::string &name) {
 
 void GLFWWindow::ErrorCallback(int error, const char *desc) {
   Log::GetInstance().Error("glfw error[%d]: %s\n", error, desc);
+}
+
+void GLFWWindow::FrameBufferCallback(GLFWwindow *window, int width, int height) {
+  GLFWWindow *self = static_cast<GLFWWindow *>(glfwGetWindowUserPointer(window));
+  self->config_.frame_buffer_width = width;
+  self->config_.frame_buffer_height = height;
 }
 
 } // namespace xEngine
