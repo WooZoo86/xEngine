@@ -29,7 +29,7 @@ struct BlendState {
     uint64 value;
   };
 
-  Color blend_color{1.0f, 1.0f, 1.0f, 1.0f};
+  Color blend_color;
 
   BlendState();
 
@@ -51,7 +51,7 @@ inline BlendState::BlendState() {
   color_mask = PixelChannel::kRGBA;
   color_format = PixelFormat::RGBA8;
   depth_format = PixelFormat::D24S8;
-  blend_color = Color(1.0f, 1.0f, 1.0f, 1.0f);
+  blend_color = Color();
 }
 
 inline bool BlendState::operator==(const BlendState &other) const {

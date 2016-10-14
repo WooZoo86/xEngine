@@ -14,9 +14,10 @@ DataPtr StorageFilesystem::Read(Location location) {
     fseek(file, 0, SEEK_END);
     auto end = ftell(file);
     fseek(file, 0, SEEK_SET);
-    auto data = Data::Create(end - begin);
+    auto data = Data::Create(end - begin + 1);
     fread(data->buffer(), sizeof(char), data->size(), file);
     fclose(file);
+    data->operator[](data->size() - 1) = 0;
     last_status_ = IOStatus::kSuccess;
     return data;
   }

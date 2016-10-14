@@ -21,11 +21,9 @@ struct GraphicsConfig {
 
   uint16 shader_pool_size{256};
 
-  uint16 vertex_data_pool_size{1024};
-
-  uint16 index_data_pool_size{1024};
-
   uint16 texture_pool_size{1024};
+
+  uint16 mesh_pool_size{1024};
 
 };
 

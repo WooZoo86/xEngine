@@ -2,28 +2,25 @@
 #define XENGINE_GRAPHICS_CONFIG_SHADERCONFIG_H
 
 #include "graphics/GraphicsDefine.h"
+#include "graphics/GraphicsResourceSignature.h"
 
 #include "core/Data.h"
-#include "resource/ResourceIdentity.h"
 
 namespace xEngine {
 
-IncreaseResourceSignatureCounter();
-static const ResourceSignature ShaderSignature = GetResourceSignature();
-
 struct ShaderConfig {
 
-  static ShaderConfig FromData(DataPtr vertex, DataPtr fragment);
+  static ShaderConfig FromData(const char *vertex, const char *fragment);
 
   ResourceIdentity identity{ResourceIdentity::Shared(ShaderSignature)};
 
-  DataPtr vertex;
+  const char *vertex;
 
-  DataPtr fragment;
+  const char *fragment;
 
 };
 
-inline ShaderConfig ShaderConfig::FromData(DataPtr vertex, DataPtr fragment) {
+inline ShaderConfig ShaderConfig::FromData(const char *vertex, const char *fragment) {
   ShaderConfig config;
   config.vertex = vertex;
   config.fragment = fragment;

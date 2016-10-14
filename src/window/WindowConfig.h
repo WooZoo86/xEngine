@@ -30,7 +30,7 @@ struct WindowConfig {
 
   PixelFormat depth_format{PixelFormat::D24S8};
 
-  int32 sample_count{1};
+  uint8 sample_count{1};
 
   bool is_full_screen{false};
 

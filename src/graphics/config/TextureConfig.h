@@ -2,21 +2,20 @@
 #define XENGINE_GRAPHICS_CONFIG_TEXTURECONFIG_H
 
 #include "graphics/GraphicsDefine.h"
+#include "graphics/GraphicsResourceSignature.h"
 
 #include "core/Data.h"
-#include "resource/ResourceIdentity.h"
+
 #include "window/WindowDefine.h"
 
 namespace xEngine {
-
-IncreaseResourceSignatureCounter();
-static const ResourceSignature TextureSignature = GetResourceSignature();
 
 struct TextureConfig {
 
   ResourceIdentity identity{ResourceIdentity::Shared(TextureSignature)};
 
-  DataPtr data;
+  DataPtr data[static_cast<uint16>(GraphicsMaxDefine::kMaxCubeTextureFaceCount)][
+      static_cast<uint16>(GraphicsMaxDefine::kMaxTextureMipMapCount)];
 
   TextureType type{TextureType::kTexture2d};
 
@@ -39,17 +38,6 @@ struct TextureConfig {
   TextureFilterMode filter_mode_min{TextureFilterMode::kNearest};
 
   TextureFilterMode filter_mode_mag{TextureFilterMode::kNearest};
-
-  size_t data_offset[static_cast<uint16>(GraphicsMaxDefine::kMaxCubeTextureFaceCount)][
-      static_cast<uint16>(GraphicsMaxDefine::kMaxTextureMipMapCount)];
-
-  size_t data_size[static_cast<uint16>(GraphicsMaxDefine::kMaxCubeTextureFaceCount)][
-      static_cast<uint16>(GraphicsMaxDefine::kMaxTextureMipMapCount)];
-
-  TextureConfig() {
-    memset(data_offset, 0, sizeof(data_offset));
-    memset(data_size, 0, sizeof(data_size));
-  }
 };
 
 } // namespace xEngine

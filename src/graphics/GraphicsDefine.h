@@ -116,7 +116,7 @@ enum class IndexFormat: uint8 {
   kUint32,
 };
 
-static int32 SizeOfIndexFormat(IndexFormat type) {
+static size_t SizeOfIndexFormat(IndexFormat type) {
   auto size = 0;
   switch (type) {
     case IndexFormat::kNone:
@@ -134,21 +134,30 @@ static int32 SizeOfIndexFormat(IndexFormat type) {
   return size;
 }
 
-enum class VertexElementType: uint8 {
-  kInvalid,
-  kBinormal,
-  kBlendIndices,
-  kBlendWeight,
-  kColor,
-  kNormal,
+enum class VertexElementSemantic: uint8 {
   kPosition,
-  kPositionTransformed,
-  kPointSize,
+  kTexcoord0,
+  kTexcoord1,
+  kTexcoord2,
+  kTexcoord3,
+  kColor0,
+  kColor1,
+  kNormal,
   kTangent,
-  kTexcoord,
+  kBinormal,
+  kWeights,
+  kIndices,
+  kInstance0,
+  kInstance1,
+  kInstance2,
+  kInstance3,
+
+  kMaxSemanticCount,
+  kInvalid
 };
 
 enum class VertexElementFormat: uint8 {
+  kInvalid,
   kFloat1,
   kFloat2,
   kFloat3,
@@ -163,7 +172,27 @@ enum class VertexElementFormat: uint8 {
   kShort4Normalized,
 };
 
-static int32 SizeOfVertexElementFormat(VertexElementFormat format) {
+static bool IsNormalizedForVertexElementFormat(VertexElementFormat format)
+{
+  switch (format)
+  {
+    case VertexElementFormat::kFloat1: return false;
+    case VertexElementFormat::kFloat2: return false;
+    case VertexElementFormat::kFloat3: return false;
+    case VertexElementFormat::kFloat4: return false;
+    case VertexElementFormat::kByte4: return false;
+    case VertexElementFormat::kByte4Normalized: return true;
+    case VertexElementFormat::kUnsignedByte4: return false;
+    case VertexElementFormat::kUnsignedByte4Normalized: return true;
+    case VertexElementFormat::kShort2: return false;
+    case VertexElementFormat::kShort2Normalized: return true;
+    case VertexElementFormat::kShort4: return false;
+    case VertexElementFormat::kShort4Normalized: return true;
+    default: x_error("unknown VertexElementFormat\n"); return 0;
+  }
+}
+
+static size_t SizeOfVertexElementFormat(VertexElementFormat format) {
   switch (format) {
     case VertexElementFormat::kFloat1:
       return 4;

@@ -29,9 +29,11 @@ class OpenGLRenderer: public RendererInterface {
 
   virtual void Render() override;
 
-  virtual void ApplyTarget(ResourceID id = kInvalidResourceID) override;
+  virtual void ApplyTarget(ResourceID id = kInvalidResourceID, const ClearState &state = ClearState()) override;
 
-  virtual void ApplyClearState(const ClearState &state) override;
+  virtual void ApplyViewPort(int32 x, int32 y, int32 width, int32 height) override;
+
+  virtual void ApplyScissor(int32 x, int32 y, int32 width, int32 height) override;
 
   virtual void ApplyBlendState(const BlendState &blend_state) override;
 
@@ -45,38 +47,31 @@ class OpenGLRenderer: public RendererInterface {
 
   virtual void ResetRasterizerState() override;
 
-  virtual void ApplyViewPort(int32 x, int32 y, int32 width, int32 height) override;
-
-  virtual void ApplyScissor(int32 x, int32 y, int32 width, int32 height) override;
-
   virtual void ApplyShader(ResourceID id) override;
 
   virtual void UpdateShaderUniform(ResourceID id, eastl::string name, UniformFormat format, const void *buffer) override;
 
   virtual void ResetShader() override;
 
-  virtual void ApplyVertexData(ResourceID id, bool force_update = false) override;
-
-  virtual void UpdateVertexData(ResourceID id, int32 offset, DataPtr data) override;
-
-  virtual void ResetVertexData() override;
-
-  virtual void ApplyIndexData(ResourceID id) override;
-
-  virtual void UpdateIndexData(ResourceID id, int32 offset, DataPtr data) override;
-
-  virtual void ResetIndexData() override;
-
   virtual void ApplyTexture(ResourceID id, int32 index) override;
 
   virtual void ResetTexture() override;
 
+  virtual void ApplyMesh(ResourceID id) override;
+
+  virtual void UpdateMesh(ResourceID id,
+                          const void *vertex_buffer,
+                          size_t vertex_offset,
+                          size_t vertex_size,
+                          const void *index_buffer,
+                          size_t index_offset,
+                          size_t index_size) override;
+
+  virtual void ResetMesh() override;
+
   virtual void DrawTopology(VertexTopology topology, int32 first, int32 count) override;
 
   virtual void Reset() override;
-
- private:
-  void UpdateVertexAttributePointer(bool force_update);
 
  private:
   GraphicsConfig config_;

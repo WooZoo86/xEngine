@@ -23,4 +23,5 @@ endif()
 
 add_subdirectory(src)
 add_subdirectory(third_party)
+add_subdirectory(plugin)
 add_subdirectory(sample)

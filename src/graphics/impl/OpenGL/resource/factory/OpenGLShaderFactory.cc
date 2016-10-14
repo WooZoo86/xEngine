@@ -7,9 +7,9 @@
 
 namespace xEngine {
 
-static GLuint CompileShader(GLenum type, DataPtr data) {
-  auto source = static_cast<const char *>(data->buffer());
-  auto length = static_cast<int32>(data->size());
+static GLuint CompileShader(GLenum type, const char *data) {
+  auto source = static_cast<const char *>(data);
+  auto length = static_cast<GLint>(strlen(data));
 
   auto shader = glCreateShader(type);
   x_assert(shader != 0);
@@ -61,6 +61,12 @@ void OpenGLShaderFactory::Create(OpenGLShader &resource) {
     glAttachShader(program, vertex_shader);
     glAttachShader(program, fragment_shader);
 
+    for (auto semantic_index = 0; semantic_index < static_cast<uint8>(VertexElementSemantic::kMaxSemanticCount); ++semantic_index) {
+      glBindAttribLocation(program,
+                           static_cast<GLuint>(semantic_index),
+                           AttributeNameForVertexElementSemantic(static_cast<VertexElementSemantic>(semantic_index)));
+    }
+
     glLinkProgram(program);
 
     auto status = 0;
@@ -91,21 +97,6 @@ void OpenGLShaderFactory::Create(OpenGLShader &resource) {
   DeleteShader(fragment_shader);
 
   if (program != 0) {
-    int32 active_attribute_count, max_attribute_name_length;
-
-    glGetProgramiv(program, GL_ACTIVE_ATTRIBUTES, &active_attribute_count);
-    glGetProgramiv(program, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &max_attribute_name_length);
-
-    char attribute_name[max_attribute_name_length];
-
-    for (auto attribute_index = 0; attribute_index < active_attribute_count; ++attribute_index) {
-      OpenGLShader::Info info;
-      GLsizei actual_attribute_name_length;
-      glGetActiveAttrib(program, attribute_index, max_attribute_name_length, &actual_attribute_name_length, &info.size, &info.type, attribute_name);
-      info.location = static_cast<GLuint>(glGetAttribLocation(program, attribute_name));
-      resource.attribute_info.insert(eastl::make_pair(eastl::string(attribute_name, actual_attribute_name_length), info));
-    }
-
     int32 active_uniform_count, max_uniform_name_length;
 
     glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &active_uniform_count);
@@ -114,16 +105,17 @@ void OpenGLShaderFactory::Create(OpenGLShader &resource) {
     char uniform_name[max_uniform_name_length];
 
     for (auto uniform_index = 0; uniform_index < active_uniform_count; ++uniform_index) {
-      OpenGLShader::Info info;
+      GLenum type;
+      GLsizei size;
       GLsizei actual_uniform_name_length;
-      glGetActiveUniform(program, uniform_index, max_uniform_name_length, &actual_uniform_name_length, &info.size, &info.type, uniform_name);
-      info.location = static_cast<GLuint>(glGetUniformLocation(program, uniform_name));
-      resource.uniform_info.insert(eastl::make_pair(eastl::string(uniform_name, actual_uniform_name_length), info));
+      glGetActiveUniform(program, static_cast<GLuint>(uniform_index), max_uniform_name_length, &actual_uniform_name_length, &size, &type, uniform_name);
+      auto location = static_cast<GLuint>(glGetUniformLocation(program, uniform_name));
+      resource.uniform_location.insert(eastl::make_pair(eastl::string(uniform_name, static_cast<size_t>(actual_uniform_name_length)), location));
     }
   }
 
-  resource.config().vertex.reset();
-  resource.config().fragment.reset();
+  resource.config().vertex = nullptr;
+  resource.config().fragment = nullptr;
 
   resource.program_id = program;
 

@@ -22,12 +22,6 @@ void OpenGLTextureFactory::Create(OpenGLTexture &resource) {
   auto layout = is_compressed ? 0 : GLEnumForPixelFormatAsLayout(config.color_format);
   auto format = GLEnumForPixelFormatAsFormat(config.color_format);
 
-  if (config.data == nullptr || config.data->Empty()) {
-    Log::GetInstance().Error("[OpenGLTextureFactory::Create] no data\n");
-    resource.Failed();
-    return;
-  }
-
   if (config.mipmap_count != 1 &&
       (IsTextureFilterModeUseMipmap(config.filter_mode_min) ||
        IsTextureFilterModeUseMipmap(config.filter_mode_mag))) {
@@ -51,9 +45,8 @@ void OpenGLTextureFactory::Create(OpenGLTexture &resource) {
       auto height = config.height >> j;
       if (width == 0) width = 1;
       if (height == 0) height = 1;
-      if (config.data_size[i][j] <= 0 ||
-          config.data_offset[i][j] + config.data_size[i][j] > config.data->size() ||
-          config.data_offset[i][j] + SizeOfPixelFormat(config.color_format) * width * height > config.data->size()) {
+      if (config.data[i][j] == nullptr ||
+          config.data[i][j]->size() < SizeOfPixelFormat(config.color_format) * width * height) {
         Log::GetInstance().Error("[OpenGLTextureFactory::Create] wrong data size\n");
         resource.Failed();
         return;
@@ -116,8 +109,8 @@ void OpenGLTextureFactory::Create(OpenGLTexture &resource) {
                                width,
                                height,
                                0,
-                               static_cast<GLsizei>(config.data_size[face_index][mipmap_index]),
-                               config.data->buffer(static_cast<size_t>(config.data_offset[face_index][mipmap_index])));
+                               static_cast<GLsizei>(config.data[face_index][mipmap_index]->size()),
+                               config.data[face_index][mipmap_index]->buffer());
       } else {
         glTexImage2D(real_target,
                      mipmap_index,
@@ -127,12 +120,18 @@ void OpenGLTextureFactory::Create(OpenGLTexture &resource) {
                      0,
                      format,
                      layout,
-                     config.data->buffer(static_cast<size_t>(config.data_offset[face_index][mipmap_index])));
+                     config.data[face_index][mipmap_index]->buffer());
       }
     }
   }
 
-  resource.config().data.reset();
+  for (auto i = 0; i < static_cast<uint16>(GraphicsMaxDefine::kMaxCubeTextureFaceCount); ++i) {
+    for (auto j = 0; j < static_cast<uint16>(GraphicsMaxDefine::kMaxTextureMipMapCount); ++j) {
+      if (resource.config().data[i][j] != nullptr) {
+        resource.config().data[i][j].reset();
+      }
+    }
+  }
 
   resource.texture_id = texture_id;
 

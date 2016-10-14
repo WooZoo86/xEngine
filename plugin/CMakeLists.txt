@@ -27,15 +27,8 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/third_party/mongoose
     ${PROJECT_SOURCE_DIR}/third_party/glm/glm
     ${PROJECT_SOURCE_DIR}/third_party/${GLAD_DIR}/include
+    ${PROJECT_SOURCE_DIR}/third_party/stb_image
+    ${PROJECT_SOURCE_DIR}/third_party/nuklear
 )
 
-file(GLOB_RECURSE src *.h *.cc)
-
-add_library(xEngine ${src})
-
-foreach(file ${src})
-    get_filename_component(group ${file} PATH)
-    string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/" "" group ${group})
-    string(REPLACE "/" "\\" group ${group})
-    source_group(${group} FILES ${file})
-endforeach()
+add_subdirectory(nuklear)

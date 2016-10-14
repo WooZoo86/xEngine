@@ -29,9 +29,9 @@ struct OpenGLRendererCache {
   enum PrepareMask: uint8 {
     kRenderTarget = 1,
     kShader = 2,
-    kVertexBuffer = 4,
+    kMesh = 4,
 
-    kPrepared = kRenderTarget | kShader | kVertexBuffer,
+    kPrepared = kRenderTarget | kShader | kMesh,
   };
 
   uint8 prepared_mask{0};
@@ -55,10 +55,8 @@ struct OpenGLRendererCache {
   GLuint frame_buffer{0};
 
   GLuint vertex_buffer{0};
-  ResourceID vertex_resource_id{kInvalidResourceID};
-
-  GLuint index_buffer{0};
-  IndexFormat index_format{IndexFormat::kNone};
+  GLuint vertex_array{0};
+  IndexFormat index_type{IndexFormat::kNone};
 
   OpenGLShader shader;
 
@@ -71,7 +69,7 @@ struct OpenGLRendererCache {
   }
 };
 
-inline GLenum GLEnumForBufferUsage(BufferUsage usage) {
+static GLenum GLEnumForBufferUsage(BufferUsage usage) {
   switch (usage) {
     case BufferUsage::kImmutable:
       return GL_STATIC_DRAW;
@@ -87,7 +85,7 @@ inline GLenum GLEnumForBufferUsage(BufferUsage usage) {
   }
 }
 
-inline GLenum GLEnumForTextureFilterMode(TextureFilterMode mode) {
+static GLenum GLEnumForTextureFilterMode(TextureFilterMode mode) {
   switch (mode) {
     case TextureFilterMode::kNearest:
       return GL_NEAREST;
@@ -107,7 +105,7 @@ inline GLenum GLEnumForTextureFilterMode(TextureFilterMode mode) {
   }
 }
 
-inline GLenum GLEnumForTextureWrapMode(TextureWrapMode mode) {
+static GLenum GLEnumForTextureWrapMode(TextureWrapMode mode) {
   switch (mode) {
     case TextureWrapMode::kClampToEdge:
       return GL_CLAMP_TO_EDGE;
@@ -121,7 +119,7 @@ inline GLenum GLEnumForTextureWrapMode(TextureWrapMode mode) {
   }
 }
 
-inline GLenum GLEnumForTextureType(TextureType type) {
+static GLenum GLEnumForTextureType(TextureType type) {
   switch (type) {
     case TextureType::kTexture2d:
       return GL_TEXTURE_2D;
@@ -135,7 +133,7 @@ inline GLenum GLEnumForTextureType(TextureType type) {
   }
 }
 
-inline GLenum GLEnumForTextureTypeAsBinding(TextureType type) {
+static GLenum GLEnumForTextureTypeAsBinding(TextureType type) {
   switch (type) {
     case TextureType::kTexture2d:
       return GL_TEXTURE_BINDING_2D;
@@ -149,7 +147,7 @@ inline GLenum GLEnumForTextureTypeAsBinding(TextureType type) {
   }
 }
 
-inline GLenum GLEnumForPixelFormatAsInternal(PixelFormat format) {
+static GLenum GLEnumForPixelFormatAsInternal(PixelFormat format) {
   switch (format) {
     case PixelFormat::RGBA8:
       return GL_RGBA8;
@@ -197,7 +195,7 @@ inline GLenum GLEnumForPixelFormatAsInternal(PixelFormat format) {
   }
 }
 
-inline GLenum GLEnumForPixelFormatAsLayout(PixelFormat format) {
+static GLenum GLEnumForPixelFormatAsLayout(PixelFormat format) {
   switch (format) {
     case PixelFormat::RGBA32F:
       return GL_FLOAT;
@@ -225,7 +223,7 @@ inline GLenum GLEnumForPixelFormatAsLayout(PixelFormat format) {
   }
 }
 
-inline GLenum GLEnumForPixelFormatAsFormat(PixelFormat format) {
+static GLenum GLEnumForPixelFormatAsFormat(PixelFormat format) {
   switch (format) {
     case PixelFormat::RGBA8:
     case PixelFormat::R5G5B5A1:
@@ -267,7 +265,7 @@ inline GLenum GLEnumForPixelFormatAsFormat(PixelFormat format) {
   }
 }
 
-inline GLint VertexCountForVertexElementFormat(VertexElementFormat format) {
+static GLint VertexCountForVertexElementFormat(VertexElementFormat format) {
   switch (format) {
     case VertexElementFormat::kFloat1:
       return 1;
@@ -299,7 +297,7 @@ inline GLint VertexCountForVertexElementFormat(VertexElementFormat format) {
   }
 }
 
-inline GLenum GLEnumForVertexElementFormat(VertexElementFormat format) {
+static GLenum GLEnumForVertexElementFormat(VertexElementFormat format) {
   switch (format) {
     case VertexElementFormat::kFloat1:
       return GL_FLOAT;
@@ -331,39 +329,7 @@ inline GLenum GLEnumForVertexElementFormat(VertexElementFormat format) {
   }
 }
 
-inline GLboolean IsNormalizedForVertexElementFormat(VertexElementFormat format) {
-  switch (format) {
-    case VertexElementFormat::kFloat1:
-      return GL_FALSE;
-    case VertexElementFormat::kFloat2:
-      return GL_FALSE;
-    case VertexElementFormat::kFloat3:
-      return GL_FALSE;
-    case VertexElementFormat::kFloat4:
-      return GL_FALSE;
-    case VertexElementFormat::kByte4:
-      return GL_FALSE;
-    case VertexElementFormat::kByte4Normalized:
-      return GL_TRUE;
-    case VertexElementFormat::kUnsignedByte4:
-      return GL_FALSE;
-    case VertexElementFormat::kUnsignedByte4Normalized:
-      return GL_TRUE;
-    case VertexElementFormat::kShort2:
-      return GL_FALSE;
-    case VertexElementFormat::kShort2Normalized:
-      return GL_TRUE;
-    case VertexElementFormat::kShort4:
-      return GL_FALSE;
-    case VertexElementFormat::kShort4Normalized:
-      return GL_TRUE;
-    default:
-      x_error("unknown VertexElementFormat\n");
-      return 0;
-  }
-}
-
-inline GLenum GLEnumForVertexTopology(VertexTopology type) {
+static GLenum GLEnumForVertexTopology(VertexTopology type) {
   switch (type) {
     case VertexTopology::kPoints:
       return GL_POINTS;
@@ -385,7 +351,7 @@ inline GLenum GLEnumForVertexTopology(VertexTopology type) {
   }
 }
 
-inline GLenum GLEnumForIndexFormat(IndexFormat type) {
+static GLenum GLEnumForIndexFormat(IndexFormat type) {
   switch (type) {
     case IndexFormat::kUint16:
       return GL_UNSIGNED_SHORT;
@@ -397,7 +363,7 @@ inline GLenum GLEnumForIndexFormat(IndexFormat type) {
   }
 }
 
-inline GLenum GLEnumForBlendFactor(BlendFactor type) {
+static GLenum GLEnumForBlendFactor(BlendFactor type) {
   switch (type) {
     case BlendFactor::kZero:
       return GL_ZERO;
@@ -408,7 +374,7 @@ inline GLenum GLEnumForBlendFactor(BlendFactor type) {
     case BlendFactor::kOneMinusSrcColor:
       return GL_ONE_MINUS_SRC_COLOR;
     case BlendFactor::kSrcAlpha:
-      return GL_SRC_COLOR;
+      return GL_SRC_ALPHA;
     case BlendFactor::kOneMinusSrcAlpha:
       return GL_ONE_MINUS_SRC_ALPHA;
     case BlendFactor::kDstColor:
@@ -435,7 +401,7 @@ inline GLenum GLEnumForBlendFactor(BlendFactor type) {
   }
 }
 
-inline GLenum GLEnumForBlendOperation(BlendOperation type) {
+static GLenum GLEnumForBlendOperation(BlendOperation type) {
   switch (type) {
     case BlendOperation::kAdd:
       return GL_FUNC_ADD;
@@ -449,7 +415,7 @@ inline GLenum GLEnumForBlendOperation(BlendOperation type) {
   }
 }
 
-inline GLenum GLEnumForCompareFunction(CompareFunction func) {
+static GLenum GLEnumForCompareFunction(CompareFunction func) {
   switch (func) {
     case CompareFunction::kNever:
       return GL_NEVER;
@@ -473,7 +439,7 @@ inline GLenum GLEnumForCompareFunction(CompareFunction func) {
   }
 }
 
-inline GLenum GLEnumForStencilOperation(StencilOperation type) {
+static GLenum GLEnumForStencilOperation(StencilOperation type) {
   switch (type) {
     case StencilOperation::kKeep:
       return GL_KEEP;
@@ -497,7 +463,7 @@ inline GLenum GLEnumForStencilOperation(StencilOperation type) {
   }
 }
 
-inline GLenum GLEnumForFaceSide(FaceSide face) {
+static GLenum GLEnumForFaceSide(FaceSide face) {
   switch (face) {
     case FaceSide::kFront:
       return GL_FRONT;
@@ -511,7 +477,7 @@ inline GLenum GLEnumForFaceSide(FaceSide face) {
   }
 }
 
-inline GLenum GLEnumForFrontFaceType(FrontFaceType type) {
+static GLenum GLEnumForFrontFaceType(FrontFaceType type) {
   switch (type) {
     case FrontFaceType::kClockWise:
       return GL_CW;
@@ -523,31 +489,27 @@ inline GLenum GLEnumForFrontFaceType(FrontFaceType type) {
   }
 }
 
-inline const char *AttributeNameForVertexElementType(VertexElementType type) {
-  switch (type) {
-    case VertexElementType::kBinormal:
-      return "aBinormal";
-    case VertexElementType::kBlendIndices:
-      return "aBlendIndices";
-    case VertexElementType::kBlendWeight:
-      return "aBlendWeight";
-    case VertexElementType::kColor:
-      return "aColor";
-    case VertexElementType::kNormal:
-      return "aNormal";
-    case VertexElementType::kPosition:
-      return "aPosition";
-    case VertexElementType::kPositionTransformed:
-      return "aPositionTransformed";
-    case VertexElementType::kPointSize:
-      return "aPointSize";
-    case VertexElementType::kTangent:
-      return "aTangent";
-    case VertexElementType::kTexcoord:
-      return "aTexcoord";
-    default:
-      x_error("invalid VertexElementType\n");
-      return nullptr;
+static const char *AttributeNameForVertexElementSemantic(VertexElementSemantic semantic)
+{
+  switch (semantic)
+  {
+    case VertexElementSemantic::kPosition: return "aPosition";
+    case VertexElementSemantic::kTexcoord0: return "aTexcoord0";
+    case VertexElementSemantic::kTexcoord1: return "aTexcoord1";
+    case VertexElementSemantic::kTexcoord2: return "aTexcoord2";
+    case VertexElementSemantic::kTexcoord3: return "aTexcoord3";
+    case VertexElementSemantic::kColor0: return "aColor0";
+    case VertexElementSemantic::kColor1: return "aColor1";
+    case VertexElementSemantic::kNormal: return "aNormal";
+    case VertexElementSemantic::kTangent: return "aTangent";
+    case VertexElementSemantic::kBinormal: return "aBinormal";
+    case VertexElementSemantic::kWeights: return "aWeights";
+    case VertexElementSemantic::kIndices: return "aIndices";
+    case VertexElementSemantic::kInstance0: return "aInstance0";
+    case VertexElementSemantic::kInstance1: return "aInstance1";
+    case VertexElementSemantic::kInstance2: return "aInstance2";
+    case VertexElementSemantic::kInstance3: return "aInstance3";
+    default: x_error("unknown VertexElementSemantic\n"); return nullptr;
   }
 }
 

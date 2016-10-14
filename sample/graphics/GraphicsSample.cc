@@ -1,8 +1,6 @@
 #include "application/Application.h"
 #include "core/Log.h"
 #include "graphics/Graphics.h"
-#include "graphics/RendererInterface.h"
-#include "graphics/GraphicsResourceManagerInterface.h"
 #include "window/Window.h"
 #include "io/IO.h"
 #include "storage/StorageFilesystem.h"
@@ -29,8 +27,9 @@ class GraphicsSample : public Application {
     IO::GetInstance().RegisterFilesystem("storage", StorageFilesystem::Creator);
 
     load_shader();
-    load_vertex_data();
     load_texture();
+    load_mesh();
+    state_ = ClearState::ClearColor();
 
     return Application::Initialize();
   }
@@ -58,7 +57,7 @@ class GraphicsSample : public Application {
   void load_shader() {
     static const auto generate_shader = [&]() {
       if (shader_ == kInvalidResourceID && vertex_shader_ && fragment_shader_) {
-        shader_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(ShaderConfig::FromData(vertex_shader_, fragment_shader_));
+        shader_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(ShaderConfig::FromData(vertex_shader_->buffer(), fragment_shader_->buffer()));
       }
     };
     IO::GetInstance().Read("local:vertex.shader", [&](Location location, IOStatus status, DataPtr data) {
@@ -73,47 +72,6 @@ class GraphicsSample : public Application {
         generate_shader();
       }
     });
-  }
-
-  void load_vertex_data() {
-    float32 vertices[] = {
-        -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // Top-left
-         0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // Top-right
-         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, // Bottom-right
-        -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f  // Bottom-left
-    };
-    uint16 indices[] = {
-        0, 1, 2,
-        2, 3, 0
-    };
-    VertexDataConfig vertex_config;
-    vertex_config.buffer_usage = BufferUsage::kStatic;
-    vertex_config.data = Data::Create(reinterpret_cast<const char *>(vertices), sizeof(vertices));
-    vertex_config.vertex_size = sizeof(vertices) / 4;
-    VertexElementConfig position_element;
-    position_element.type = VertexElementType::kPosition;
-    position_element.format = VertexElementFormat::kFloat2;
-    position_element.normalized = false;
-    vertex_config.element[0] = position_element;
-    VertexElementConfig color_element;
-    color_element.type = VertexElementType::kColor;
-    color_element.format = VertexElementFormat::kFloat3;
-    color_element.normalized = false;
-    color_element.offset = 2 * sizeof(float32);
-    vertex_config.element[1] = color_element;
-    VertexElementConfig texcoord_element;
-    texcoord_element.type = VertexElementType::kTexcoord;
-    texcoord_element.format = VertexElementFormat::kFloat2;
-    texcoord_element.normalized = false;
-    texcoord_element.offset = 5 * sizeof(float32);
-    vertex_config.element[2] = texcoord_element;
-    vertex_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(vertex_config);
-    IndexDataConfig index_config;
-    index_config.buffer_usage = BufferUsage::kStatic;
-    index_config.data = Data::Create(reinterpret_cast<const char *>(indices), sizeof(indices));
-    index_config.type = IndexFormat::kUint16;
-    index_config.count = sizeof(indices) / sizeof(uint16);
-    index_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(index_config);
   }
 
   void load_texture() {
@@ -135,14 +93,35 @@ class GraphicsSample : public Application {
           TextureConfig config;
           config.width = width;
           config.height = height;
-          config.type = TextureType::kTexture2d;
           config.color_format = PixelFormat::RGBA8;
-          config.data_size[0][0] = data->size();
-          config.data = data;
+          config.data[0][0] = data;
           texture_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(config);
         }
       }
     });
+  }
+
+  void load_mesh() {
+    float32 vertices[] = {
+        -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // Top-left
+         0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // Top-right
+         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, // Bottom-right
+        -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f  // Bottom-left
+    };
+    uint16 indices[] = {
+        0, 1, 2,
+        2, 3, 0
+    };
+    MeshConfig mesh_config;
+    mesh_config.index_type = IndexFormat::kUint16;
+    mesh_config.index_count = sizeof(indices) / sizeof(uint16);
+    mesh_config.index_data = indices;
+    mesh_config.vertex_count = 4;
+    mesh_config.vertex_data = vertices;
+    mesh_config.layout.AddElement(VertexElementSemantic::kPosition, VertexElementFormat::kFloat2)
+        .AddElement(VertexElementSemantic::kColor0, VertexElementFormat::kFloat3)
+        .AddElement(VertexElementSemantic::kTexcoord0, VertexElementFormat::kFloat2);
+    mesh_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(mesh_config);
   }
 
   void draw() {
@@ -151,23 +130,21 @@ class GraphicsSample : public Application {
       state_.clear_color += Color(0.01f, 0.005f, 0.0025f, 0.0f);
       state_.clear_color = glm::mod(state_.clear_color, 1.0f);
       auto &renderer = Window::GetInstance().GetGraphics(window_id_)->renderer();
-      renderer->ApplyTarget();
-      renderer->ApplyClearState(state_);
-      renderer->Render();
+      renderer->Reset();
+      renderer->ApplyTarget(kInvalidResourceID, state_);
       renderer->ApplyShader(shader_);
-      renderer->ApplyVertexData(vertex_);
-      renderer->ApplyIndexData(index_);
       renderer->ApplyTexture(texture_, texture_index);
+      renderer->ApplyMesh(mesh_);
       renderer->UpdateShaderUniform(shader_, "tex", UniformFormat::kTexture, &texture_index);
       renderer->DrawTopology(VertexTopology::kTriangles, 0, 6);
+      renderer->Render();
     }
   }
 
  private:
   ResourceID shader_{kInvalidResourceID};
-  ResourceID vertex_{kInvalidResourceID};
-  ResourceID index_{kInvalidResourceID};
   ResourceID texture_{kInvalidResourceID};
+  ResourceID mesh_{kInvalidResourceID};
   DataPtr vertex_shader_{nullptr};
   DataPtr fragment_shader_{nullptr};
   ResourceID window_id_{kInvalidResourceID};
