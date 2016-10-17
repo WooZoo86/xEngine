@@ -76,7 +76,7 @@ void OpenGLShaderFactory::Create(OpenGLShader &resource) {
     if (status == GL_FALSE) {
       auto log_length = 0;
       glGetProgramiv(program, GL_INFO_LOG_LENGTH, &log_length);
-			auto log = static_cast<char *>(malloc(static_cast<size_t>(log_length)));
+      auto log = static_cast<char *>(malloc(static_cast<size_t>(log_length)));
       glGetProgramInfoLog(program, log_length, &log_length, log);
       Log::GetInstance().Debug("[link fail]:\n%s\n", log);
       free(log);
@@ -103,7 +103,7 @@ void OpenGLShaderFactory::Create(OpenGLShader &resource) {
     glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &active_uniform_count);
     glGetProgramiv(program, GL_ACTIVE_UNIFORM_MAX_LENGTH, &max_uniform_name_length);
 
-		auto uniform_name = static_cast<char *>(malloc(static_cast<size_t>(max_uniform_name_length)));
+    auto uniform_name = static_cast<char *>(malloc(static_cast<size_t>(max_uniform_name_length)));
 
     for (auto uniform_index = 0; uniform_index < active_uniform_count; ++uniform_index) {
       GLenum type;

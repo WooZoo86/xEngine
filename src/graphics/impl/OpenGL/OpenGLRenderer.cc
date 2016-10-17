@@ -26,7 +26,6 @@ void OpenGLRenderer::PostOpenGLCallback(const char *name, void *function, int le
 }
 
 void OpenGLRenderer::Initialize(const GraphicsConfig &config) {
-  config_ = config;
   window_ = Window::GetInstance().Get(config.window).get();
   resource_manager_ = static_cast<OpenGLGraphicsResourceManager *>(window_->graphics()->resource_manager().get());
   if (gladLoadGL() == 0) {
@@ -43,7 +42,6 @@ void OpenGLRenderer::Finalize() {
   Reset();
   window_ = nullptr;
   resource_manager_ = nullptr;
-  config_ = GraphicsConfig();
 }
 
 void OpenGLRenderer::Render() {

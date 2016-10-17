@@ -11,9 +11,6 @@
 
 #include <glad/glad.h>
 
-#include <EASTL/hash_map.h>
-#include <EASTL/string.h>
-
 namespace xEngine {
 
 struct OpenGLShader: public Resource<ShaderConfig> {

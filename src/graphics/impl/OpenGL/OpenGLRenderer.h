@@ -72,10 +72,10 @@ class OpenGLRenderer: public RendererInterface {
   virtual void Reset() override;
 
  private:
-  GraphicsConfig config_;
-  OpenGLRendererCache cache_;
   OpenGLGraphicsResourceManager *resource_manager_{nullptr};
   WindowInterface *window_{nullptr};
+
+  OpenGLRendererCache cache_;
 };
 
 }

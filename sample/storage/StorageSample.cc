@@ -13,7 +13,7 @@ class StorageSample : public Application {
 #if X_MACOS
     IO::GetInstance().AddPlaceholder("local", "storage:///Users/leafnsand/Desktop/");
 #elif X_WINDOWS
-		IO::GetInstance().AddPlaceholder("local", "storage://C:\\Users\\leafnsand\\Desktop\\");
+    IO::GetInstance().AddPlaceholder("local", "storage://C:\\Users\\leafnsand\\Desktop\\");
 #endif
     IO::GetInstance().RegisterFilesystem("storage", StorageFilesystem::Creator);
 

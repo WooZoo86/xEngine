@@ -14,7 +14,7 @@ void OpenGLTextureFactory::Create(OpenGLTexture &resource) {
 
   auto &config = resource.config();
 
-  uint16 face_count = config.type == TextureType::kTextureCube ?
+  auto face_count = config.type == TextureType::kTextureCube ?
                       static_cast<uint16>(GraphicsMaxDefine::kMaxCubeTextureFaceCount) :
                       static_cast<uint16>(1);
   auto is_compressed = IsCompressedPixelFormat(config.color_format);

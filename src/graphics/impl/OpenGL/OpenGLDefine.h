@@ -15,9 +15,6 @@
 
 #include <glad/glad.h>
 
-#include <EASTL/hash_map.h>
-#include <EASTL/string.h>
-
 namespace xEngine {
 
 enum class OpenGLMaxDefine: uint16 {
