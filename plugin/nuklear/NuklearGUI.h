@@ -57,9 +57,7 @@ class NuklearGUI {
   eastl::vector<ResourceID> image_;
   ResourceID shader_{kInvalidResourceID};
   ResourceID mesh_{kInvalidResourceID};
-  BlendState blend_state_;
-  DepthStencilState depth_stencil_state;
-  RasterizerState rasterizer_state_;
+  ResourceID pipeline_{kInvalidResourceID};
 };
 
 } // namespace xEngine

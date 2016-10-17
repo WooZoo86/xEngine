@@ -132,6 +132,6 @@ void OpenGLShaderFactory::Destroy(OpenGLShader &resource) {
   }
 }
 
-}
+} // namespace xEngine
 
 #endif // X_OPENGL

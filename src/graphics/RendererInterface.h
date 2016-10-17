@@ -30,17 +30,9 @@ class RendererInterface {
 
   virtual void ApplyScissor(int32 x, int32 y, int32 width, int32 height) = 0;
 
-  virtual void ApplyBlendState(const BlendState &blend_state) = 0;
+  virtual void ApplyPipeline(ResourceID id) = 0;
 
-  virtual void ResetBlendState() = 0;
-
-  virtual void ApplyDepthStencilState(const DepthStencilState &depth_stencil_state) = 0;
-
-  virtual void ResetDepthStencilState() = 0;
-
-  virtual void ApplyRasterizerState(const RasterizerState &rasterizer_state) = 0;
-
-  virtual void ResetRasterizerState() = 0;
+  virtual void ResetPipeline() = 0;
 
   virtual void ApplyShader(ResourceID id) = 0;
 

@@ -3,12 +3,15 @@
 namespace xEngine {
 
 IncreaseResourceSignatureCounter();
-const ResourceSignature TextureSignature = GetResourceSignature();
+constexpr ResourceSignature TextureSignature = GetResourceSignature();
 
 IncreaseResourceSignatureCounter();
-const ResourceSignature ShaderSignature = GetResourceSignature();
+constexpr ResourceSignature ShaderSignature = GetResourceSignature();
 
 IncreaseResourceSignatureCounter();
-const ResourceSignature MeshSignature = GetResourceSignature();
+constexpr ResourceSignature MeshSignature = GetResourceSignature();
+
+IncreaseResourceSignatureCounter();
+constexpr ResourceSignature PipelineSignature = GetResourceSignature();
 
 } // namespace xEngine

@@ -6,6 +6,7 @@
 #include "graphics/config/ShaderConfig.h"
 #include "graphics/config/TextureConfig.h"
 #include "graphics/config/MeshConfig.h"
+#include "graphics/config/PipelineConfig.h"
 
 #include "resource/Resource.h"
 
@@ -48,6 +49,14 @@ struct OpenGLMesh: public Resource<MeshConfig> {
     index_buffer_id = 0;
     vertex_buffer_id = 0;
     vertex_array_id = 0;
+  }
+
+};
+
+struct OpenGLPipeline : public Resource<PipelineConfig> {
+
+  virtual void Reset() override {
+
   }
 
 };

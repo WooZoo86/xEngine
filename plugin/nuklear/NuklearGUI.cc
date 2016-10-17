@@ -104,18 +104,22 @@ void NuklearGUI::Initialize(NuklearConfig config) {
       AddElement(VertexElementSemantic::kColor0, VertexElementFormat::kUnsignedByte4Normalized);
   mesh_ = graphics_->resource_manager()->Create(mesh_config);
 
-  blend_state_.enable = true;
-  blend_state_.src_rgb_factor = BlendFactor::kSrcAlpha;
-  blend_state_.dst_rgb_factor = BlendFactor::kOneMinusSrcAlpha;
-  blend_state_.color_format = window_->config().color_format;
-  blend_state_.depth_format = window_->config().depth_format;
-  blend_state_.color_mask = PixelChannel::kRGB;
+  PipelineConfig pipeline_config;
 
-  depth_stencil_state.depth_enable = false;
+  pipeline_config.blend_state.enable = true;
+  pipeline_config.blend_state.src_rgb_factor = BlendFactor::kSrcAlpha;
+  pipeline_config.blend_state.dst_rgb_factor = BlendFactor::kOneMinusSrcAlpha;
+  pipeline_config.blend_state.color_format = window_->config().color_format;
+  pipeline_config.blend_state.depth_format = window_->config().depth_format;
+  pipeline_config.blend_state.color_mask = PixelChannel::kRGB;
 
-  rasterizer_state_.scissor_test_enable = true;
-  rasterizer_state_.cull_face_enable = false;
-  rasterizer_state_.sample = window_->config().sample_count;
+  pipeline_config.depth_stencil_state.depth_enable = false;
+
+  pipeline_config.rasterizer_state.scissor_test_enable = true;
+  pipeline_config.rasterizer_state.cull_face_enable = false;
+  pipeline_config.rasterizer_state.sample = window_->config().sample_count;
+
+  pipeline_ = graphics_->resource_manager()->Create(pipeline_config);
 
   auto vertex_size = mesh_config.vertex_count * mesh_config.layout.size;
   auto index_size = mesh_config.index_count * SizeOfIndexFormat(mesh_config.index_type);
@@ -158,9 +162,7 @@ void NuklearGUI::EndFrame() {
   nk_convert(&context_, &command, &vertex_buffer, &index_buffer, &config_);
   graphics_->renderer()->UpdateMesh(mesh_, vertex_data, 0, vertex_buffer.needed, index_data, 0, index_buffer.needed);
   graphics_->renderer()->UpdateShaderUniform(shader_, "uProjectionMatrix", UniformFormat::kMatrix4, glm::value_ptr(matrix));
-  graphics_->renderer()->ApplyBlendState(blend_state_);
-  graphics_->renderer()->ApplyDepthStencilState(depth_stencil_state);
-  graphics_->renderer()->ApplyRasterizerState(rasterizer_state_);
+  graphics_->renderer()->ApplyPipeline(pipeline_);
   const struct nk_draw_command *cmd = nullptr;
   ResourceID current_texture = kInvalidResourceID;
   int element_offset = 0;

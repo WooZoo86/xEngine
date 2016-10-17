@@ -25,6 +25,8 @@ struct GraphicsConfig {
 
   uint16 mesh_pool_size{1024};
 
+  uint16 pipeline_pool_size{256};
+
 };
 
 inline GraphicsConfig GraphicsConfig::ForWindow(ResourceID id) {
@@ -33,6 +35,6 @@ inline GraphicsConfig GraphicsConfig::ForWindow(ResourceID id) {
   return config;
 }
 
-}
+} // namespace xEngine
 
 #endif // XENGINE_GRAPHICS_CONFIG_GRAPHICSCONFIG_H

@@ -3,14 +3,13 @@
 
 #if X_OPENGL
 
-#include "OpenGLDefine.h"
 #include "graphics/RendererInterface.h"
+#include "graphics/impl/OpenGL/OpenGLDefine.h"
+#include "graphics/impl/OpenGL/resource/OpenGLGraphicsResourceManager.h"
+
+#include "window/Window.h"
 
 namespace xEngine {
-
-class WindowInterface;
-
-class OpenGLGraphicsResourceManager;
 
 class OpenGLRenderer: public RendererInterface {
  private:
@@ -33,17 +32,9 @@ class OpenGLRenderer: public RendererInterface {
 
   virtual void ApplyScissor(int32 x, int32 y, int32 width, int32 height) override;
 
-  virtual void ApplyBlendState(const BlendState &blend_state) override;
+  virtual void ApplyPipeline(ResourceID id) override;
 
-  virtual void ResetBlendState() override;
-
-  virtual void ApplyDepthStencilState(const DepthStencilState &depth_stencil_state) override;
-
-  virtual void ResetDepthStencilState() override;
-
-  virtual void ApplyRasterizerState(const RasterizerState &rasterizer_state) override;
-
-  virtual void ResetRasterizerState() override;
+  virtual void ResetPipeline() override;
 
   virtual void ApplyShader(ResourceID id) override;
 
@@ -72,9 +63,36 @@ class OpenGLRenderer: public RendererInterface {
   virtual void Reset() override;
 
  private:
-  OpenGLGraphicsResourceManager *resource_manager_{nullptr};
-  WindowInterface *window_{nullptr};
+  void ApplyBlendState(const BlendState &blend_state);
 
+  void ResetBlendState();
+
+  void ApplyDepthStencilState(const DepthStencilState &depth_stencil_state);
+
+  void ResetDepthStencilState();
+
+  void ApplyRasterizerState(const RasterizerState &rasterizer_state);
+
+  void ResetRasterizerState();
+
+  WindowInterface *window() {
+    static WindowInterface *pointer = nullptr;
+    if (pointer == nullptr) {
+      pointer = Window::GetInstance().Get(config_.window).get();
+    }
+    return pointer;
+  }
+
+  OpenGLGraphicsResourceManager *resource_manager() {
+    static OpenGLGraphicsResourceManager *pointer = nullptr;
+    if (pointer == nullptr) {
+      pointer = static_cast<OpenGLGraphicsResourceManager *>(window()->graphics()->resource_manager().get());
+    }
+    return pointer;
+  }
+
+ private:
+  GraphicsConfig config_;
   OpenGLRendererCache cache_;
 };
 

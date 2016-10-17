@@ -27,6 +27,6 @@ inline ShaderConfig ShaderConfig::FromData(const char *vertex, const char *fragm
   return config;
 }
 
-}
+} // namespace xEngine
 
 #endif // XENGINE_GRAPHICS_CONFIG_SHADERCONFIG_H

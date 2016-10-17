@@ -104,6 +104,6 @@ void OpenGLMeshFactory::Destroy(OpenGLMesh &resource) {
   }
 }
 
-}
+} // namespace xEngine
 
 #endif // X_OPENGL
