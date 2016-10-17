@@ -38,32 +38,37 @@ void D3D11Renderer::Initialize(const GraphicsConfig &config) {
   swap_chain_desc.Windowed = !window->config().is_full_screen;
 
   D3D_FEATURE_LEVEL feature_level;
-  auto result = D3D11CreateDeviceAndSwapChain(
-      nullptr,
-      D3D_DRIVER_TYPE_HARDWARE,
-      nullptr,
-      flags,
-      nullptr,
-      0,
-      D3D11_SDK_VERSION,
-      &swap_chain_desc,
-      &swap_chain_,
-      &device_,
-      &feature_level,
-      &context_
-  );
+	x_d3d11_assert(D3D11CreateDeviceAndSwapChain(
+		nullptr,
+		D3D_DRIVER_TYPE_HARDWARE,
+		nullptr,
+		flags,
+		nullptr,
+		0,
+		D3D11_SDK_VERSION,
+		&swap_chain_desc,
+		&swap_chain_,
+		&device_,
+		&feature_level,
+		&context_
+	), "D3D11 init error!\n");
 
-  x_assert_msg(SUCCEEDED(result), "D3D11 init error!\n");
   x_assert(device_ && context_ && swap_chain_);
 
-  result = swap_chain_->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void **>(&render_target_));
+	x_d3d11_assert(swap_chain_->GetBuffer(
+		0,
+		__uuidof(ID3D11Texture2D),
+		reinterpret_cast<void **>(&render_target_)
+	), "get render target failed!\n");
 
-  x_assert_msg(SUCCEEDED(result), "get render target failed!\n");
   x_assert(render_target_);
 
-  result = device_->CreateRenderTargetView(render_target_, nullptr, &render_target_view_);
+	x_d3d11_assert(device_->CreateRenderTargetView(
+		render_target_,
+		nullptr,
+		&render_target_view_
+	), "create render target view failed!\n");
 
-  x_assert_msg(SUCCEEDED(result), "create render target view failed!\n");
   x_assert(render_target_view_);
 
   if (window->config().depth_format != PixelFormat::NONE) {
@@ -80,9 +85,12 @@ void D3D11Renderer::Initialize(const GraphicsConfig &config) {
     depth_stencil_desc.CPUAccessFlags = 0;
     depth_stencil_desc.MiscFlags = 0;
 
-    result = device_->CreateTexture2D(&depth_stencil_desc, nullptr, &depth_stencil_buffer_);
+		x_d3d11_assert(device_->CreateTexture2D(
+			&depth_stencil_desc,
+			nullptr,
+			&depth_stencil_buffer_
+		), "create depth and stencil buffer failed!\n");
 
-    x_assert_msg(SUCCEEDED(result), "create depth and stencil buffer failed!\n");
     x_assert(depth_stencil_buffer_);
 
     D3D11_DEPTH_STENCIL_VIEW_DESC depth_stencil_view_desc;
@@ -92,9 +100,12 @@ void D3D11Renderer::Initialize(const GraphicsConfig &config) {
         window->config().sample_count > 1 ? D3D11_DSV_DIMENSION_TEXTURE2DMS : D3D11_DSV_DIMENSION_TEXTURE2D;
     depth_stencil_view_desc.Texture2D.MipSlice = 0;
 
-    result = device_->CreateDepthStencilView(depth_stencil_buffer_, &depth_stencil_view_desc, &depth_stencil_view_);
+		x_d3d11_assert(device_->CreateDepthStencilView(
+			depth_stencil_buffer_,
+			&depth_stencil_view_desc,
+			&depth_stencil_view_
+		), "create depth and stencil view failed!\n");
 
-    x_assert_msg(SUCCEEDED(result), "create depth and stencil view failed!\n");
     x_assert(depth_stencil_view_);
   }
 
@@ -142,7 +153,48 @@ void D3D11Renderer::ApplyClearState(const ClearState &state) {
   context_->ClearRenderTargetView(render_target_view_, glm::value_ptr(state.clear_color));
 }
 
+void D3D11Renderer::ApplyBlendState(const BlendState &blend_state) {}
+
+void D3D11Renderer::ResetBlendState() {}
+
+void D3D11Renderer::ApplyDepthStencilState(const DepthStencilState &depth_stencil_state) {}
+
+void D3D11Renderer::ResetDepthStencilState() {}
+
+void D3D11Renderer::ApplyRasterizerState(const RasterizerState &rasterizer_state) {}
+
+void D3D11Renderer::ResetRasterizerState() {}
+
+void D3D11Renderer::ApplyViewPort(int32 x, int32 y, int32 width, int32 height) {}
+
+void D3D11Renderer::ApplyScissor(int32 x, int32 y, int32 width, int32 height) {}
+
+void D3D11Renderer::ApplyShader(ResourceID id) {}
+
+void D3D11Renderer::UpdateShaderUniform(ResourceID id, eastl::string name, UniformFormat format, const void *buffer) {}
+
+void D3D11Renderer::ResetShader() {}
+
+void D3D11Renderer::ApplyVertexData(ResourceID id, bool force_update) {}
+
+void D3D11Renderer::UpdateVertexData(ResourceID id, int32 offset, DataPtr data) {}
+
+void D3D11Renderer::ResetVertexData() {}
+
+void D3D11Renderer::ApplyIndexData(ResourceID id) {}
+
+void D3D11Renderer::UpdateIndexData(ResourceID id, int32 offset, DataPtr data) {}
+
+void D3D11Renderer::ResetIndexData() {}
+
+void D3D11Renderer::ApplyTexture(ResourceID id, int32 index) {}
+
+void D3D11Renderer::ResetTexture() {}
+
+void D3D11Renderer::DrawTopology(VertexTopology topology, int32 first, int32 count) {}
+
 void D3D11Renderer::Reset() {}
+
 }
 
 #endif

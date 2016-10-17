@@ -62,8 +62,6 @@ static GLenum GLEnumForBufferUsage(BufferUsage usage) {
   switch (usage) {
     case BufferUsage::kImmutable:
       return GL_STATIC_DRAW;
-    case BufferUsage::kStatic:
-      return GL_STATIC_DRAW;
     case BufferUsage::kDynamic:
       return GL_DYNAMIC_DRAW;
     case BufferUsage::kStream:

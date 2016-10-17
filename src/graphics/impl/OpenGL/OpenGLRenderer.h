@@ -6,8 +6,6 @@
 #include "OpenGLDefine.h"
 #include "graphics/RendererInterface.h"
 
-#include <glad/glad.h>
-
 namespace xEngine {
 
 class WindowInterface;

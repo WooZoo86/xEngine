@@ -72,7 +72,6 @@ enum class TextureType: uint8 {
 
 enum class BufferUsage: uint8 {
   kImmutable,
-  kStatic,
   kDynamic,
   kStream,
 };
