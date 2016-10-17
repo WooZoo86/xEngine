@@ -13,9 +13,9 @@ struct GraphicsConfig {
 
   ResourceID window{kInvalidResourceID};
 
-#if X_WINDOWS
+#if X_D3D11
   GraphicsType type{GraphicsType::kD3D11};
-#else
+#elif X_OPENGL
   GraphicsType type{GraphicsType::kOpenGL3};
 #endif
 
