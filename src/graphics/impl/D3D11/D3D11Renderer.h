@@ -3,8 +3,11 @@
 
 #if X_D3D11
 
-#include "D3D11Define.h"
 #include "graphics/RendererInterface.h"
+#include "graphics/impl/D3D11/D3D11Define.h"
+#include "graphics/impl/D3D11/resource/D3D11GraphicsResourceManager.h"
+
+#include "window/Window.h"
 
 namespace xEngine {
 
@@ -26,17 +29,9 @@ class D3D11Renderer: public RendererInterface {
 
    virtual void ApplyScissor(int32 x, int32 y, int32 width, int32 height) override;
 
-   virtual void ApplyBlendState(const BlendState &blend_state) override;
+   virtual void ApplyPipeline(ResourceID id) override;
 
-   virtual void ResetBlendState() override;
-
-   virtual void ApplyDepthStencilState(const DepthStencilState &depth_stencil_state) override;
-
-   virtual void ResetDepthStencilState() override;
-
-   virtual void ApplyRasterizerState(const RasterizerState &rasterizer_state) override;
-
-   virtual void ResetRasterizerState() override;
+   virtual void ResetPipeline() override;
 
    virtual void ApplyShader(ResourceID id) override;
 
@@ -65,8 +60,24 @@ class D3D11Renderer: public RendererInterface {
    virtual void Reset() override;
 
  private:
-  WindowInterface *window_{nullptr};
-  D3D11GraphicsResourceManager *resource_manager_{nullptr};
+   WindowInterface *window() {
+     static WindowInterface *pointer = nullptr;
+     if (pointer == nullptr) {
+       pointer = Window::GetInstance().Get(config_.window).get();
+     }
+     return pointer;
+   }
+
+   D3D11GraphicsResourceManager *resource_manager() {
+     static D3D11GraphicsResourceManager *pointer = nullptr;
+     if (pointer == nullptr) {
+       pointer = static_cast<D3D11GraphicsResourceManager *>(window()->graphics()->resource_manager().get());
+     }
+     return pointer;
+   }
+
+ private:
+  GraphicsConfig config_;
 
   ID3D11Device *device_{nullptr};
   ID3D11DeviceContext *context_{nullptr};

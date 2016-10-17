@@ -5,16 +5,16 @@
 namespace xEngine {
 
 IncreaseResourcePoolIDCounter();
-constexpr ResourcePoolID g_opengl_shader_resource_pool_id = GetResourcePoolID();
+static const ResourcePoolID g_opengl_shader_resource_pool_id = GetResourcePoolID();
 
 IncreaseResourcePoolIDCounter();
-constexpr ResourcePoolID g_opengl_texture_resource_pool_id = GetResourcePoolID();
+static const ResourcePoolID g_opengl_texture_resource_pool_id = GetResourcePoolID();
 
 IncreaseResourcePoolIDCounter();
-constexpr ResourcePoolID g_opengl_mesh_resource_pool_id = GetResourcePoolID();
+static const ResourcePoolID g_opengl_mesh_resource_pool_id = GetResourcePoolID();
 
 IncreaseResourcePoolIDCounter();
-constexpr ResourcePoolID g_opengl_pipeline_resource_pool_id = GetResourcePoolID();
+static const ResourcePoolID g_opengl_pipeline_resource_pool_id = GetResourcePoolID();
 
 void OpenGLGraphicsResourceManager::Initialize(const GraphicsConfig &config) {
   shader_pool_.Initialize(config.shader_pool_size, g_opengl_shader_resource_pool_id);

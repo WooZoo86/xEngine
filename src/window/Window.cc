@@ -9,7 +9,7 @@
 namespace xEngine {
 
 IncreaseResourcePoolIDCounter();
-constexpr ResourcePoolID g_window_pool_resource_id = GetResourcePoolID();
+static const ResourcePoolID g_window_pool_resource_id = GetResourcePoolID();
 
 void Window::Initialize(uint16 pool_size) {
   x_assert(!Available());

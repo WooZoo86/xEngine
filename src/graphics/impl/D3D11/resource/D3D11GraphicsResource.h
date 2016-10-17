@@ -6,6 +6,7 @@
 #include "graphics/config/ShaderConfig.h"
 #include "graphics/config/TextureConfig.h"
 #include "graphics/config/MeshConfig.h"
+#include "graphics/config/PipelineConfig.h"
 
 #include "resource/Resource.h"
 
@@ -57,6 +58,16 @@ struct D3D11Mesh : public Resource<MeshConfig> {
   virtual void Reset() override {
     vertex_buffer = nullptr;
     index_buffer = nullptr;
+  }
+
+};
+
+struct D3D11Pipeline : public Resource<PipelineConfig> {
+
+  ID3D11InputLayout *input_layout{nullptr};
+
+  virtual void Reset() override {
+    input_layout = nullptr;
   }
 
 };
