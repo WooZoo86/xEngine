@@ -11,14 +11,14 @@ namespace xEngine {
 
 class D3D11TextureFactory : public ResourceFactory<D3D11Texture> {
  public:
-	explicit D3D11TextureFactory(ID3D11Device *device) : device_(device) {}
+  explicit D3D11TextureFactory(ID3D11Device *device) : device_(device) {}
 
-	virtual void Create(D3D11Texture &resource) override;
+  virtual void Create(D3D11Texture &resource) override;
 
-	virtual void Destroy(D3D11Texture &resource) override;
+  virtual void Destroy(D3D11Texture &resource) override;
 
  private:
-	ID3D11Device *device_{nullptr};
+  ID3D11Device *device_{nullptr};
 };
 
 } // namespace xEngine

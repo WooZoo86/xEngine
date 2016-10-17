@@ -3,50 +3,63 @@
 
 #if X_D3D11
 
-#include "graphics/impl/D3D11/D3D11Define.h"
-
 #include "graphics/config/ShaderConfig.h"
-#include "graphics/config/VertexDataConfig.h"
-#include "graphics/config/IndexDataConfig.h"
 #include "graphics/config/TextureConfig.h"
+#include "graphics/config/MeshConfig.h"
 
 #include "resource/Resource.h"
 
+#include <D3D11.h>
+
 namespace xEngine {
 
-	struct D3D11Shader : public Resource<ShaderConfig> {
+struct D3D11Shader : public Resource<ShaderConfig> {
 
-		virtual void Reset() override {
-		}
+  ID3D11VertexShader *vertex_shader{nullptr};
 
-	};
+  ID3D11PixelShader *fragment_shader{nullptr};
 
-	struct D3D11VertexData : public Resource<VertexDataConfig> {
+  virtual void Reset() override {
+    vertex_shader = nullptr;
+    fragment_shader = nullptr;
+  }
 
-		ID3D11Buffer *buffer{nullptr};
+};
 
-		virtual void Reset() override {
-			buffer = nullptr;
-		}
+struct D3D11Texture : public Resource<TextureConfig> {
 
-	};
+  ID3D11Texture2D *texture{nullptr};
 
-	struct D3D11IndexData : public Resource<IndexDataConfig> {
+  ID3D11RenderTargetView *render_target_view{nullptr};
 
-		ID3D11Buffer *buffer{ nullptr };
+  ID3D11DepthStencilView *depth_stencil_view{nullptr};
 
-		virtual void Reset() override {
-			buffer = nullptr;
-		}
+  ID3D11ShaderResourceView *shader_resource_view{nullptr};
 
-	};
+  ID3D11SamplerState *sampler_state{nullptr};
 
-	struct D3D11Texture : public Resource<TextureConfig> {
+  virtual void Reset() override {
+    texture = nullptr;
+    render_target_view = nullptr;
+    depth_stencil_view = nullptr;
+    shader_resource_view = nullptr;
+    sampler_state = nullptr;
+  }
 
-		virtual void Reset() override {
-		}
+};
 
-	};
+struct D3D11Mesh : public Resource<MeshConfig> {
+
+  ID3D11Buffer *vertex_buffer{nullptr};
+
+  ID3D11Buffer *index_buffer{nullptr};
+
+  virtual void Reset() override {
+    vertex_buffer = nullptr;
+    index_buffer = nullptr;
+  }
+
+};
 
 } // namespace xEngine
 
