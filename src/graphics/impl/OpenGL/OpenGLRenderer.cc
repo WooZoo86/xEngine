@@ -218,7 +218,7 @@ void OpenGLRenderer::ApplyTexture(ResourceID id, int32 index) {
 }
 
 void OpenGLRenderer::ResetTexture() {
-  for (auto index = 0; index < static_cast<uint16>(OpenGLMaxDefine::kMaxTextureCount); ++index) {
+  for (auto index = 0; index < static_cast<uint16>(GraphicsMaxDefine::kMaxTextureCount); ++index) {
     if (cache_.texture_2d[index] != 0) {
       glActiveTexture(static_cast<GLenum>(GL_TEXTURE0 + index));
       glBindTexture(GL_TEXTURE_2D, 0);

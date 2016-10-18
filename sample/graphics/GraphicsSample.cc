@@ -58,6 +58,11 @@ class GraphicsSample : public Application {
     static const auto generate_shader = [&]() {
       if (shader_ == kInvalidResourceID && vertex_shader_ && fragment_shader_) {
         shader_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(ShaderConfig::FromData(vertex_shader_->buffer(), fragment_shader_->buffer()));
+        auto pipeline_config = PipelineConfig::ShaderWithLayout(shader_, VertexLayout());
+        pipeline_config.vertex_layout.AddElement(VertexElementSemantic::kPosition, VertexElementFormat::kFloat2)
+          .AddElement(VertexElementSemantic::kColor0, VertexElementFormat::kFloat3)
+          .AddElement(VertexElementSemantic::kTexcoord0, VertexElementFormat::kFloat2);
+        pipeline_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(pipeline_config);
       }
     };
     IO::GetInstance().Read("local:vertex.shader", [&](Location location, IOStatus status, DataPtr data) {
@@ -135,6 +140,7 @@ class GraphicsSample : public Application {
       renderer->ApplyShader(shader_);
       renderer->ApplyTexture(texture_, texture_index);
       renderer->ApplyMesh(mesh_);
+      renderer->ApplyPipeline(pipeline_);
       renderer->UpdateShaderUniform(shader_, "tex", UniformFormat::kTexture, &texture_index);
       renderer->DrawTopology(VertexTopology::kTriangles, 0, 6);
       renderer->Render();
@@ -145,6 +151,7 @@ class GraphicsSample : public Application {
   ResourceID shader_{kInvalidResourceID};
   ResourceID texture_{kInvalidResourceID};
   ResourceID mesh_{kInvalidResourceID};
+  ResourceID pipeline_{kInvalidResourceID};
   DataPtr vertex_shader_{nullptr};
   DataPtr fragment_shader_{nullptr};
   ResourceID window_id_{kInvalidResourceID};

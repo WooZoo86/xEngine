@@ -17,10 +17,6 @@
 
 namespace xEngine {
 
-enum class OpenGLMaxDefine: uint16 {
-  kMaxTextureCount = 16,
-};
-
 struct OpenGLRendererCache {
   BlendState blend_state;
   DepthStencilState depth_stencil_state;
@@ -46,8 +42,8 @@ struct OpenGLRendererCache {
 
   OpenGLShader shader;
 
-  GLuint texture_2d[static_cast<uint16>(OpenGLMaxDefine::kMaxTextureCount)];
-  GLuint texture_cube[static_cast<uint16>(OpenGLMaxDefine::kMaxTextureCount)];
+  GLuint texture_2d[static_cast<uint16>(GraphicsMaxDefine::kMaxTextureCount)];
+  GLuint texture_cube[static_cast<uint16>(GraphicsMaxDefine::kMaxTextureCount)];
 
   OpenGLRendererCache() {
     memset(texture_2d, 0, sizeof(texture_2d));

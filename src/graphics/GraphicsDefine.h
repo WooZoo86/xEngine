@@ -14,6 +14,7 @@ typedef glm::vec4 Color;
 typedef glm::highp_ivec4 IntColor;
 
 enum class GraphicsMaxDefine: uint16 {
+  kMaxTextureCount = 16,
   kMaxVertexElementCount = 16, // OpenGL ES 3.0
   kMaxCubeTextureFaceCount = 6,
   kMaxTextureMipMapCount = 12,

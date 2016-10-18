@@ -222,27 +222,163 @@ void D3D11Renderer::ApplyScissor(int32 x, int32 y, int32 width, int32 height) {
   }
 }
 
-void D3D11Renderer::ApplyPipeline(ResourceID id) {}
+void D3D11Renderer::ApplyPipeline(ResourceID id) {
+  auto &pipeline = resource_manager()->pipeline_pool_.Find(id);
+  if (pipeline.status() == ResourceStatus::kCompleted) {
+    if (pipeline.input_layout != cache_.input_layout) {
+      context_->IASetInputLayout(pipeline.input_layout);
+      cache_.input_layout = pipeline.input_layout;
+    }
+    if (pipeline.blend_state != cache_.blend_state) {
+      context_->OMSetBlendState(pipeline.blend_state, glm::value_ptr(pipeline.config().blend_state.blend_color), 0xFFFFFFFF);
+      cache_.blend_state = pipeline.blend_state;
+    }
+    if (pipeline.depth_stencil_state != cache_.depth_stencil_state) {
+      context_->OMSetDepthStencilState(pipeline.depth_stencil_state, pipeline.config().depth_stencil_state.stencil_value);
+      cache_.depth_stencil_state = pipeline.depth_stencil_state;
+    }
+    if (pipeline.rasterizer_state != cache_.rasterizer_state) {
+      context_->RSSetState(pipeline.rasterizer_state);
+      cache_.rasterizer_state = pipeline.rasterizer_state;
+    }
+  }
+}
 
-void D3D11Renderer::ResetPipeline() {}
+void D3D11Renderer::ResetPipeline() {
+  context_->IASetInputLayout(nullptr);
+  cache_.input_layout = nullptr;
+  context_->OMSetBlendState(nullptr, nullptr, 0xFFFFFFFF);
+  cache_.blend_state = nullptr;
+  context_->OMSetDepthStencilState(nullptr, 0xFFFFFFFF);
+  cache_.depth_stencil_state = nullptr;
+  context_->RSSetState(nullptr);
+  cache_.rasterizer_state = nullptr;
+}
 
-void D3D11Renderer::ApplyShader(ResourceID id) {}
+void D3D11Renderer::ApplyShader(ResourceID id) {
+  auto &shader = resource_manager()->shader_pool_.Find(id);
+  if (shader.status() == ResourceStatus::kCompleted) {
+    if (shader.vertex_shader != cache_.vertex_shader) {
+      context_->VSSetShader(shader.vertex_shader, nullptr, 0);
+      cache_.vertex_shader = shader.vertex_shader;
+    }
+    if (shader.fragment_shader != cache_.fragment_shader) {
+      context_->PSSetShader(shader.fragment_shader, nullptr, 0);
+      cache_.fragment_shader = shader.fragment_shader;
+    }
+  }
+}
 
-void D3D11Renderer::UpdateShaderUniform(ResourceID id, eastl::string name, UniformFormat format, const void *buffer) {}
+void D3D11Renderer::UpdateShaderUniform(ResourceID id, eastl::string name, UniformFormat format, const void *buffer) {
+  auto &shader = resource_manager()->shader_pool_.Find(id);
+  if (shader.status() == ResourceStatus::kCompleted) {
+    if (shader.vertex_shader != cache_.vertex_shader) {
+      context_->VSSetShader(shader.vertex_shader, nullptr, 0);
+      cache_.vertex_shader = shader.vertex_shader;
+    }
+    if (shader.fragment_shader != cache_.fragment_shader) {
+      context_->PSSetShader(shader.fragment_shader, nullptr, 0);
+      cache_.fragment_shader = shader.fragment_shader;
+    }
+  }
+}
 
-void D3D11Renderer::ResetShader() {}
+void D3D11Renderer::ResetShader() {
+  context_->VSSetShader(nullptr, nullptr, 0);
+  cache_.vertex_shader = nullptr;
+  context_->PSSetShader(nullptr, nullptr, 0);
+  cache_.fragment_shader = nullptr;
+}
 
-void D3D11Renderer::ApplyTexture(ResourceID id, int32 index) {}
+void D3D11Renderer::ApplyTexture(ResourceID id, int32 index) {
+  auto &texture = resource_manager()->texture_pool_.Find(id);
+  if (texture.status() == ResourceStatus::kCompleted) {
+    // TODO vertex shader
+    if (texture.shader_resource_view != cache_.fragment_shader_resource_view[index]) {
+      context_->PSSetShaderResources(index, 1, &texture.shader_resource_view);
+      cache_.fragment_shader_resource_view[index] = texture.shader_resource_view;
+    }
+    if (texture.sampler_state != cache_.fragment_sampler_state[index]) {
+      context_->PSSetSamplers(index, 1, &texture.sampler_state);
+      cache_.fragment_sampler_state[index] = texture.sampler_state;
+    }
+  }
+}
 
-void D3D11Renderer::ResetTexture() {}
+void D3D11Renderer::ResetTexture() {
+  memset(cache_.fragment_shader_resource_view, 0, sizeof(cache_.fragment_shader_resource_view));
+  memset(cache_.fragment_sampler_state, 0, sizeof(cache_.fragment_sampler_state));
+  context_->PSSetShaderResources(0, static_cast<uint16>(GraphicsMaxDefine::kMaxTextureCount), cache_.fragment_shader_resource_view);
+  context_->PSSetSamplers(0, static_cast<uint16>(GraphicsMaxDefine::kMaxTextureCount), cache_.fragment_sampler_state);
+  
+}
 
-void D3D11Renderer::ApplyMesh(ResourceID id) {}
+void D3D11Renderer::ApplyMesh(ResourceID id) {
+  auto &mesh = resource_manager()->mesh_pool_.Find(id);
+  if (mesh.status() == ResourceStatus::kCompleted) {
+    // TODO multi vertex buffer
+    if (mesh.vertex_buffer != cache_.vertex_buffer) {
+      static const uint32 offset = 0;
+      context_->IASetVertexBuffers(0, 1, &mesh.vertex_buffer, &mesh.config().layout.size, &offset);
+      cache_.vertex_buffer = mesh.vertex_buffer;
+    }
+    if (mesh.index_buffer != cache_.index_buffer) {
+      context_->IASetIndexBuffer(mesh.index_buffer, EnumForIndexFormat(mesh.config().index_type), 0);
+      cache_.index_buffer = mesh.index_buffer;
+      cache_.index_format = mesh.config().index_type;
+    }
+  }
+}
 
-void D3D11Renderer::UpdateMesh(ResourceID id, const void *vertex_buffer, size_t vertex_offset, size_t vertex_size, const void *index_buffer, size_t index_offset, size_t index_size) {}
+void D3D11Renderer::UpdateMesh(ResourceID id, const void *vertex_buffer, size_t vertex_offset, size_t vertex_size, const void *index_buffer, size_t index_offset, size_t index_size) {
+  auto &mesh = resource_manager()->mesh_pool_.Find(id);
+  if (mesh.status() == ResourceStatus::kCompleted) {
+    // TODO multi vertex buffer
+    if (mesh.vertex_buffer != cache_.vertex_buffer) {
+      static const uint32 offset = 0;
+      context_->IASetVertexBuffers(0, 1, &mesh.vertex_buffer, &mesh.config().layout.size, &offset);
+      cache_.vertex_buffer = mesh.vertex_buffer;
+    }
+    if (vertex_buffer != nullptr && vertex_size > 0) {
+      D3D11_MAPPED_SUBRESOURCE vertex_source;
+      x_d3d11_assert_msg(context_->Map(mesh.vertex_buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &vertex_source), "map vertex buffer falied!\n");
+      auto pointer = reinterpret_cast<char *>(vertex_source.pData) + vertex_offset;
+      memcpy(pointer, vertex_buffer, vertex_size);
+      context_->Unmap(mesh.vertex_buffer, 0);
+    }
+    if (mesh.index_buffer != cache_.index_buffer) {
+      context_->IASetIndexBuffer(mesh.index_buffer, EnumForIndexFormat(mesh.config().index_type), 0);
+      cache_.index_buffer = mesh.index_buffer;
+      cache_.index_format = mesh.config().index_type;
+    }
+    if (index_buffer != nullptr && index_size > 0) {
+      D3D11_MAPPED_SUBRESOURCE index_source;
+      x_d3d11_assert_msg(context_->Map(mesh.index_buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &index_source), "map index buffer falied!\n");
+      auto pointer = reinterpret_cast<char *>(index_source.pData) + index_offset;
+      memcpy(pointer, index_buffer, index_size);
+      context_->Unmap(mesh.index_buffer, 0);
+    }
+  }
+}
 
-void D3D11Renderer::ResetMesh() {}
+void D3D11Renderer::ResetMesh() {
+  static const uint32 size = 0;
+  static const uint32 offset = 0;
+  cache_.vertex_buffer = nullptr;
+  context_->IASetVertexBuffers(0, 1, &cache_.vertex_buffer, &size, &offset);
+  cache_.index_buffer = nullptr;
+  cache_.index_format = IndexFormat::kNone;
+  context_->IASetIndexBuffer(nullptr, DXGI_FORMAT_UNKNOWN, 0);
+}
 
-void D3D11Renderer::DrawTopology(VertexTopology topology, int32 first, int32 count) {}
+void D3D11Renderer::DrawTopology(VertexTopology topology, int32 first, int32 count) {
+  context_->IASetPrimitiveTopology(EnumForVertexTopology(topology));
+  if (cache_.index_format == IndexFormat::kNone) {
+    context_->Draw(count, first);
+  } else {
+    context_->DrawIndexed(count, first, 0);
+  }
+}
 
 void D3D11Renderer::Reset() {
   ResetShader();

@@ -42,11 +42,21 @@ struct D3DRendererCache {
 
   ID3D11Buffer *vertex_buffer{nullptr};
 
+  IndexFormat index_format{IndexFormat::kNone};
   ID3D11Buffer *index_buffer{nullptr};
 
   ID3D11VertexShader *vertex_shader{nullptr};
 
   ID3D11PixelShader *fragment_shader{nullptr};
+
+  ID3D11ShaderResourceView *fragment_shader_resource_view[static_cast<uint16>(GraphicsMaxDefine::kMaxTextureCount)];
+
+  ID3D11SamplerState *fragment_sampler_state[static_cast<uint16>(GraphicsMaxDefine::kMaxTextureCount)];
+
+  D3DRendererCache() {
+    memset(fragment_shader_resource_view, 0, sizeof(fragment_shader_resource_view));
+    memset(fragment_sampler_state, 0, sizeof(fragment_sampler_state));
+  }
 };
 
 static DXGI_FORMAT SwapChainFormatForPixelFormat(PixelFormat format) {
@@ -332,6 +342,25 @@ static DXGI_FORMAT EnumForVertexElementFormat(VertexElementFormat format) {
     case VertexElementFormat::kShort4: return DXGI_FORMAT_R16G16B16A16_SINT;
     case VertexElementFormat::kShort4Normalized: return DXGI_FORMAT_R16G16B16A16_SNORM;
     default: x_error("unsupport VertexElementFormat!\n"); return DXGI_FORMAT_UNKNOWN;
+  }
+}
+
+static DXGI_FORMAT EnumForIndexFormat(IndexFormat format) {
+  switch (format) {
+    case IndexFormat::kUint16: return DXGI_FORMAT_R16_UINT;
+    case IndexFormat::kUint32: return DXGI_FORMAT_R32_UINT;
+    default: x_error("unsupport IndexFormat!\n"); return DXGI_FORMAT_UNKNOWN;
+  }
+}
+
+static D3D11_PRIMITIVE_TOPOLOGY EnumForVertexTopology(VertexTopology topology) {
+  switch (topology) {
+    case VertexTopology::kPoints: return D3D11_PRIMITIVE_TOPOLOGY_POINTLIST;
+    case VertexTopology::kLines: return D3D11_PRIMITIVE_TOPOLOGY_LINELIST;
+    case VertexTopology::kLineStrip: return D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP;
+    case VertexTopology::kTriangles: return D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    case VertexTopology::kTriangleStrip: return D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
+    default: x_error("unsupport VertexTopology!\n"); return D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED;
   }
 }
 
