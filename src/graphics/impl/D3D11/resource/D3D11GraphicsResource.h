@@ -16,11 +16,17 @@ namespace xEngine {
 
 struct D3D11Shader : public Resource<ShaderConfig> {
 
+  ID3D10Blob *vertex_blob{nullptr};
+
+  ID3D10Blob *fragment_blob{nullptr};
+
   ID3D11VertexShader *vertex_shader{nullptr};
 
   ID3D11PixelShader *fragment_shader{nullptr};
 
   virtual void Reset() override {
+    vertex_blob = nullptr;
+    fragment_blob = nullptr;
     vertex_shader = nullptr;
     fragment_shader = nullptr;
   }
@@ -66,8 +72,17 @@ struct D3D11Pipeline : public Resource<PipelineConfig> {
 
   ID3D11InputLayout *input_layout{nullptr};
 
+  ID3D11BlendState *blend_state{nullptr};
+
+  ID3D11DepthStencilState *depth_stencil_state{nullptr};
+
+  ID3D11RasterizerState *rasterizer_state{nullptr};
+
   virtual void Reset() override {
     input_layout = nullptr;
+    blend_state = nullptr;
+    depth_stencil_state = nullptr;
+    rasterizer_state = nullptr;
   }
 
 };

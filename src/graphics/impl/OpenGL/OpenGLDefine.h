@@ -473,10 +473,8 @@ static GLenum GLEnumForFrontFaceType(FrontFaceType type) {
   }
 }
 
-static const char *AttributeNameForVertexElementSemantic(VertexElementSemantic semantic)
-{
-  switch (semantic)
-  {
+static const char *AttributeNameForVertexElementSemantic(VertexElementSemantic semantic) {
+  switch (semantic) {
     case VertexElementSemantic::kPosition: return "aPosition";
     case VertexElementSemantic::kTexcoord0: return "aTexcoord0";
     case VertexElementSemantic::kTexcoord1: return "aTexcoord1";

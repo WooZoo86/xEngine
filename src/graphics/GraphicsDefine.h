@@ -62,6 +62,8 @@ enum class BlendOperation: uint8 {
   kAdd,
   kSubtract,
   kReverseSubtract,
+  kMin,
+  kMax,
 };
 
 enum class TextureType: uint8 {

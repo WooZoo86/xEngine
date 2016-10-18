@@ -37,6 +37,47 @@ static const char *fragment_shader =
     "   outColor = Color * texture(uTexture, Texcoord);\n"
     "}\n";
 
+#elif X_D3D11
+
+static const char *vertex_shader = 
+    "cbuffer buffer0\n"
+    "{\n"
+    "  float4x4 ProjectionMatrix;\n"
+    "};\n"
+    "struct VS_INPUT\n"
+    "{\n"
+    "  float2 position : POSITION;\n"
+    "  float4 color : COLOR0;\n"
+    "  float2 texcoord : TEXCOORD0;\n"
+    "};\n"
+    "struct PS_INPUT\n"
+    "{\n"
+    "  float4 position : SV_POSITION;\n"
+    "  float4 color : COLOR0;\n"
+    "  float2 texcoord : TEXCOORD0;\n"
+    "};\n"
+    "PS_INPUT main(VS_INPUT input)\n"
+    "{\n"
+    "  PS_INPUT output;\n"
+    "  output.position = mul(ProjectionMatrix, float4(input.position.xy, 0.f, 1.f));\n"
+    "  output.color = input.color;\n"
+    "  output.texcoord  = input.texcoord;\n"
+    "  return output;\n"
+    "}\n";
+
+const char *fragment_shader =
+    "sampler sampler0;\n"
+    "Texture2D texture0;\n"
+    "struct PS_INPUT\n"
+    "{\n"
+    "  float4 color : COLOR0;\n"
+    "  float2 texcoord : TEXCOORD0;\n"
+    "};\n"
+    "float4 main(PS_INPUT input) : SV_Target\n"
+    "{\n"
+    "  return input.color * texture0.Sample(sampler0, input.texcoord);\n"
+    "}\n";
+
 #endif
 
 struct vertex_struct {
@@ -104,7 +145,7 @@ void NuklearGUI::Initialize(NuklearConfig config) {
       AddElement(VertexElementSemantic::kColor0, VertexElementFormat::kUnsignedByte4Normalized);
   mesh_ = graphics_->resource_manager()->Create(mesh_config);
 
-  PipelineConfig pipeline_config;
+  auto pipeline_config = PipelineConfig::ShaderWithLayout(shader_, mesh_config.layout);
 
   pipeline_config.blend_state.enable = true;
   pipeline_config.blend_state.src_rgb_factor = BlendFactor::kSrcAlpha;

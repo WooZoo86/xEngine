@@ -72,7 +72,6 @@ void D3D11ShaderFactory::Create(D3D11Shader &resource) {
       nullptr,
       &vertex_shader
     ), "create vertex shader failed\n");
-    vertex_blob->Release();
   }
 
   if (fragment_blob != nullptr) {
@@ -82,9 +81,10 @@ void D3D11ShaderFactory::Create(D3D11Shader &resource) {
       nullptr,
       &fragment_shader
     ), "create fragment shader failed\n");
-    fragment_blob->Release();
   }
 
+  resource.vertex_blob = vertex_blob;
+  resource.fragment_blob = fragment_blob;
   resource.vertex_shader = vertex_shader;
   resource.fragment_shader = fragment_shader;
 
@@ -93,10 +93,16 @@ void D3D11ShaderFactory::Create(D3D11Shader &resource) {
 
 void D3D11ShaderFactory::Destroy(D3D11Shader &resource) {
   x_assert(resource.status() == ResourceStatus::kFailed || resource.status() == ResourceStatus::kCompleted);
-  if (resource.vertex_shader) {
+  if (resource.vertex_blob != nullptr) {
+    resource.vertex_blob->Release();
+  }
+  if (resource.fragment_blob != nullptr) {
+    resource.fragment_blob->Release();
+  }
+  if (resource.vertex_shader != nullptr) {
     resource.vertex_shader->Release();
   }
-  if (resource.fragment_shader) {
+  if (resource.fragment_shader != nullptr) {
     resource.fragment_shader->Release();
   }
 }

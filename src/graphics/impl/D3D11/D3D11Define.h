@@ -49,7 +49,7 @@ struct D3DRendererCache {
   ID3D11PixelShader *fragment_shader{nullptr};
 };
 
-static DXGI_FORMAT SwapChainFormatFromPixelFormat(PixelFormat format) {
+static DXGI_FORMAT SwapChainFormatForPixelFormat(PixelFormat format) {
   switch (format) {
     case PixelFormat::RGBA8:
       return DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -59,7 +59,7 @@ static DXGI_FORMAT SwapChainFormatFromPixelFormat(PixelFormat format) {
   }
 }
 
-static DXGI_FORMAT RenderTargetFormatFromPixelFormat(PixelFormat format) {
+static DXGI_FORMAT RenderTargetFormatForPixelFormat(PixelFormat format) {
   switch (format) {
     case PixelFormat::RGBA8:
       return DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -96,9 +96,9 @@ static UINT D3D11CPUAccessFlagForBufferUsage(BufferUsage usage) {
     case BufferUsage::kImmutable:
       return 0;
     case BufferUsage::kDynamic:
-      return D3D11_CPU_ACCESS_READ;
+      return D3D11_CPU_ACCESS_WRITE;
     case BufferUsage::kStream:
-      return D3D11_CPU_ACCESS_READ;
+      return D3D11_CPU_ACCESS_WRITE;
     default:
       x_error("unknown BufferUsage\n");
       return 0;
@@ -120,12 +120,11 @@ static DXGI_FORMAT TextureFormatForPixelFormat(PixelFormat format) {
     case PixelFormat::D16: return DXGI_FORMAT_D16_UNORM;
     case PixelFormat::D32: return DXGI_FORMAT_D32_FLOAT;
     case PixelFormat::D24S8: return DXGI_FORMAT_D24_UNORM_S8_UINT;
-    default: x_error("unknown PixelFormat\n");
-      return DXGI_FORMAT_UNKNOWN;
+    default: x_error("unknown PixelFormat\n"); return DXGI_FORMAT_UNKNOWN;
   }
 }
 
-static D3D11_FILTER SamplerFilterForTextureFilterMode(TextureFilterMode min, TextureFilterMode mag) {
+static D3D11_FILTER EnumForTextureFilterMode(TextureFilterMode min, TextureFilterMode mag) {
   if (TextureFilterMode::kNearest == mag) {
     switch (min) {
       case TextureFilterMode::kNearest:
@@ -161,7 +160,7 @@ static D3D11_FILTER SamplerFilterForTextureFilterMode(TextureFilterMode min, Tex
   return D3D11_FILTER_MIN_MAG_MIP_POINT;
 }
 
-static D3D11_TEXTURE_ADDRESS_MODE TextureAddressModeForTextureWrapMode(TextureWrapMode mode) {
+static D3D11_TEXTURE_ADDRESS_MODE EnumForTextureWrapMode(TextureWrapMode mode) {
   switch (mode) {
     case TextureWrapMode::kClampToEdge:
       return D3D11_TEXTURE_ADDRESS_CLAMP;
@@ -190,6 +189,149 @@ static uint32 RowPitchForPixelFormat(PixelFormat format, uint32 width) {
       return max(16, 2 * width);
     default:
       return width * SizeOfPixelFormat(format);
+  }
+}
+
+static D3D11_BLEND EnumForBlendFactor(BlendFactor factor) {
+  switch (factor) {
+    case BlendFactor::kZero: return D3D11_BLEND_ZERO;
+    case BlendFactor::kOne: return D3D11_BLEND_ONE;
+    case BlendFactor::kSrcColor: return D3D11_BLEND_SRC_COLOR;
+    case BlendFactor::kOneMinusBlendColor: return D3D11_BLEND_INV_SRC_COLOR;
+    case BlendFactor::kSrcAlpha: return D3D11_BLEND_SRC_ALPHA;
+    case BlendFactor::kOneMinusSrcAlpha: return D3D11_BLEND_INV_SRC_ALPHA;
+    case BlendFactor::kDstColor: return D3D11_BLEND_DEST_COLOR;
+    case BlendFactor::kOneMinusDstColor: return D3D11_BLEND_INV_DEST_COLOR;
+    case BlendFactor::kDstAlpha: return D3D11_BLEND_DEST_ALPHA;
+    case BlendFactor::kOneMinusDstAlpha: return D3D11_BLEND_INV_DEST_ALPHA;
+    case BlendFactor::kSrcAlphaSaturated: return D3D11_BLEND_SRC_ALPHA_SAT;
+    case BlendFactor::kBlendColor: return D3D11_BLEND_BLEND_FACTOR;
+    case BlendFactor::kOneMinusBlendAlpha: return D3D11_BLEND_INV_BLEND_FACTOR;
+    default: x_error("unsupport blend factor\n"); return D3D11_BLEND_ONE;
+  }
+}
+
+static D3D11_BLEND_OP EnumForBlendOperation(BlendOperation operation) {
+  switch (operation) {
+    case BlendOperation::kAdd: return D3D11_BLEND_OP_ADD;
+    case BlendOperation::kSubtract: return D3D11_BLEND_OP_SUBTRACT;
+    case BlendOperation::kReverseSubtract: return D3D11_BLEND_OP_REV_SUBTRACT;
+    case BlendOperation::kMin: return D3D11_BLEND_OP_MIN;
+    case BlendOperation::kMax: return D3D11_BLEND_OP_MAX;
+    default: x_error("unsupport blend operation\n"); return D3D11_BLEND_OP_ADD;
+  }
+}
+
+static uint8 ColorWriteMaskForPixelChannel(PixelChannel mask) {
+  uint8 result = 0;
+  if (static_cast<uint8>(mask) & static_cast<uint8>(PixelChannel::kRed)) {
+    result |= D3D11_COLOR_WRITE_ENABLE_RED;
+  }
+  if (static_cast<uint8>(mask) & static_cast<uint8>(PixelChannel::kGreen)) {
+    result |= D3D11_COLOR_WRITE_ENABLE_GREEN;
+  }
+  if (static_cast<uint8>(mask) & static_cast<uint8>(PixelChannel::kBlue)) {
+    result |= D3D11_COLOR_WRITE_ENABLE_BLUE;
+  }
+  if (static_cast<uint8>(mask) & static_cast<uint8>(PixelChannel::kAlpha)) {
+    result |= D3D11_COLOR_WRITE_ENABLE_ALPHA;
+  }
+  return result;
+}
+
+static D3D11_COMPARISON_FUNC EnumForCompareFunction(CompareFunction function) {
+  switch (function) {
+    case CompareFunction::kNever: return D3D11_COMPARISON_NEVER;
+    case CompareFunction::kLess: return D3D11_COMPARISON_LESS;
+    case CompareFunction::kEqual: return D3D11_COMPARISON_EQUAL;
+    case CompareFunction::kLessEqual: return D3D11_COMPARISON_LESS_EQUAL;
+    case CompareFunction::kGreater: return D3D11_COMPARISON_GREATER;
+    case CompareFunction::kNotEqual: return D3D11_COMPARISON_NOT_EQUAL;
+    case CompareFunction::kGreaterEqual: return D3D11_COMPARISON_GREATER_EQUAL;
+    case CompareFunction::kAlways: return D3D11_COMPARISON_ALWAYS;
+    default: x_error("unsupport CompareFunction\n"); return D3D11_COMPARISON_ALWAYS;
+  }
+}
+
+static D3D11_STENCIL_OP EnumForStencilOperation(StencilOperation operation) {
+  switch (operation) {
+    case StencilOperation::kKeep: return D3D11_STENCIL_OP_KEEP;
+    case StencilOperation::kZero: return D3D11_STENCIL_OP_ZERO;
+    case StencilOperation::kReplace: return D3D11_STENCIL_OP_REPLACE;
+    case StencilOperation::kIncrement: return D3D11_STENCIL_OP_INCR;
+    case StencilOperation::kIncrementWrap: return D3D11_STENCIL_OP_INCR_SAT;
+    case StencilOperation::kDecrement: return D3D11_STENCIL_OP_DECR;
+    case StencilOperation::kDecrementWrap: return D3D11_STENCIL_OP_DECR_SAT;
+    case StencilOperation::kInvert: return D3D11_STENCIL_OP_INVERT;
+    default: x_error("unsupport StencilOperation\n"); return D3D11_STENCIL_OP_ZERO;
+  }
+}
+
+static const char *SemanticForVertexElementSemantic(VertexElementSemantic semantic) {
+  switch (semantic) {
+    case VertexElementSemantic::kPosition:
+      return "POSITION";
+    case VertexElementSemantic::kTexcoord0:
+    case VertexElementSemantic::kTexcoord1:
+    case VertexElementSemantic::kTexcoord2:
+    case VertexElementSemantic::kTexcoord3:
+      return "TEXCOORD";
+    case VertexElementSemantic::kColor0:
+    case VertexElementSemantic::kColor1:
+      return "COLOR";
+    case VertexElementSemantic::kNormal:
+      return "NORMAL";
+    case VertexElementSemantic::kTangent:
+      return "TANGENT";
+    case VertexElementSemantic::kBinormal:
+      return "BINORMAL";
+    case VertexElementSemantic::kWeights:
+      return "BLENDWEIGHT";
+    case VertexElementSemantic::kIndices:
+      return "BLENDINDICES";
+    case VertexElementSemantic::kInstance0:
+    case VertexElementSemantic::kInstance1:
+    case VertexElementSemantic::kInstance2:
+    case VertexElementSemantic::kInstance3:
+      return "INSTANCE";
+    default: 
+      x_error("unsupport VertexElementSemantic\n"); 
+      return nullptr;
+  }
+}
+
+static uint32 IndexForVertexElementSemantic(VertexElementSemantic semantic) {
+  switch (semantic) {
+    case VertexElementSemantic::kTexcoord1:
+    case VertexElementSemantic::kColor1:
+    case VertexElementSemantic::kInstance1:
+      return 1;
+    case VertexElementSemantic::kTexcoord2:
+    case VertexElementSemantic::kInstance2:
+      return 2;
+    case VertexElementSemantic::kTexcoord3:
+    case VertexElementSemantic::kInstance3:
+      return 3;
+    default:
+      return 0;
+  }
+}
+
+static DXGI_FORMAT EnumForVertexElementFormat(VertexElementFormat format) {
+  switch (format) {
+    case VertexElementFormat::kFloat1: return DXGI_FORMAT_R32_FLOAT;
+    case VertexElementFormat::kFloat2: return DXGI_FORMAT_R32G32_FLOAT;
+    case VertexElementFormat::kFloat3: return DXGI_FORMAT_R32G32B32_FLOAT;
+    case VertexElementFormat::kFloat4: return DXGI_FORMAT_R32G32B32A32_FLOAT;
+    case VertexElementFormat::kByte4: return DXGI_FORMAT_R8G8B8A8_SINT;
+    case VertexElementFormat::kByte4Normalized: return DXGI_FORMAT_R8G8B8A8_SNORM;
+    case VertexElementFormat::kUnsignedByte4: return DXGI_FORMAT_R8G8B8A8_UINT;
+    case VertexElementFormat::kUnsignedByte4Normalized: return DXGI_FORMAT_R8G8B8A8_UNORM;
+    case VertexElementFormat::kShort2: return DXGI_FORMAT_R16G16_SINT;
+    case VertexElementFormat::kShort2Normalized: return DXGI_FORMAT_R16G16_SNORM;
+    case VertexElementFormat::kShort4: return DXGI_FORMAT_R16G16B16A16_SINT;
+    case VertexElementFormat::kShort4Normalized: return DXGI_FORMAT_R16G16B16A16_SNORM;
+    default: x_error("unsupport VertexElementFormat!\n"); return DXGI_FORMAT_UNKNOWN;
   }
 }
 

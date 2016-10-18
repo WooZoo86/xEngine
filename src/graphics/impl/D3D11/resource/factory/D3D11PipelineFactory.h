@@ -9,11 +9,21 @@
 
 namespace xEngine {
 
+class D3D11GraphicsResourceManager;
+
 class D3D11PipelineFactory: public ResourceFactory<D3D11Pipeline> {
  public:
+  D3D11PipelineFactory(D3D11GraphicsResourceManager *manager, ID3D11Device *device) :
+    manager_(manager),
+    device_(device) {}
+
   virtual void Create(D3D11Pipeline &resource) override;
 
   virtual void Destroy(D3D11Pipeline &resource) override;
+
+ private:
+  D3D11GraphicsResourceManager *manager_{nullptr};
+  ID3D11Device *device_{nullptr};
 };
 
 } // namespace xEngine

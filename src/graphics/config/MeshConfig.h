@@ -9,6 +9,7 @@ namespace xEngine {
 struct VertexLayout {
 
   VertexLayout &AddElement(VertexElementSemantic semantic, VertexElementFormat format) {
+    x_assert(element_count <= static_cast<uint16>(GraphicsMaxDefine::kMaxVertexElementCount));
     elements[element_count].semantic = semantic;
     elements[element_count].format = format;
     elements[element_count].offset = size;

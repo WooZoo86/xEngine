@@ -25,7 +25,8 @@ class D3D11GraphicsResourceManager: public GraphicsResourceManagerInterface {
   explicit D3D11GraphicsResourceManager(ID3D11Device *device) :
     shader_factory_(device),
     texture_factory_(device),
-    mesh_factory_(device) {}
+    mesh_factory_(device),
+    pipeline_factory_(this, device){}
 
   virtual void Initialize(const GraphicsConfig &config) override;
 
@@ -53,6 +54,7 @@ class D3D11GraphicsResourceManager: public GraphicsResourceManagerInterface {
   D3D11PipelineFactory pipeline_factory_;
 
   friend class D3D11Renderer;
+  friend class D3D11PipelineFactory;
 };
 
 } // namespace xEngine

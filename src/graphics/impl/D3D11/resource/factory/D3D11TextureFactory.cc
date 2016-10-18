@@ -103,10 +103,10 @@ void D3D11TextureFactory::Create(D3D11Texture &resource) {
 
   D3D11_SAMPLER_DESC sampler_desc;
   ZeroMemory(&sampler_desc, sizeof(sampler_desc));
-  sampler_desc.Filter = SamplerFilterForTextureFilterMode(config.filter_mode_min, config.filter_mode_mag);
-  sampler_desc.AddressU = TextureAddressModeForTextureWrapMode(config.wrap_mod_s);
-  sampler_desc.AddressV = TextureAddressModeForTextureWrapMode(config.wrap_mod_t);
-  sampler_desc.AddressW = TextureAddressModeForTextureWrapMode(config.wrap_mod_r);
+  sampler_desc.Filter = EnumForTextureFilterMode(config.filter_mode_min, config.filter_mode_mag);
+  sampler_desc.AddressU = EnumForTextureWrapMode(config.wrap_mod_s);
+  sampler_desc.AddressV = EnumForTextureWrapMode(config.wrap_mod_t);
+  sampler_desc.AddressW = EnumForTextureWrapMode(config.wrap_mod_r);
   sampler_desc.MipLODBias = 0.0f;
   sampler_desc.MaxAnisotropy = 1;
   sampler_desc.ComparisonFunc = D3D11_COMPARISON_NEVER;

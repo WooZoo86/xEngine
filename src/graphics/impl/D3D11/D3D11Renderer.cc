@@ -28,7 +28,7 @@ void D3D11Renderer::Initialize(const GraphicsConfig &config) {
   swap_chain_desc.BufferCount = 1;
   swap_chain_desc.BufferDesc.Width = window()->config().width;
   swap_chain_desc.BufferDesc.Height = window()->config().height;
-  swap_chain_desc.BufferDesc.Format = SwapChainFormatFromPixelFormat(window()->config().color_format);
+  swap_chain_desc.BufferDesc.Format = SwapChainFormatForPixelFormat(window()->config().color_format);
   swap_chain_desc.BufferDesc.RefreshRate.Numerator = 60;
   swap_chain_desc.BufferDesc.RefreshRate.Denominator = 1;
   swap_chain_desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
@@ -78,7 +78,7 @@ void D3D11Renderer::Initialize(const GraphicsConfig &config) {
     depth_stencil_desc.Height = window()->config().height;
     depth_stencil_desc.MipLevels = 1;
     depth_stencil_desc.ArraySize = 1;
-    depth_stencil_desc.Format = RenderTargetFormatFromPixelFormat(window()->config().depth_format);
+    depth_stencil_desc.Format = RenderTargetFormatForPixelFormat(window()->config().depth_format);
     depth_stencil_desc.SampleDesc = swap_chain_desc.SampleDesc;
     depth_stencil_desc.Usage = D3D11_USAGE_DEFAULT;
     depth_stencil_desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
