@@ -2,11 +2,53 @@
 #include "core/Log.h"
 #include "graphics/Graphics.h"
 #include "window/Window.h"
-#include "io/IO.h"
-#include "storage/StorageFilesystem.h"
+
+#include "GraphicsSample.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
+
+#if X_OPENGL
+
+#elif X_D3D11
+
+static const char *vertex_shader =
+  "struct VS_INPUT\n"
+  "{\n"
+  "    float2 aPosition: POSITION;\n"
+  "    float2 aTexcoord0: TEXCOORD;\n"
+  "    float3 aColor0: COLOR;\n"
+  "};\n"
+  "struct VS_OUTPUT\n"
+  "{\n"
+  "    float4 Position: SV_POSITION;\n"
+  "    float2 Texcoord: TEXCOORD;\n"
+  "    float3 Color: COLOR;\n"
+  "};\n"
+  "VS_OUTPUT main(const VS_INPUT input)\n"
+  "{\n"
+  "    VS_OUTPUT output;\n"
+  "    output.Texcoord = input.aTexcoord0;\n"
+  "    output.Color = input.aColor0;\n"
+  "    output.Position = float4(input.aPosition, 0.0, 1.0);\n"
+  "    return output;\n"
+  "}\n";
+
+static const char *fragment_shader =
+  "sampler sampler0;\n"
+  "Texture2D texture0;\n"
+  "struct PS_INPUT\n"
+  "{\n"
+  "    float4 Position: SV_POSITION;\n"
+  "    float2 Texcoord: TEXCOORD;\n"
+  "    float3 Color: COLOR;\n"
+  "};\n"
+  "float4 main(const PS_INPUT input): SV_TARGET\n"
+  "{\n"
+  "    return texture0.Sample(sampler0, input.Texcoord) * float4(input.Color, 1.0);\n"
+  "}\n";
+
+#endif
 
 using namespace xEngine;
 
@@ -18,13 +60,6 @@ class GraphicsSample : public Application {
     window_id_ = Window::GetInstance().Create(WindowConfig::ForWindow(1024, 768, "GraphicsSample"));
     Window::GetInstance().MakeCurrent(window_id_);
     Window::GetInstance().GetGraphics(window_id_)->Initialize(GraphicsConfig::ForWindow(window_id_));
-    IO::GetInstance().Initialize();
-#if X_MACOS
-    IO::GetInstance().AddPlaceholder("local", "storage:///Users/leafnsand/Desktop/");
-#elif X_WINDOWS
-    IO::GetInstance().AddPlaceholder("local", "storage://C:\\Users\\leafnsand\\Desktop\\");
-#endif
-    IO::GetInstance().RegisterFilesystem("storage", StorageFilesystem::Creator);
 
     load_shader();
     load_texture();
@@ -39,8 +74,6 @@ class GraphicsSample : public Application {
     return Application::Finalize();
   }
   virtual ApplicationStatus Loop() override {
-    IO::GetInstance().Tick();
-
     draw();
 
     Window::GetInstance().PollEvent();
@@ -55,55 +88,32 @@ class GraphicsSample : public Application {
 
  private:
   void load_shader() {
-    static const auto generate_shader = [&]() {
-      if (shader_ == kInvalidResourceID && vertex_shader_ && fragment_shader_) {
-        shader_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(ShaderConfig::FromData(vertex_shader_->buffer(), fragment_shader_->buffer()));
-        auto pipeline_config = PipelineConfig::ShaderWithLayout(shader_, VertexLayout());
-        pipeline_config.vertex_layout.AddElement(VertexElementSemantic::kPosition, VertexElementFormat::kFloat2)
-          .AddElement(VertexElementSemantic::kColor0, VertexElementFormat::kFloat3)
-          .AddElement(VertexElementSemantic::kTexcoord0, VertexElementFormat::kFloat2);
-        pipeline_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(pipeline_config);
-      }
-    };
-    IO::GetInstance().Read("local:vertex.shader", [&](Location location, IOStatus status, DataPtr data) {
-      if (status == IOStatus::kSuccess) {
-        vertex_shader_ = data;
-        generate_shader();
-      }
-    });
-    IO::GetInstance().Read("local:fragment.shader", [&](Location location, IOStatus status, DataPtr data) {
-      if (status == IOStatus::kSuccess) {
-        fragment_shader_ = data;
-        generate_shader();
-      }
-    });
+    auto shader_config = ShaderConfig::FromData(vertex_shader, fragment_shader);
+    shader_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(shader_config);
   }
 
   void load_texture() {
-    IO::GetInstance().Read("local:test.jpg", [&](Location location, IOStatus status, DataPtr data) {
-      if (status == IOStatus::kSuccess) {
-        int width, height, components;
-        stbi_set_unpremultiply_on_load(1);
-        stbi_convert_iphone_png_to_rgb(1);
-        auto result = stbi_info_from_memory(reinterpret_cast<const stbi_uc *>(data->buffer()),
-                                            static_cast<int>(data->size()),
-                                            &width, &height, &components);
-        if (result == 1 && width > 0 && height > 0)
-        {
-          auto buffer = stbi_load_from_memory(reinterpret_cast<const stbi_uc *>(data->buffer()),
-                                              static_cast<int>(data->size()),
-                                              &width, &height, &components, STBI_rgb_alpha);
-          data->Copy(reinterpret_cast<const char *>(buffer), static_cast<size_t>(width * height * 4));
-          stbi_image_free(buffer);
-          TextureConfig config;
-          config.width = width;
-          config.height = height;
-          config.color_format = PixelFormat::RGBA8;
-          config.data[0][0] = data;
-          texture_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(config);
-        }
-      }
-    });
+    auto data = Data::Create(reinterpret_cast<const char *>(test_jpg), test_jpg_len);
+    int width, height, components;
+    stbi_set_unpremultiply_on_load(1);
+    stbi_convert_iphone_png_to_rgb(1);
+    auto result = stbi_info_from_memory(reinterpret_cast<const stbi_uc *>(data->buffer()),
+      static_cast<int>(data->size()),
+      &width, &height, &components);
+    if (result == 1 && width > 0 && height > 0)
+    {
+      auto buffer = stbi_load_from_memory(reinterpret_cast<const stbi_uc *>(data->buffer()),
+        static_cast<int>(data->size()),
+        &width, &height, &components, STBI_rgb_alpha);
+      data->Copy(reinterpret_cast<const char *>(buffer), static_cast<size_t>(width * height * 4));
+      stbi_image_free(buffer);
+      TextureConfig config;
+      config.width = width;
+      config.height = height;
+      config.color_format = PixelFormat::RGBA8;
+      config.data[0][0] = data;
+      texture_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(config);
+    }
   }
 
   void load_mesh() {
@@ -127,6 +137,9 @@ class GraphicsSample : public Application {
         .AddElement(VertexElementSemantic::kColor0, VertexElementFormat::kFloat3)
         .AddElement(VertexElementSemantic::kTexcoord0, VertexElementFormat::kFloat2);
     mesh_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(mesh_config);
+
+    auto pipeline_config = PipelineConfig::ShaderWithLayout(shader_, mesh_config.layout);
+    pipeline_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(pipeline_config);
   }
 
   void draw() {
