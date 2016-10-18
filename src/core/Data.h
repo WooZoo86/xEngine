@@ -29,7 +29,7 @@ class Data final {
     other.size_ = 0;
   }
 
-  ~Data() { if (buffer_ != nullptr) free(buffer_); }
+  ~Data() { if (buffer_ != nullptr) eastl::GetDefaultAllocator()->deallocate(buffer_, size_); }
 
   void operator=(Data &other) { Copy(other.buffer_, other.size_); }
 
@@ -41,13 +41,9 @@ class Data final {
 
   bool operator==(const Data &other) const { return size_ == other.size_ && buffer_ == other.buffer_; }
 
-  char &operator[](size_t offset) { x_assert(offset < size_); return buffer_[offset]; }
-
-  char operator[](size_t offset) const { x_assert(offset < size_); return buffer_[offset]; }
-
   bool Empty() const { return buffer_ == nullptr || size_ == 0; }
 
-  void Assign(char *buffer, size_t size, size_t offset = 0);
+  void Assign(char *buffer, size_t size);
 
   void Copy(const char *buffer, size_t size, size_t offset = 0);
 

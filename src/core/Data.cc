@@ -2,11 +2,11 @@
 
 namespace xEngine {
 
-void Data::Assign(char *buffer, size_t size, size_t offset) {
+void Data::Assign(char *buffer, size_t size) {
   if (buffer_ != nullptr) {
     eastl::GetDefaultAllocator()->deallocate(buffer_, size_);
   }
-  buffer_ = buffer + offset;
+  buffer_ = buffer;
   size_ = size;
 }
 
