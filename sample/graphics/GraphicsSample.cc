@@ -10,6 +10,29 @@
 
 #if X_OPENGL
 
+static const char *vertex_shader =
+  "#version 150 core\n"
+  "in vec2 aPosition;\n"
+  "in vec2 aTexcoord0;\n"
+  "in vec3 aColor0;\n"
+  "out vec2 Texcoord;\n"
+  "out vec3 Color;\n"
+  "void main() {\n"
+  "    Texcoord = aTexcoord0;\n"
+  "    Color = aColor0;\n"
+  "    gl_Position = vec4(aPosition, 0, 1);\n"
+  "}\n";
+
+static const char *fragment_shader =
+  "#version 150 core\n"
+  "in vec2 Texcoord;\n"
+  "in vec3 Color;\n"
+  "uniform sampler2D uTexture;\n"
+  "out vec4 outColor;\n"
+  "void main() {\n"
+  "    outColor = texture(uTexture, Texcoord) * vec4(Color, 1);\n"
+  "}\n";
+
 #elif X_D3D11
 
 static const char *vertex_shader =
@@ -154,7 +177,7 @@ class GraphicsSample : public Application {
       renderer->ApplyTexture(texture_, texture_index);
       renderer->ApplyMesh(mesh_);
       renderer->ApplyPipeline(pipeline_);
-      renderer->UpdateShaderUniform(shader_, "tex", UniformFormat::kTexture, &texture_index);
+      renderer->UpdateShaderUniform(shader_, "uTexture", UniformFormat::kTexture, &texture_index);
       renderer->DrawTopology(VertexTopology::kTriangles, 0, 6);
       renderer->Render();
     }
@@ -165,8 +188,6 @@ class GraphicsSample : public Application {
   ResourceID texture_{kInvalidResourceID};
   ResourceID mesh_{kInvalidResourceID};
   ResourceID pipeline_{kInvalidResourceID};
-  DataPtr vertex_shader_{nullptr};
-  DataPtr fragment_shader_{nullptr};
   ResourceID window_id_{kInvalidResourceID};
   ClearState state_;
 };
