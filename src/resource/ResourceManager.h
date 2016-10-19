@@ -10,7 +10,9 @@
 namespace xEngine {
 
 class ResourceManager {
- public:
+ protected:
+  virtual ~ResourceManager() {}
+
   void Add(const ResourceIdentity &identity, ResourceID id);
 
   void Remove(ResourceID id);

@@ -11,7 +11,7 @@
 #if X_OPENGL
 
 static const char *vertex_shader =
-  "#version 150 core\n"
+  "#version 410 core\n"
   "in vec2 aPosition;\n"
   "in vec2 aTexcoord0;\n"
   "in vec3 aColor0;\n"
@@ -24,7 +24,7 @@ static const char *vertex_shader =
   "}\n";
 
 static const char *fragment_shader =
-  "#version 150 core\n"
+  "#version 410 core\n"
   "in vec2 Texcoord;\n"
   "in vec3 Color;\n"
   "uniform sampler2D uTexture;\n"
@@ -58,8 +58,8 @@ static const char *vertex_shader =
   "}\n";
 
 static const char *fragment_shader =
-  "sampler sampler0;\n"
-  "Texture2D texture0;\n"
+  "Texture2D uTexture;\n"
+  "sampler uTexture_sampler;\n"
   "struct PS_INPUT\n"
   "{\n"
   "    float4 Position: SV_POSITION;\n"
@@ -68,7 +68,7 @@ static const char *fragment_shader =
   "};\n"
   "float4 main(const PS_INPUT input): SV_TARGET\n"
   "{\n"
-  "    return texture0.Sample(sampler0, input.Texcoord) * float4(input.Color, 1.0);\n"
+  "    return uTexture.Sample(uTexture_sampler, input.Texcoord) * float4(input.Color, 1.0);\n"
   "}\n";
 
 #endif
@@ -166,7 +166,6 @@ class GraphicsSample : public Application {
   }
 
   void draw() {
-    static const auto texture_index = 0;
     if (window_id_ != kInvalidResourceID) {
       state_.clear_color += Color(0.01f, 0.005f, 0.0025f, 0.0f);
       state_.clear_color = glm::mod(state_.clear_color, 1.0f);
@@ -174,10 +173,9 @@ class GraphicsSample : public Application {
       renderer->Reset();
       renderer->ApplyTarget(kInvalidResourceID, state_);
       renderer->ApplyShader(shader_);
-      renderer->ApplyTexture(texture_, texture_index);
       renderer->ApplyMesh(mesh_);
       renderer->ApplyPipeline(pipeline_);
-      renderer->UpdateShaderUniform(shader_, "uTexture", UniformFormat::kTexture, &texture_index);
+      renderer->UpdateShaderUniform(shader_, "uTexture", UniformFormat::kTexture, &texture_);
       renderer->DrawTopology(VertexTopology::kTriangles, 0, 6);
       renderer->Render();
     }

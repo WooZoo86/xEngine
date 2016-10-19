@@ -49,11 +49,17 @@ struct D3DRendererCache {
 
   ID3D11PixelShader *fragment_shader{nullptr};
 
+  ID3D11ShaderResourceView *vertex_shader_resource_view[static_cast<uint16>(GraphicsMaxDefine::kMaxTextureCount)];
+
+  ID3D11SamplerState *vertex_sampler_state[static_cast<uint16>(GraphicsMaxDefine::kMaxTextureCount)];
+
   ID3D11ShaderResourceView *fragment_shader_resource_view[static_cast<uint16>(GraphicsMaxDefine::kMaxTextureCount)];
 
   ID3D11SamplerState *fragment_sampler_state[static_cast<uint16>(GraphicsMaxDefine::kMaxTextureCount)];
 
   D3DRendererCache() {
+    memset(vertex_shader_resource_view, 0, sizeof(vertex_shader_resource_view));
+    memset(vertex_sampler_state, 0, sizeof(vertex_sampler_state));
     memset(fragment_shader_resource_view, 0, sizeof(fragment_shader_resource_view));
     memset(fragment_sampler_state, 0, sizeof(fragment_sampler_state));
   }

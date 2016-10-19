@@ -34,9 +34,13 @@ void GLFWWindow::Create(const WindowConfig &config) {
 #if X_DEBUG
   glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
 #endif // X_DEBUG
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+#if X_MACOS
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#else
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_FALSE);
+#endif
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   window_ = glfwCreateWindow(config_.width, config_.height, config_.title.c_str(), nullptr, nullptr);
   x_assert(Available());

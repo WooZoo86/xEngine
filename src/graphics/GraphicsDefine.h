@@ -18,6 +18,7 @@ enum class GraphicsMaxDefine: uint16 {
   kMaxVertexElementCount = 16, // OpenGL ES 3.0
   kMaxCubeTextureFaceCount = 6,
   kMaxTextureMipMapCount = 12,
+  kMaxUniformBlockCount = 16,
 };
 
 enum class GraphicsType: uint8 {
@@ -303,6 +304,11 @@ enum class ClearType: uint8 {
 
   kDepthAndStencil = static_cast<uint8>(kDepth) | static_cast<uint8>(kStencil),
   kAll = static_cast<uint8>(kColor) | static_cast<uint8>(kDepthAndStencil),
+};
+
+enum class GraphicsPipelineStage: uint8 {
+  kVertexShader,
+  kFragmentShader,
 };
 
 }

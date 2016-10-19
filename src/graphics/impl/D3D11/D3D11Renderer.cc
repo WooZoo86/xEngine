@@ -2,6 +2,7 @@
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "d3dcompiler.lib")
+#pragma comment(lib, "dxguid.lib")
 
 #include "D3D11Define.h"
 #include "D3D11Renderer.h"
@@ -133,13 +134,24 @@ void D3D11Renderer::Finalize() {
     swap_chain_->Release();
     swap_chain_ = nullptr;
   }
-  if (device_) {
-    device_->Release();
-    device_ = nullptr;
-  }
   if (context_) {
     context_->Release();
     context_ = nullptr;
+  }
+#if X_DEBUG
+  ID3D11Debug *d3d11_debug;
+  x_d3d11_assert_msg(device_->QueryInterface(
+    __uuidof(ID3D11Debug),
+    reinterpret_cast<void **>(&d3d11_debug)
+  ), "get d3d11 debug failed!\n");
+  d3d11_debug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
+  if (d3d11_debug != nullptr) {
+    d3d11_debug->Release();
+  }
+#endif
+  if (device_) {
+    device_->Release();
+    device_ = nullptr;
   }
   config_ = GraphicsConfig();
 }
@@ -280,6 +292,89 @@ void D3D11Renderer::UpdateShaderUniform(ResourceID id, eastl::string name, Unifo
       context_->PSSetShader(shader.fragment_shader, nullptr, 0);
       cache_.fragment_shader = shader.fragment_shader;
     }
+
+    if (format == UniformFormat::kTexture) {
+      auto texture_id = *reinterpret_cast<const ResourceID *>(buffer);
+      auto &texture = resource_manager()->texture_pool_.Find(texture_id);
+      auto texture_pair = shader.vertex_texture_index.find(name.c_str());
+      if (texture_pair != shader.vertex_texture_index.end()) {
+        ApplyTexture(texture, texture_pair->second, GraphicsPipelineStage::kVertexShader);
+      } else {
+        texture_pair = shader.fragment_texture_index.find(name.c_str());
+        if (texture_pair != shader.fragment_texture_index.end()) {
+          ApplyTexture(texture, texture_pair->second, GraphicsPipelineStage::kFragmentShader);
+        }
+      }
+      auto sampler_name = name + "_sampler";
+      auto sampler_pair = shader.vertex_sampler_index.find(sampler_name.c_str());
+      if (sampler_pair != shader.vertex_sampler_index.end()) {
+        ApplySamplerState(texture, sampler_pair->second, GraphicsPipelineStage::kVertexShader);
+      } else {
+        sampler_pair = shader.fragment_sampler_index.find(sampler_name.c_str());
+        if (sampler_pair != shader.fragment_sampler_index.end()) {
+          ApplySamplerState(texture, sampler_pair->second, GraphicsPipelineStage::kFragmentShader);
+        }
+      }
+      return;
+    }
+
+    D3D11_SHADER_VARIABLE_DESC variable_desc;
+    auto &uniform_blocks = shader.vertex_uniform_blocks;
+    auto variable_reflection = shader.vertex_reflection->GetVariableByName(name.c_str());
+    if (FAILED(variable_reflection->GetDesc(&variable_desc))) {
+      uniform_blocks = shader.fragment_uniform_blocks;
+      variable_reflection = shader.fragment_reflection->GetVariableByName(name.c_str());
+      if (FAILED(variable_reflection->GetDesc(&variable_desc))) {
+        Log::GetInstance().Error("cannot find uniform: %s\n", name.c_str());
+        return;
+      }
+    }
+    
+    x_assert(variable_desc.Size == SizeOfUniformFormat(format));
+    auto uniform_buffer_reflection = variable_reflection->GetBuffer();
+    D3D11_SHADER_BUFFER_DESC buffer_desc;
+    x_d3d11_assert(uniform_buffer_reflection->GetDesc(&buffer_desc));
+    auto pair = uniform_blocks.find(buffer_desc.Name);
+    x_assert(pair != uniform_blocks.end());
+
+    auto uniform_buffer = eastl::get<0>(pair->second);
+
+    D3D11_MAPPED_SUBRESOURCE uniform_buffer_source;
+    x_d3d11_assert_msg(context_->Map(uniform_buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &uniform_buffer_source), "map uniform buffer falied!\n");
+    auto pointer = reinterpret_cast<char *>(uniform_buffer_source.pData) + variable_desc.StartOffset;
+    memcpy(pointer, buffer, variable_desc.Size);
+    context_->Unmap(uniform_buffer, 0);
+  }
+}
+
+void D3D11Renderer::UpdateShaderUniformBlock(ResourceID id, eastl::string name, const void *buffer) {
+  auto &shader = resource_manager()->shader_pool_.Find(id);
+  if (shader.status() == ResourceStatus::kCompleted) {
+    if (shader.vertex_shader != cache_.vertex_shader) {
+      context_->VSSetShader(shader.vertex_shader, nullptr, 0);
+      cache_.vertex_shader = shader.vertex_shader;
+    }
+    if (shader.fragment_shader != cache_.fragment_shader) {
+      context_->PSSetShader(shader.fragment_shader, nullptr, 0);
+      cache_.fragment_shader = shader.fragment_shader;
+    }
+
+    auto pair = shader.vertex_uniform_blocks.find(name.c_str());
+    if (pair == shader.vertex_uniform_blocks.end()) {
+      pair = shader.fragment_uniform_blocks.find(name.c_str());
+      if (pair == shader.fragment_uniform_blocks.end()) {
+        Log::GetInstance().Error("cannot find uniform block: %s\n", name.c_str());
+        return;
+      }
+    }
+
+    auto uniform_buffer = eastl::get<0>(pair->second);
+    auto uniform_block_size = eastl::get<1>(pair->second);
+
+    D3D11_MAPPED_SUBRESOURCE uniform_buffer_source;
+    x_d3d11_assert_msg(context_->Map(uniform_buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &uniform_buffer_source), "map uniform buffer falied!\n");
+    memcpy(uniform_buffer_source.pData, buffer, uniform_block_size);
+    context_->Unmap(uniform_buffer, 0);
   }
 }
 
@@ -288,29 +383,6 @@ void D3D11Renderer::ResetShader() {
   cache_.vertex_shader = nullptr;
   context_->PSSetShader(nullptr, nullptr, 0);
   cache_.fragment_shader = nullptr;
-}
-
-void D3D11Renderer::ApplyTexture(ResourceID id, int32 index) {
-  auto &texture = resource_manager()->texture_pool_.Find(id);
-  if (texture.status() == ResourceStatus::kCompleted) {
-    // TODO vertex shader
-    if (texture.shader_resource_view != cache_.fragment_shader_resource_view[index]) {
-      context_->PSSetShaderResources(index, 1, &texture.shader_resource_view);
-      cache_.fragment_shader_resource_view[index] = texture.shader_resource_view;
-    }
-    if (texture.sampler_state != cache_.fragment_sampler_state[index]) {
-      context_->PSSetSamplers(index, 1, &texture.sampler_state);
-      cache_.fragment_sampler_state[index] = texture.sampler_state;
-    }
-  }
-}
-
-void D3D11Renderer::ResetTexture() {
-  memset(cache_.fragment_shader_resource_view, 0, sizeof(cache_.fragment_shader_resource_view));
-  memset(cache_.fragment_sampler_state, 0, sizeof(cache_.fragment_sampler_state));
-  context_->PSSetShaderResources(0, static_cast<uint16>(GraphicsMaxDefine::kMaxTextureCount), cache_.fragment_shader_resource_view);
-  context_->PSSetSamplers(0, static_cast<uint16>(GraphicsMaxDefine::kMaxTextureCount), cache_.fragment_sampler_state);
-  
 }
 
 void D3D11Renderer::ApplyMesh(ResourceID id) {
@@ -383,8 +455,56 @@ void D3D11Renderer::DrawTopology(VertexTopology topology, int32 first, int32 cou
 void D3D11Renderer::Reset() {
   ResetShader();
   ResetTexture();
+  ResetSamplerState();
   ResetMesh();
   ResetPipeline();
+}
+
+void D3D11Renderer::ApplyTexture(const D3D11Texture &texture, int32 index, GraphicsPipelineStage stage) {
+  if (texture.status() == ResourceStatus::kCompleted) {
+    if (stage == GraphicsPipelineStage::kVertexShader) {
+      if (texture.shader_resource_view != cache_.vertex_shader_resource_view[index]) {
+        context_->PSSetShaderResources(index, 1, &texture.shader_resource_view);
+        cache_.vertex_shader_resource_view[index] = texture.shader_resource_view;
+      }
+    } else if (stage == GraphicsPipelineStage::kFragmentShader) {
+      if (texture.shader_resource_view != cache_.fragment_shader_resource_view[index]) {
+        context_->PSSetShaderResources(index, 1, &texture.shader_resource_view);
+        cache_.fragment_shader_resource_view[index] = texture.shader_resource_view;
+      }
+    }
+  }
+}
+
+void D3D11Renderer::ResetTexture() {
+  memset(cache_.vertex_shader_resource_view, 0, sizeof(cache_.vertex_shader_resource_view));
+  context_->PSSetShaderResources(0, static_cast<uint16>(GraphicsMaxDefine::kMaxTextureCount), cache_.vertex_shader_resource_view);
+  memset(cache_.fragment_shader_resource_view, 0, sizeof(cache_.fragment_shader_resource_view));
+  context_->PSSetShaderResources(0, static_cast<uint16>(GraphicsMaxDefine::kMaxTextureCount), cache_.fragment_shader_resource_view);
+}
+
+void D3D11Renderer::ApplySamplerState(const D3D11Texture &texture, int32 index, GraphicsPipelineStage stage) {
+  if (texture.status() == ResourceStatus::kCompleted) {
+    if (stage == GraphicsPipelineStage::kVertexShader) {
+      if (texture.sampler_state != cache_.vertex_sampler_state[index]) {
+        context_->PSSetSamplers(index, 1, &texture.sampler_state);
+        cache_.vertex_sampler_state[index] = texture.sampler_state;
+      }
+    }
+    else if (stage == GraphicsPipelineStage::kFragmentShader) {
+      if (texture.sampler_state != cache_.fragment_sampler_state[index]) {
+        context_->PSSetSamplers(index, 1, &texture.sampler_state);
+        cache_.fragment_sampler_state[index] = texture.sampler_state;
+      }
+    }
+  }
+}
+
+void D3D11Renderer::ResetSamplerState() {
+  memset(cache_.vertex_sampler_state, 0, sizeof(cache_.vertex_sampler_state));
+  context_->PSSetSamplers(0, static_cast<uint16>(GraphicsMaxDefine::kMaxTextureCount), cache_.vertex_sampler_state);
+  memset(cache_.fragment_sampler_state, 0, sizeof(cache_.fragment_sampler_state));
+  context_->PSSetSamplers(0, static_cast<uint16>(GraphicsMaxDefine::kMaxTextureCount), cache_.fragment_sampler_state);
 }
 
 }

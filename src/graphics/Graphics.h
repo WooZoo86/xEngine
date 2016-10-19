@@ -6,7 +6,6 @@
 #include "GraphicsResourceManagerInterface.h"
 
 #include <EASTL/unique_ptr.h>
-#include <EASTL/hash_map.h>
 
 namespace xEngine {
 

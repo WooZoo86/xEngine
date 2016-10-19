@@ -13,7 +13,7 @@ namespace xEngine {
 #if X_OPENGL
 
 static const char *vertex_shader =
-    "#version 150 core\n"
+    "#version 410 core\n"
     "uniform mat4 uProjectionMatrix;\n"
     "in vec2 aPosition;\n"
     "in vec2 aTexcoord0;\n"
@@ -27,7 +27,7 @@ static const char *vertex_shader =
     "}\n";
 
 static const char *fragment_shader =
-    "#version 150 core\n"
+    "#version 410 core\n"
     "precision mediump float;\n"
     "uniform sampler2D uTexture;\n"
     "in vec2 Texcoord;\n"
@@ -40,7 +40,7 @@ static const char *fragment_shader =
 #elif X_D3D11
 
 static const char *vertex_shader = 
-    "float4x4 ProjectionMatrix;\n"
+    "float4x4 uProjectionMatrix;\n"
     "struct VS_INPUT\n"
     "{\n"
     "  float2 position : POSITION;\n"
@@ -56,7 +56,7 @@ static const char *vertex_shader =
     "VS_OUPUT main(VS_INPUT input)\n"
     "{\n"
     "  VS_OUPUT output;\n"
-    "  output.position = mul(ProjectionMatrix, float4(input.position.xy, 0.f, 1.f));\n"
+    "  output.position = mul(uProjectionMatrix, float4(input.position.xy, 0.f, 1.f));\n"
     "  output.color = input.color;\n"
     "  output.texcoord  = input.texcoord;\n"
     "  return output;\n"
@@ -175,8 +175,9 @@ void NuklearGUI::Finalize() {
   x_assert(Available());
   graphics_->resource_manager()->Destroy(shader_);
   graphics_->resource_manager()->Destroy(mesh_);
+  graphics_->resource_manager()->Destroy(pipeline_);
   for (auto &id : image_) {
-    graphics_->resource_manager()->Remove(id);
+    graphics_->resource_manager()->Destroy(id);
   }
   image_.clear();
   nk_font_atlas_clear(&font_atlas_);
@@ -204,7 +205,7 @@ void NuklearGUI::EndFrame() {
   graphics_->renderer()->ApplyPipeline(pipeline_);
   const struct nk_draw_command *cmd = nullptr;
   ResourceID current_texture = kInvalidResourceID;
-  int element_offset = 0;
+  auto element_offset = 0;
   nk_draw_foreach(cmd, &context_, &command) {
     auto texture = image_[cmd->texture.id];
     if (current_texture != texture) {

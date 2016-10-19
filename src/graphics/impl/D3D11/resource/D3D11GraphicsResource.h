@@ -11,6 +11,11 @@
 #include "resource/Resource.h"
 
 #include <D3D11.h>
+#include <D3Dcompiler.h>
+
+#include <EASTL/hash_map.h>
+#include <EASTL/string.h>
+#include <EASTL/tuple.h>
 
 namespace xEngine {
 
@@ -24,11 +29,35 @@ struct D3D11Shader : public Resource<ShaderConfig> {
 
   ID3D11PixelShader *fragment_shader{nullptr};
 
+  ID3D11ShaderReflection *vertex_reflection{nullptr};
+
+  ID3D11ShaderReflection *fragment_reflection{nullptr};
+
+  eastl::hash_map<eastl::string, eastl::tuple<ID3D11Buffer *, size_t>> vertex_uniform_blocks;
+
+  eastl::hash_map<eastl::string, eastl::tuple<ID3D11Buffer *, size_t>> fragment_uniform_blocks;
+
+  eastl::hash_map<eastl::string, uint32> vertex_texture_index;
+
+  eastl::hash_map<eastl::string, uint32> vertex_sampler_index;
+
+  eastl::hash_map<eastl::string, uint32> fragment_texture_index;
+
+  eastl::hash_map<eastl::string, uint32> fragment_sampler_index;
+
   virtual void Reset() override {
     vertex_blob = nullptr;
     fragment_blob = nullptr;
     vertex_shader = nullptr;
     fragment_shader = nullptr;
+    vertex_reflection = nullptr;
+    fragment_reflection = nullptr;
+    vertex_uniform_blocks.clear();
+    fragment_uniform_blocks.clear();
+    vertex_texture_index.clear();
+    vertex_sampler_index.clear();
+    fragment_texture_index.clear();
+    fragment_sampler_index.clear();
   }
 
 };

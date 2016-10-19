@@ -37,11 +37,9 @@ class D3D11Renderer: public RendererInterface {
 
    virtual void UpdateShaderUniform(ResourceID id, eastl::string name, UniformFormat format, const void *buffer) override;
 
+   virtual void UpdateShaderUniformBlock(ResourceID id, eastl::string name, const void *buffer) override;
+
    virtual void ResetShader() override;
-
-   virtual void ApplyTexture(ResourceID id, int32 index) override;
-
-   virtual void ResetTexture() override;
 
    virtual void ApplyMesh(ResourceID id) override;
 
@@ -60,6 +58,14 @@ class D3D11Renderer: public RendererInterface {
    virtual void Reset() override;
 
  private:
+   void ApplyTexture(const D3D11Texture &texture, int32 index, GraphicsPipelineStage stage);
+
+   void ResetTexture();
+
+   void ApplySamplerState(const D3D11Texture &texture, int32 index, GraphicsPipelineStage stage);
+
+   void ResetSamplerState();
+
    WindowInterface *window() {
      static WindowInterface *pointer = nullptr;
      if (pointer == nullptr) {
