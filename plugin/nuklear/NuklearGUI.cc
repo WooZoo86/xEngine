@@ -63,8 +63,8 @@ static const char *vertex_shader =
     "}\n";
 
 const char *fragment_shader =
-    "sampler sampler0;\n"
-    "Texture2D texture0;\n"
+    "Texture2D uTexture;\n"
+    "SamplerState uTexture_sampler;\n"
     "struct PS_INPUT\n"
     "{\n"
     "  float4 position : SV_POSITION;\n"
@@ -73,7 +73,7 @@ const char *fragment_shader =
     "};\n"
     "float4 main(PS_INPUT input) : SV_Target\n"
     "{\n"
-    "  return input.color * texture0.Sample(sampler0, input.texcoord);\n"
+    "  return input.color * uTexture.Sample(uTexture_sampler, input.texcoord);\n"
     "}\n";
 
 #endif
@@ -210,7 +210,7 @@ void NuklearGUI::EndFrame() {
     auto texture = image_[cmd->texture.id];
     if (current_texture != texture) {
       current_texture = texture;
-      graphics_->renderer()->ApplyTexture(current_texture, 0);
+      graphics_->renderer()->UpdateShaderUniform(shader_, "uTexture", UniformFormat::kTexture, &current_texture);
     }
     graphics_->renderer()->ApplyScissor(static_cast<int32>(cmd->clip_rect.x * scale_x),
                                         static_cast<int32>((window_->config().height - (cmd->clip_rect.y + cmd->clip_rect.h)) * scale_y),

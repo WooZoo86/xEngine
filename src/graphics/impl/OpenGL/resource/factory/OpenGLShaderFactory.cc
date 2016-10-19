@@ -100,6 +100,11 @@ void OpenGLShaderFactory::Create(OpenGLShader &resource) {
   DeleteShader(fragment_shader);
 
   if (program != 0) {
+    GLint current_program;
+    glGetIntegerv(GL_CURRENT_PROGRAM, &current_program);
+
+    glUseProgram(program);
+
     int32 active_uniform_count, max_uniform_name_length;
 
     glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &active_uniform_count);
@@ -107,6 +112,7 @@ void OpenGLShaderFactory::Create(OpenGLShader &resource) {
 
     auto uniform_name = static_cast<char *>(eastl::GetDefaultAllocator()->allocate(static_cast<size_t>(max_uniform_name_length)));
 
+    auto texture_location = 0;
     for (auto uniform_index = 0; uniform_index < active_uniform_count; ++uniform_index) {
       GLenum type;
       GLsizei size;
@@ -114,9 +120,16 @@ void OpenGLShaderFactory::Create(OpenGLShader &resource) {
       glGetActiveUniform(program, static_cast<GLuint>(uniform_index), max_uniform_name_length, &actual_uniform_name_length, &size, &type, uniform_name);
       auto location = static_cast<GLuint>(glGetUniformLocation(program, uniform_name));
       resource.uniform_location.insert(eastl::make_pair(eastl::string(uniform_name, static_cast<size_t>(actual_uniform_name_length)), location));
+      if (type == GL_SAMPLER_2D) {
+        glUniform1i(location, texture_location);
+        resource.texture_location.insert(eastl::make_pair(eastl::string(uniform_name, static_cast<size_t>(actual_uniform_name_length)), texture_location));
+        ++texture_location;
+      }
     }
 
     eastl::GetDefaultAllocator()->deallocate(uniform_name, static_cast<size_t>(max_uniform_name_length));
+
+    glUseProgram(static_cast<GLuint>(current_program));
   }
 
   resource.config().vertex = nullptr;

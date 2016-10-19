@@ -40,11 +40,9 @@ class OpenGLRenderer: public RendererInterface {
 
   virtual void UpdateShaderUniform(ResourceID id, eastl::string name, UniformFormat format, const void *buffer) override;
 
+  virtual void UpdateShaderUniformBlock(ResourceID id, eastl::string name, const void *buffer) override;
+
   virtual void ResetShader() override;
-
-  virtual void ApplyTexture(ResourceID id, int32 index) override;
-
-  virtual void ResetTexture() override;
 
   virtual void ApplyMesh(ResourceID id) override;
 
@@ -63,6 +61,10 @@ class OpenGLRenderer: public RendererInterface {
   virtual void Reset() override;
 
  private:
+  void ApplyTexture(ResourceID id, int32 index);
+
+  void ResetTexture();
+
   void ApplyBlendState(const BlendState &blend_state);
 
   void ResetBlendState();

@@ -14,6 +14,7 @@
 
 #include <EASTL/hash_map.h>
 #include <EASTL/string.h>
+#include <EASTL/tuple.h>
 
 namespace xEngine {
 
@@ -23,9 +24,15 @@ struct OpenGLShader: public Resource<ShaderConfig> {
 
   eastl::hash_map<eastl::string, GLuint> uniform_location;
 
+  eastl::hash_map<eastl::string, eastl::tuple<GLuint, GLuint, GLsizei>> uniform_block_info;
+
+  eastl::hash_map<eastl::string, GLuint> texture_location;
+
   virtual void Reset() override {
     program_id = 0;
     uniform_location.clear();
+    uniform_block_info.clear();
+    texture_location.clear();
   }
 
 };

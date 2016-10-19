@@ -59,7 +59,7 @@ static const char *vertex_shader =
 
 static const char *fragment_shader =
   "Texture2D uTexture;\n"
-  "sampler uTexture_sampler;\n"
+  "SamplerState uTexture_sampler;\n"
   "struct PS_INPUT\n"
   "{\n"
   "    float4 Position: SV_POSITION;\n"
