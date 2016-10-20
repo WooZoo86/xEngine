@@ -369,7 +369,7 @@ void OpenGLRenderer::UpdateUniformBlockData(ResourceID id, size_t offset, size_t
 
       glBindBuffer(GL_UNIFORM_BUFFER, uniform_buffer.uniform_buffer_id);
 
-      auto source = glMapBufferRange(GL_UNIFORM_BUFFER, offset, length, GL_MAP_READ_BIT);
+      auto source = glMapBufferRange(GL_UNIFORM_BUFFER, offset, length, GL_MAP_WRITE_BIT);
       memcpy(source, buffer, length);
       glUnmapBuffer(GL_UNIFORM_BUFFER);
 
@@ -434,9 +434,11 @@ void OpenGLRenderer::UpdateMesh(ResourceID id,
       if (mesh.config().vertex_count * mesh.config().layout.size < vertex_offset + vertex_size) {
         Log::GetInstance().Error("UpdateMesh failed, vertex size: %d, but want offset: %d, length: %d\n",
                                  mesh.config().vertex_count * mesh.config().layout.size, vertex_offset, vertex_size);
-        return;
+      } else {
+        auto vertex_source = glMapBufferRange(GL_ARRAY_BUFFER, vertex_offset, vertex_size, GL_MAP_WRITE_BIT);
+        memcpy(vertex_source, vertex_buffer, vertex_size);
+        glUnmapBuffer(GL_ARRAY_BUFFER);
       }
-      glBufferSubData(GL_ARRAY_BUFFER, vertex_offset, vertex_size, vertex_buffer);
     }
     if (mesh.vertex_array_id != cache_.vertex_array) {
       glBindVertexArray(mesh.vertex_array_id);
@@ -449,9 +451,11 @@ void OpenGLRenderer::UpdateMesh(ResourceID id,
       if (mesh.config().index_count * SizeOfIndexFormat(mesh.config().index_type) < index_offset + index_size) {
         Log::GetInstance().Error("UpdateMesh failed, index size: %d, but want offset: %d, length: %d\n",
                                  mesh.config().index_count * SizeOfIndexFormat(mesh.config().index_type), index_offset, index_size);
-        return;
+      } else {
+        auto index_source = glMapBufferRange(GL_ELEMENT_ARRAY_BUFFER, index_offset, index_size, GL_MAP_WRITE_BIT);
+        memcpy(index_source, index_buffer, index_size);
+        glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
       }
-      glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, index_offset, index_size, index_buffer);
     }
   }
 }

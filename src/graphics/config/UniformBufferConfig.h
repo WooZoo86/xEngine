@@ -35,6 +35,8 @@ struct UniformBufferConfig {
 
   size_t size{0};
 
+  BufferUsage usage{BufferUsage::kStream};
+
 };
 
 } // namespace xEngine
