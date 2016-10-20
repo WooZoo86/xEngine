@@ -287,23 +287,23 @@ void OpenGLRenderer::UpdateShaderUniformData(ResourceID shader_id, const eastl::
       } else if (info.type == GL_FLOAT_MAT4x3) {
         glUniformMatrix4x3fv(info.location, 1, GL_FALSE, glm::value_ptr(glm::mat4x3(value)));
       } else if (info.type == GL_DOUBLE_MAT2) {
-        glUniformMatrix2dv(info.location, 1, GL_FALSE, glm::value_ptr(value));
+        glUniformMatrix2dv(info.location, 1, GL_FALSE, glm::value_ptr(glm::highp_dmat2(value)));
       } else if (info.type == GL_DOUBLE_MAT2x3) {
-        glUniformMatrix2x3dv(info.location, 1, GL_FALSE, glm::value_ptr(value));
+        glUniformMatrix2x3dv(info.location, 1, GL_FALSE, glm::value_ptr(glm::highp_dmat2x3(value)));
       } else if (info.type == GL_DOUBLE_MAT2x4) {
-        glUniformMatrix2x4dv(info.location, 1, GL_FALSE, glm::value_ptr(value));
+        glUniformMatrix2x4dv(info.location, 1, GL_FALSE, glm::value_ptr(glm::highp_dmat2x4(value)));
       } else if (info.type == GL_DOUBLE_MAT3) {
-        glUniformMatrix3dv(info.location, 1, GL_FALSE, glm::value_ptr(value));
+        glUniformMatrix3dv(info.location, 1, GL_FALSE, glm::value_ptr(glm::highp_dmat3(value)));
       } else if (info.type == GL_DOUBLE_MAT3x2) {
-        glUniformMatrix3x2dv(info.location, 1, GL_FALSE, glm::value_ptr(value));
+        glUniformMatrix3x2dv(info.location, 1, GL_FALSE, glm::value_ptr(glm::highp_dmat3x2(value)));
       } else if (info.type == GL_DOUBLE_MAT3x4) {
-        glUniformMatrix3x4dv(info.location, 1, GL_FALSE, glm::value_ptr(value));
+        glUniformMatrix3x4dv(info.location, 1, GL_FALSE, glm::value_ptr(glm::highp_dmat3x4(value)));
       } else if (info.type == GL_DOUBLE_MAT4) {
         glUniformMatrix4dv(info.location, 1, GL_FALSE, glm::value_ptr(value));
       } else if (info.type == GL_DOUBLE_MAT4x2) {
-        glUniformMatrix4x2dv(info.location, 1, GL_FALSE, glm::value_ptr(value));
+        glUniformMatrix4x2dv(info.location, 1, GL_FALSE, glm::value_ptr(glm::highp_dmat4x2(value)));
       } else if (info.type == GL_DOUBLE_MAT4x3) {
-        glUniformMatrix4x3dv(info.location, 1, GL_FALSE, glm::value_ptr(value));
+        glUniformMatrix4x3dv(info.location, 1, GL_FALSE, glm::value_ptr(glm::highp_dmat4x3(value)));
       } else {
         Log::GetInstance().Error("uniform %s should not be glm::f64vec4\n", name.c_str());
       }
