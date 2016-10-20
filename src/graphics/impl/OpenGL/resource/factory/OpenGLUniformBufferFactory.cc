@@ -19,10 +19,10 @@ void OpenGLUniformBufferFactory::Create(OpenGLUniformBuffer &resource) {
   GLint current_uniform_buffer;
   glGetIntegerv(GL_UNIFORM_BUFFER_BINDING, &current_uniform_buffer);
 
-  glBindBuffer(GL_UNIFORM_BLOCK, uniform_buffer_id);
-  glBufferData(GL_UNIFORM_BLOCK, resource.config().size, nullptr, GL_DYNAMIC_DRAW);
+  glBindBuffer(GL_UNIFORM_BUFFER, uniform_buffer_id);
+  glBufferData(GL_UNIFORM_BUFFER, resource.config().size, nullptr, GL_DYNAMIC_DRAW);
 
-  glBindBuffer(GL_UNIFORM_BLOCK, static_cast<GLuint>(current_uniform_buffer));
+  glBindBuffer(GL_UNIFORM_BUFFER, static_cast<GLuint>(current_uniform_buffer));
 
   resource.uniform_buffer_id = uniform_buffer_id;
 

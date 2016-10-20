@@ -50,6 +50,8 @@ class RendererInterface {
 
   virtual void UpdateShaderUniformBlock(ResourceID shader_id, const eastl::string &name, ResourceID uniform_buffer_id) = 0;
 
+  virtual void UpdateUniformBlockData(ResourceID id, size_t offset, size_t length, const void *buffer) = 0;
+
   virtual void ResetShader() = 0;
 
   virtual void ApplySampler(ResourceID id, uint8 index) = 0;

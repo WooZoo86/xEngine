@@ -347,10 +347,33 @@ void OpenGLRenderer::UpdateShaderUniformBlock(ResourceID shader_id, const eastl:
     if (uniform_buffer.status() == ResourceStatus::kCompleted) {
       auto pair = shader.uniform_block_info.find(name);
       if (pair != shader.uniform_block_info.end()) {
-        glBindBufferBase(GL_UNIFORM_BUFFER, pair->second.location, uniform_buffer.uniform_buffer_id);
+        if (cache_.uniform_buffer[pair->second.location] != uniform_buffer.uniform_buffer_id) {
+          glBindBufferBase(GL_UNIFORM_BUFFER, pair->second.location, uniform_buffer.uniform_buffer_id);
+          cache_.uniform_buffer[pair->second.location] = uniform_buffer.uniform_buffer_id;
+        }
       } else {
         Log::GetInstance().Error("cannot find uniform block: %s\n", name.c_str());
       }
+    }
+  }
+}
+
+void OpenGLRenderer::UpdateUniformBlockData(ResourceID id, size_t offset, size_t length, const void *buffer) {
+  auto &uniform_buffer = resource_manager()->uniform_buffer_pool_.Find(id);
+  if (uniform_buffer.status() == ResourceStatus::kCompleted) {
+    if (uniform_buffer.config().size < offset + length) {
+      Log::GetInstance().Error("uniform buffer size is smaller then offset + length\n");
+    } else {
+      GLint current_uniform_buffer;
+      glGetIntegerv(GL_UNIFORM_BUFFER_BINDING, &current_uniform_buffer);
+
+      glBindBuffer(GL_UNIFORM_BUFFER, uniform_buffer.uniform_buffer_id);
+
+      auto source = glMapBufferRange(GL_UNIFORM_BUFFER, offset, length, GL_MAP_READ_BIT);
+      memcpy(source, buffer, length);
+      glUnmapBuffer(GL_UNIFORM_BUFFER);
+
+      glBindBuffer(GL_UNIFORM_BUFFER, static_cast<GLuint>(current_uniform_buffer));
     }
   }
 }
@@ -455,6 +478,7 @@ void OpenGLRenderer::Reset() {
   ResetTexture();
   ResetMesh();
   ResetPipeline();
+  ResetSampler();
 }
 
 void OpenGLRenderer::ApplyTexture(ResourceID id, int32 index) {
