@@ -7,6 +7,8 @@
 #include "graphics/config/TextureConfig.h"
 #include "graphics/config/MeshConfig.h"
 #include "graphics/config/PipelineConfig.h"
+#include "graphics/config/SamplerConfig.h"
+#include "graphics/config/UniformBufferConfig.h"
 
 #include "resource/Resource.h"
 
@@ -20,19 +22,29 @@ namespace xEngine {
 
 struct OpenGLShader: public Resource<ShaderConfig> {
 
+  struct UniformInfo {
+    GLuint location{0};
+    GLenum type{GL_INVALID_ENUM};
+    GLsizei size{0};
+    uint8 texture_2d_index{0};
+    uint8 texture_cube_index{0};
+  };
+
+  struct UniformBlockInfo {
+    GLuint location{0};
+    GLsizei size{0};
+  };
+
   GLuint program_id{0};
 
-  eastl::hash_map<eastl::string, GLuint> uniform_location;
+  eastl::hash_map<eastl::string, UniformInfo> uniform_info;
 
-  eastl::hash_map<eastl::string, eastl::tuple<GLuint, GLuint, GLsizei>> uniform_block_info;
-
-  eastl::hash_map<eastl::string, GLuint> texture_location;
+  eastl::hash_map<eastl::string, UniformBlockInfo> uniform_block_info;
 
   virtual void Reset() override {
     program_id = 0;
-    uniform_location.clear();
+    uniform_info.clear();
     uniform_block_info.clear();
-    texture_location.clear();
   }
 
 };
@@ -63,10 +75,30 @@ struct OpenGLMesh: public Resource<MeshConfig> {
 
 };
 
-struct OpenGLPipeline : public Resource<PipelineConfig> {
+struct OpenGLPipeline: public Resource<PipelineConfig> {
 
   virtual void Reset() override {
 
+  }
+
+};
+
+struct OpenGLSampler: public Resource<SamplerConfig> {
+
+  GLuint sampler_id{0};
+
+  virtual void Reset() override {
+    sampler_id = 0;
+  }
+
+};
+
+struct OpenGLUniformBuffer: public Resource<UniformBufferConfig> {
+
+  GLuint uniform_buffer_id{0};
+
+  virtual void Reset() override {
+    uniform_buffer_id = 0;
   }
 
 };

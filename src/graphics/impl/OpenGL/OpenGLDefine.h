@@ -40,14 +40,17 @@ struct OpenGLRendererCache {
   GLuint vertex_array{0};
   IndexFormat index_type{IndexFormat::kNone};
 
-  OpenGLShader shader;
+  GLuint program_id;
 
   GLuint texture_2d[static_cast<uint16>(GraphicsMaxDefine::kMaxTextureCount)];
   GLuint texture_cube[static_cast<uint16>(GraphicsMaxDefine::kMaxTextureCount)];
 
+  GLuint sampler_id[static_cast<uint16>(GraphicsMaxDefine::kMaxSamplerCount)];
+
   OpenGLRendererCache() {
     memset(texture_2d, 0, sizeof(texture_2d));
     memset(texture_cube, 0, sizeof(texture_cube));
+    memset(sampler_id, 0, sizeof(sampler_id));
   }
 };
 

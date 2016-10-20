@@ -27,6 +27,10 @@ struct GraphicsConfig {
 
   uint16 pipeline_pool_size{256};
 
+  uint16 sampler_pool_size{128};
+
+  uint16 uniform_buffer_size{128};
+
 };
 
 inline GraphicsConfig GraphicsConfig::ForWindow(ResourceID id) {

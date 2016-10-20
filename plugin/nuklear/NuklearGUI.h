@@ -58,6 +58,7 @@ class NuklearGUI {
   ResourceID shader_{kInvalidResourceID};
   ResourceID mesh_{kInvalidResourceID};
   ResourceID pipeline_{kInvalidResourceID};
+  ResourceID sampler_{kInvalidResourceID};
 };
 
 } // namespace xEngine

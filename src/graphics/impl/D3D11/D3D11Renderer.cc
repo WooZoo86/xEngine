@@ -10,8 +10,6 @@
 
 #include "window/Window.h"
 
-#include <gtc/type_ptr.hpp>
-
 #include <Windows.h>
 
 namespace xEngine {

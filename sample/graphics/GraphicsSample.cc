@@ -136,6 +136,7 @@ class GraphicsSample : public Application {
       config.color_format = PixelFormat::RGBA8;
       config.data[0][0] = data;
       texture_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(config);
+      sampler_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(SamplerConfig());
     }
   }
 
@@ -175,7 +176,8 @@ class GraphicsSample : public Application {
       renderer->ApplyShader(shader_);
       renderer->ApplyMesh(mesh_);
       renderer->ApplyPipeline(pipeline_);
-      renderer->UpdateShaderUniform(shader_, "uTexture", UniformFormat::kTexture, &texture_);
+      renderer->ApplySampler(sampler_, 0);
+      renderer->UpdateShaderUniformTexture(shader_, "uTexture", texture_);
       renderer->DrawTopology(VertexTopology::kTriangles, 0, 6);
       renderer->Render();
     }
@@ -184,6 +186,7 @@ class GraphicsSample : public Application {
  private:
   ResourceID shader_{kInvalidResourceID};
   ResourceID texture_{kInvalidResourceID};
+  ResourceID sampler_{kInvalidResourceID};
   ResourceID mesh_{kInvalidResourceID};
   ResourceID pipeline_{kInvalidResourceID};
   ResourceID window_id_{kInvalidResourceID};

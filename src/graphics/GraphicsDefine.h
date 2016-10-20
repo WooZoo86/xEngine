@@ -6,6 +6,7 @@
 #include "resource/Resource.h"
 
 #include <glm.hpp>
+#include <gtc/type_ptr.hpp>
 
 namespace xEngine {
 
@@ -19,6 +20,7 @@ enum class GraphicsMaxDefine: uint16 {
   kMaxCubeTextureFaceCount = 6,
   kMaxTextureMipMapCount = 12,
   kMaxUniformBlockCount = 16,
+  kMaxSamplerCount = 48,
 };
 
 enum class GraphicsType: uint8 {
@@ -228,6 +230,7 @@ static size_t SizeOfVertexElementFormat(VertexElementFormat format) {
 }
 
 enum class UniformFormat: uint8 {
+  kInvalid,
   kInt,
   kBool,
   kVector1,

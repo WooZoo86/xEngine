@@ -22,23 +22,6 @@ void OpenGLTextureFactory::Create(OpenGLTexture &resource) {
   auto layout = is_compressed ? 0 : GLEnumForPixelFormatAsLayout(config.color_format);
   auto format = GLEnumForPixelFormatAsFormat(config.color_format);
 
-  if (config.mipmap_count != 1 &&
-      (IsTextureFilterModeUseMipmap(config.filter_mode_min) ||
-       IsTextureFilterModeUseMipmap(config.filter_mode_mag))) {
-    Log::GetInstance().Error("[OpenGLTextureFactory::Create] error with mipmap\n");
-    resource.Failed();
-    return;
-  }
-
-  if (config.type == TextureType::kTextureCube &&
-      !(config.wrap_mod_s == TextureWrapMode::kClampToEdge &&
-        config.wrap_mod_t == TextureWrapMode::kClampToEdge &&
-        config.wrap_mod_r == TextureWrapMode::kClampToEdge)) {
-    Log::GetInstance().Error("[OpenGLTextureFactory::Create] error with wrap mod\n");
-    resource.Failed();
-    return;
-  }
-
   for (auto i = 0; i < face_count; ++i) {
     for (auto j = 0; j < config.mipmap_count; ++j) {
       auto width = config.width >> j;
@@ -65,13 +48,6 @@ void OpenGLTextureFactory::Create(OpenGLTexture &resource) {
 
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(target, texture_id);
-
-  glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GLEnumForTextureFilterMode(config.filter_mode_min));
-  glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GLEnumForTextureFilterMode(config.filter_mode_mag));
-
-  glTexParameteri(target, GL_TEXTURE_WRAP_S, GLEnumForTextureWrapMode(config.wrap_mod_s));
-  glTexParameteri(target, GL_TEXTURE_WRAP_T, GLEnumForTextureWrapMode(config.wrap_mod_t));
-  glTexParameteri(target, GL_TEXTURE_WRAP_R, GLEnumForTextureWrapMode(config.wrap_mod_r));
 
   for (auto face_index = 0; face_index < face_count; ++face_index) {
     auto real_target = target;

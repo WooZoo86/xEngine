@@ -38,9 +38,23 @@ class OpenGLRenderer: public RendererInterface {
 
   virtual void ApplyShader(ResourceID id) override;
 
-  virtual void UpdateShaderUniform(ResourceID id, eastl::string name, UniformFormat format, const void *buffer) override;
+  virtual void UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, uint32 value) override;
 
-  virtual void UpdateShaderUniformBlock(ResourceID id, eastl::string name, const void *buffer) override;
+  virtual void UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, float64 value) override;
+
+  virtual void UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, const glm::u32vec4 &value) override;
+
+  virtual void UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, const glm::f64vec4 &value) override;
+
+  virtual void UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, const glm::highp_dmat4x4 &value) override;
+
+  virtual void UpdateShaderUniformTexture(ResourceID shader_id, const eastl::string &name, ResourceID texture_id) override;
+
+  virtual void UpdateShaderUniformBlock(ResourceID shader_id, const eastl::string &name, ResourceID uniform_buffer_id) override;
+
+  virtual void ApplySampler(ResourceID id, uint8 index) override;
+
+  virtual void ResetSampler() override;
 
   virtual void ResetShader() override;
 

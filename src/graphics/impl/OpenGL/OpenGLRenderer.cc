@@ -143,57 +143,29 @@ void OpenGLRenderer::ResetPipeline() {
 void OpenGLRenderer::ApplyShader(ResourceID id) {
   auto &shader = resource_manager()->shader_pool_.Find(id);
   if (shader.status() == ResourceStatus::kCompleted) {
-    if (shader.program_id != cache_.shader.program_id) {
+    if (shader.program_id != cache_.program_id) {
       glUseProgram(shader.program_id);
-      cache_.shader = shader;
+      cache_.program_id = shader.program_id;
     }
   }
 }
 
-void OpenGLRenderer::UpdateShaderUniform(ResourceID id, eastl::string name, UniformFormat format, const void *buffer) {
-  auto &shader = resource_manager()->shader_pool_.Find(id);
+void OpenGLRenderer::UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, uint32 value) {
+  auto &shader = resource_manager()->shader_pool_.Find(shader_id);
   if (shader.status() == ResourceStatus::kCompleted) {
-    if (shader.program_id != cache_.shader.program_id) {
+    if (shader.program_id != cache_.program_id) {
       glUseProgram(shader.program_id);
-      cache_.shader = shader;
+      cache_.program_id = shader.program_id;
     }
-    auto pair = shader.uniform_location.find(name);
-    if (pair != shader.uniform_location.end()) {
-      switch (format) {
-        case UniformFormat::kInt:
-        case UniformFormat::kBool:
-          glUniform1iv(pair->second, 1, reinterpret_cast<const GLint *>(buffer));
-          break;
-        case UniformFormat::kVector1:
-          glUniform1fv(pair->second, 1, reinterpret_cast<const GLfloat *>(buffer));
-          break;
-        case UniformFormat::kVector2:
-          glUniform2fv(pair->second, 1, reinterpret_cast<const GLfloat *>(buffer));
-          break;
-        case UniformFormat::kVector3:
-          glUniform3fv(pair->second, 1, reinterpret_cast<const GLfloat *>(buffer));
-          break;
-        case UniformFormat::kVector4:
-          glUniform4fv(pair->second, 1, reinterpret_cast<const GLfloat *>(buffer));
-          break;
-        case UniformFormat::kMatrix2:
-          glUniformMatrix2fv(pair->second, 1, GL_FALSE, reinterpret_cast<const GLfloat *>(buffer));
-          break;
-        case UniformFormat::kMatrix3:
-          glUniformMatrix3fv(pair->second, 1, GL_FALSE, reinterpret_cast<const GLfloat *>(buffer));
-          break;
-        case UniformFormat::kMatrix4:
-          glUniformMatrix4fv(pair->second, 1, GL_FALSE, reinterpret_cast<const GLfloat *>(buffer));
-          break;
-        case UniformFormat::kTexture: {
-          auto texture_pair = shader.texture_location.find(name.c_str());
-          if (texture_pair != shader.texture_location.end()) {
-            ApplyTexture(*reinterpret_cast<const ResourceID *>(buffer), texture_pair->second);
-          }
-          break;
-        }
-        default:
-          break;
+    auto pair = shader.uniform_info.find(name);
+    if (pair != shader.uniform_info.end()) {
+      auto &info = pair->second;
+      if (info.type == GL_INT || info.type == GL_BOOL) {
+        glUniform1i(info.location, value);
+      } else if (info.type == GL_UNSIGNED_INT) {
+        glUniform1ui(info.location, value);
+      } else {
+        Log::GetInstance().Error("uniform %s should not be uint32\n", name.c_str());
       }
     } else {
       Log::GetInstance().Error("cannot find uniform: %s\n", name.c_str());
@@ -201,12 +173,207 @@ void OpenGLRenderer::UpdateShaderUniform(ResourceID id, eastl::string name, Unif
   }
 }
 
-void OpenGLRenderer::UpdateShaderUniformBlock(ResourceID id, eastl::string name, const void *buffer) {
-  // TODO
+void OpenGLRenderer::UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, float64 value) {
+  auto &shader = resource_manager()->shader_pool_.Find(shader_id);
+  if (shader.status() == ResourceStatus::kCompleted) {
+    if (shader.program_id != cache_.program_id) {
+      glUseProgram(shader.program_id);
+      cache_.program_id = shader.program_id;
+    }
+    auto pair = shader.uniform_info.find(name);
+    if (pair != shader.uniform_info.end()) {
+      auto &info = pair->second;
+      if (info.type == GL_FLOAT) {
+        glUniform1f(info.location, static_cast<GLfloat>(value));
+      } else if (info.type == GL_DOUBLE) {
+        glUniform1d(info.location, value);
+      } else {
+        Log::GetInstance().Error("uniform %s should not be float64\n", name.c_str());
+      }
+    } else {
+      Log::GetInstance().Error("cannot find uniform: %s\n", name.c_str());
+    }
+  }
+}
+
+void OpenGLRenderer::UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, const glm::u32vec4 &value) {
+  auto &shader = resource_manager()->shader_pool_.Find(shader_id);
+  if (shader.status() == ResourceStatus::kCompleted) {
+    if (shader.program_id != cache_.program_id) {
+      glUseProgram(shader.program_id);
+      cache_.program_id = shader.program_id;
+    }
+    auto pair = shader.uniform_info.find(name);
+    if (pair != shader.uniform_info.end()) {
+      auto &info = pair->second;
+      if (info.type == GL_INT_VEC2) {
+        glUniform2iv(info.location, 1, glm::value_ptr(glm::ivec2(value)));
+      } else if (info.type == GL_INT_VEC3) {
+        glUniform3iv(info.location, 1, glm::value_ptr(glm::ivec3(value)));
+      } else if (info.type == GL_INT_VEC4) {
+        glUniform4iv(info.location, 1, glm::value_ptr(glm::ivec4(value)));
+      } else if (info.type == GL_UNSIGNED_INT_VEC2) {
+        glUniform2uiv(info.location, 1, glm::value_ptr(value));
+      } else if (info.type == GL_UNSIGNED_INT_VEC3) {
+        glUniform3uiv(info.location, 1, glm::value_ptr(value));
+      } else if (info.type == GL_UNSIGNED_INT_VEC4) {
+        glUniform4uiv(info.location, 1, glm::value_ptr(value));
+      } else {
+        Log::GetInstance().Error("uniform %s should not be glm::u32vec4\n", name.c_str());
+      }
+    } else {
+      Log::GetInstance().Error("cannot find uniform: %s\n", name.c_str());
+    }
+  }
+}
+
+void OpenGLRenderer::UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, const glm::f64vec4 &value) {
+  auto &shader = resource_manager()->shader_pool_.Find(shader_id);
+  if (shader.status() == ResourceStatus::kCompleted) {
+    if (shader.program_id != cache_.program_id) {
+      glUseProgram(shader.program_id);
+      cache_.program_id = shader.program_id;
+    }
+    auto pair = shader.uniform_info.find(name);
+    if (pair != shader.uniform_info.end()) {
+      auto &info = pair->second;
+      if (info.type == GL_FLOAT_VEC2) {
+        glUniform2fv(info.location, 1, glm::value_ptr(glm::vec2(value)));
+      } else if (info.type == GL_FLOAT_VEC3) {
+        glUniform3fv(info.location, 1, glm::value_ptr(glm::vec3(value)));
+      } else if (info.type == GL_FLOAT_VEC4) {
+        glUniform4fv(info.location, 1, glm::value_ptr(glm::vec4(value)));
+      } else if (info.type == GL_DOUBLE_VEC2) {
+        glUniform2dv(info.location, 1, glm::value_ptr(value));
+      } else if (info.type == GL_DOUBLE_VEC3) {
+        glUniform3dv(info.location, 1, glm::value_ptr(value));
+      } else if (info.type == GL_DOUBLE_VEC4) {
+        glUniform4dv(info.location, 1, glm::value_ptr(value));
+      } else {
+        Log::GetInstance().Error("uniform %s should not be glm::f64vec4\n", name.c_str());
+      }
+    } else {
+      Log::GetInstance().Error("cannot find uniform: %s\n", name.c_str());
+    }
+  }
+}
+
+void OpenGLRenderer::UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, const glm::highp_dmat4x4 &value) {
+  auto &shader = resource_manager()->shader_pool_.Find(shader_id);
+  if (shader.status() == ResourceStatus::kCompleted) {
+    if (shader.program_id != cache_.program_id) {
+      glUseProgram(shader.program_id);
+      cache_.program_id = shader.program_id;
+    }
+    auto pair = shader.uniform_info.find(name);
+    if (pair != shader.uniform_info.end()) {
+      auto &info = pair->second;
+      if (info.type == GL_FLOAT_MAT2) {
+        glUniformMatrix2fv(info.location, 1, GL_FALSE, glm::value_ptr(glm::mat2(value)));
+      } else if (info.type == GL_FLOAT_MAT2x3) {
+        glUniformMatrix2x3fv(info.location, 1, GL_FALSE, glm::value_ptr(glm::mat2x3(value)));
+      } else if (info.type == GL_FLOAT_MAT2x4) {
+        glUniformMatrix2x4fv(info.location, 1, GL_FALSE, glm::value_ptr(glm::mat2x4(value)));
+      } else if (info.type == GL_FLOAT_MAT3) {
+        glUniformMatrix3fv(info.location, 1, GL_FALSE, glm::value_ptr(glm::mat3(value)));
+      } else if (info.type == GL_FLOAT_MAT3x2) {
+        glUniformMatrix3x2fv(info.location, 1, GL_FALSE, glm::value_ptr(glm::mat3x2(value)));
+      } else if (info.type == GL_FLOAT_MAT3x4) {
+        glUniformMatrix3x4fv(info.location, 1, GL_FALSE, glm::value_ptr(glm::mat3x4(value)));
+      } else if (info.type == GL_FLOAT_MAT4) {
+        glUniformMatrix4fv(info.location, 1, GL_FALSE, glm::value_ptr(glm::mat4(value)));
+      } else if (info.type == GL_FLOAT_MAT4x2) {
+        glUniformMatrix4x2fv(info.location, 1, GL_FALSE, glm::value_ptr(glm::mat4x2(value)));
+      } else if (info.type == GL_FLOAT_MAT4x3) {
+        glUniformMatrix4x3fv(info.location, 1, GL_FALSE, glm::value_ptr(glm::mat4x3(value)));
+      } else if (info.type == GL_DOUBLE_MAT2) {
+        glUniformMatrix2dv(info.location, 1, GL_FALSE, glm::value_ptr(value));
+      } else if (info.type == GL_DOUBLE_MAT2x3) {
+        glUniformMatrix2x3dv(info.location, 1, GL_FALSE, glm::value_ptr(value));
+      } else if (info.type == GL_DOUBLE_MAT2x4) {
+        glUniformMatrix2x4dv(info.location, 1, GL_FALSE, glm::value_ptr(value));
+      } else if (info.type == GL_DOUBLE_MAT3) {
+        glUniformMatrix3dv(info.location, 1, GL_FALSE, glm::value_ptr(value));
+      } else if (info.type == GL_DOUBLE_MAT3x2) {
+        glUniformMatrix3x2dv(info.location, 1, GL_FALSE, glm::value_ptr(value));
+      } else if (info.type == GL_DOUBLE_MAT3x4) {
+        glUniformMatrix3x4dv(info.location, 1, GL_FALSE, glm::value_ptr(value));
+      } else if (info.type == GL_DOUBLE_MAT4) {
+        glUniformMatrix4dv(info.location, 1, GL_FALSE, glm::value_ptr(value));
+      } else if (info.type == GL_DOUBLE_MAT4x2) {
+        glUniformMatrix4x2dv(info.location, 1, GL_FALSE, glm::value_ptr(value));
+      } else if (info.type == GL_DOUBLE_MAT4x3) {
+        glUniformMatrix4x3dv(info.location, 1, GL_FALSE, glm::value_ptr(value));
+      } else {
+        Log::GetInstance().Error("uniform %s should not be glm::f64vec4\n", name.c_str());
+      }
+    } else {
+      Log::GetInstance().Error("cannot find uniform: %s\n", name.c_str());
+    }
+  }
+}
+
+void OpenGLRenderer::UpdateShaderUniformTexture(ResourceID shader_id, const eastl::string &name, ResourceID texture_id) {
+  auto &shader = resource_manager()->shader_pool_.Find(shader_id);
+  if (shader.status() == ResourceStatus::kCompleted) {
+    if (shader.program_id != cache_.program_id) {
+      glUseProgram(shader.program_id);
+      cache_.program_id = shader.program_id;
+    }
+    auto pair = shader.uniform_info.find(name);
+    if (pair != shader.uniform_info.end()) {
+      auto &info = pair->second;
+      if (info.type == GL_SAMPLER_2D) {
+        ApplyTexture(texture_id, info.texture_2d_index);
+      } else if (info.type == GL_SAMPLER_CUBE) {
+        ApplyTexture(texture_id, info.texture_cube_index);
+      } else {
+        Log::GetInstance().Error("uniform %s should not be Texture\n", name.c_str());
+      }
+    } else {
+      Log::GetInstance().Error("cannot find uniform: %s\n", name.c_str());
+    }
+  }
+}
+
+void OpenGLRenderer::UpdateShaderUniformBlock(ResourceID shader_id, const eastl::string &name, ResourceID uniform_buffer_id) {
+  auto &shader = resource_manager()->shader_pool_.Find(shader_id);
+  if (shader.status() == ResourceStatus::kCompleted) {
+    if (shader.program_id != cache_.program_id) {
+      glUseProgram(shader.program_id);
+      cache_.program_id = shader.program_id;
+    }
+    auto &uniform_buffer = resource_manager()->uniform_buffer_pool_.Find(uniform_buffer_id);
+    if (uniform_buffer.status() == ResourceStatus::kCompleted) {
+      auto pair = shader.uniform_block_info.find(name);
+      if (pair != shader.uniform_block_info.end()) {
+        glBindBufferBase(GL_UNIFORM_BUFFER, pair->second.location, uniform_buffer.uniform_buffer_id);
+      } else {
+        Log::GetInstance().Error("cannot find uniform block: %s\n", name.c_str());
+      }
+    }
+  }
+}
+
+void OpenGLRenderer::ApplySampler(ResourceID id, uint8 index) {
+  auto &sampler = resource_manager()->sampler_pool_.Find(id);
+  if (sampler.status() == ResourceStatus::kCompleted) {
+    if (cache_.sampler_id[index] != sampler.sampler_id) {
+      glBindSampler(index, sampler.sampler_id);
+      cache_.sampler_id[index] = sampler.sampler_id;
+    }
+  }
+}
+
+void OpenGLRenderer::ResetSampler() {
+  memset(cache_.sampler_id, 0, sizeof(cache_.sampler_id));
+  for (auto i = 0; i < static_cast<uint16>(GraphicsMaxDefine::kMaxSamplerCount); ++i) {
+    glBindSampler(static_cast<GLuint>(i), 0);
+  }
 }
 
 void OpenGLRenderer::ResetShader() {
-  cache_.shader = OpenGLShader();
+  cache_.program_id = 0;
   glUseProgram(0);
 }
 

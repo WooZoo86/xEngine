@@ -6,7 +6,6 @@
 #include <nuklear.h>
 
 #include <gtc/matrix_transform.hpp>
-#include <gtc/type_ptr.hpp>
 
 namespace xEngine {
 
@@ -129,6 +128,8 @@ void NuklearGUI::Initialize(NuklearConfig config) {
 
   nk_style_set_font(&context_, &font_atlas_.default_font->handle);
 
+  sampler_ = graphics_->resource_manager()->Create(SamplerConfig());
+
   auto shader_config = ShaderConfig::FromData(vertex_shader, fragment_shader);
   shader_ = graphics_->resource_manager()->Create(shader_config);
 
@@ -173,6 +174,7 @@ void NuklearGUI::Initialize(NuklearConfig config) {
 
 void NuklearGUI::Finalize() {
   x_assert(Available());
+  graphics_->resource_manager()->Destroy(sampler_);
   graphics_->resource_manager()->Destroy(shader_);
   graphics_->resource_manager()->Destroy(mesh_);
   graphics_->resource_manager()->Destroy(pipeline_);
@@ -201,8 +203,9 @@ void NuklearGUI::EndFrame() {
   nk_buffer_clear(&index_buffer);
   nk_convert(&context_, &command, &vertex_buffer, &index_buffer, &config_);
   graphics_->renderer()->UpdateMesh(mesh_, vertex_data, 0, vertex_buffer.needed, index_data, 0, index_buffer.needed);
-  graphics_->renderer()->UpdateShaderUniform(shader_, "uProjectionMatrix", UniformFormat::kMatrix4, glm::value_ptr(matrix));
+  graphics_->renderer()->UpdateShaderUniformData(shader_, "uProjectionMatrix", matrix);
   graphics_->renderer()->ApplyPipeline(pipeline_);
+  graphics_->renderer()->ApplySampler(sampler_, 0);
   const struct nk_draw_command *cmd = nullptr;
   ResourceID current_texture = kInvalidResourceID;
   auto element_offset = 0;
@@ -210,7 +213,7 @@ void NuklearGUI::EndFrame() {
     auto texture = image_[cmd->texture.id];
     if (current_texture != texture) {
       current_texture = texture;
-      graphics_->renderer()->UpdateShaderUniform(shader_, "uTexture", UniformFormat::kTexture, &current_texture);
+      graphics_->renderer()->UpdateShaderUniformTexture(shader_, "uTexture", current_texture);
     }
     graphics_->renderer()->ApplyScissor(static_cast<int32>(cmd->clip_rect.x * scale_x),
                                         static_cast<int32>((window_->config().height - (cmd->clip_rect.y + cmd->clip_rect.h)) * scale_y),

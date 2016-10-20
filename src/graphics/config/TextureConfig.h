@@ -29,15 +29,6 @@ struct TextureConfig {
 
   bool is_render_target{false};
 
-  TextureWrapMode wrap_mod_s{TextureWrapMode::kRepeat};
-
-  TextureWrapMode wrap_mod_t{TextureWrapMode::kRepeat};
-
-  TextureWrapMode wrap_mod_r{TextureWrapMode::kRepeat};
-
-  TextureFilterMode filter_mode_min{TextureFilterMode::kNearest};
-
-  TextureFilterMode filter_mode_mag{TextureFilterMode::kNearest};
 };
 
 } // namespace xEngine

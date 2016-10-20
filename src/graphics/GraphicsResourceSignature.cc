@@ -14,4 +14,10 @@ const ResourceSignature MeshSignature = GetResourceSignature();
 IncreaseResourceSignatureCounter();
 const ResourceSignature PipelineSignature = GetResourceSignature();
 
+IncreaseResourceSignatureCounter();
+const ResourceSignature SamplerSignature = GetResourceSignature();
+
+IncreaseResourceSignatureCounter();
+const ResourceSignature UniformBufferSignature = GetResourceSignature();
+
 } // namespace xEngine
