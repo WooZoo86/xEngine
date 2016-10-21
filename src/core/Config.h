@@ -11,7 +11,7 @@
 # define X_HAS_THREADS (1)
 # define X_COMPILER_HAS_THREADLOCAL (0)
 #else
-# define X_HAS_THREADS (0)
+# define X_HAS_THREADS (1)
 # define X_COMPILER_HAS_THREADLOCAL (1)
 #endif // X_FORCE_NO_THREADS
 

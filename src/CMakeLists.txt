@@ -29,9 +29,14 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/third_party/${GLAD_DIR}/include
 )
 
-file(GLOB_RECURSE src *.h *.cc)
+file(GLOB_RECURSE src *.h *.cc *.mm)
 
 add_library(xEngine ${src})
+
+if(X_MACOS)
+    find_library(COCOA_FRAMEWORK Cocoa)
+    target_link_libraries(xEngine ${COCOA_FRAMEWORK})
+endif()
 
 foreach(file ${src})
     get_filename_component(group ${file} PATH)

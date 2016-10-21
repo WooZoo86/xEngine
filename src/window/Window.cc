@@ -4,6 +4,8 @@
 # include "window/glfw/GLFWWindow.h"
 #elif X_WINDOWS
 # include "window/win32/Win32Window.h"
+#elif X_MACOS
+# include "window/macOS/MacOSWindow.h"
 #endif
 
 namespace xEngine {
@@ -17,6 +19,8 @@ void Window::Initialize(uint16 pool_size) {
   GLFWWindow::Initialize();
 #elif X_WINDOWS
   Win32Window::Initialize();
+#elif X_MACOS
+  MacOSWindow::Initialize();
 #endif
   pool_.Initialize(pool_size, g_window_pool_resource_id);
   available_ = true;
@@ -37,6 +41,8 @@ void Window::Finalize() {
   GLFWWindow::Finalize();
 #elif X_WINDOWS
   Win32Window::Finalize();
+#elif X_MACOS
+  MacOSWindow::Finalize();
 #endif
 }
 
@@ -116,6 +122,8 @@ void Window::PollEvent() {
   GLFWWindow::PollEvent();
 #elif X_WINDOWS
   Win32Window::PollEvent();
+#elif X_MACOS
+  MacOSWindow::PollEvent();
 #endif
 }
 

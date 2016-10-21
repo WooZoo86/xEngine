@@ -4,6 +4,8 @@
 # include "window/glfw/GLFWWindow.h"
 #elif X_WINDOWS
 # include "window/win32/Win32Window.h"
+#elif X_MACOS
+# include "window/macOS/MacOSWindow.h"
 #endif
 
 namespace xEngine {
@@ -15,6 +17,8 @@ void WindowFactory::Create(WindowResource &resource) {
   resource.window.reset(new GLFWWindow);
 #elif X_WINDOWS
   resource.window.reset(new Win32Window);
+#elif X_MACOS
+  resource.window.reset(new MacOSWindow);
 #endif
   if (resource.window != nullptr) {
     resource.window->Create(resource.config());
