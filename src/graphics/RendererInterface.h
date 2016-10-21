@@ -22,6 +22,8 @@ class RendererInterface {
 
   virtual void Finalize() = 0;
 
+  virtual void MakeCurrent() = 0;
+
   virtual void Render() = 0;
 
   virtual void ApplyTarget(ResourceID id = kInvalidResourceID, const ClearState &state = ClearState()) = 0;

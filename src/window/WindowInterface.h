@@ -20,11 +20,7 @@ class WindowInterface {
 
   virtual bool Available() const = 0;
 
-  virtual void MakeCurrent() = 0;
-
   virtual bool ShouldClose() = 0;
-
-  virtual void Present() = 0;
 
   virtual void SetTitle(const eastl::string &name) = 0;
 

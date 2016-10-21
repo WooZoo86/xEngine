@@ -4,10 +4,6 @@ else()
 	add_executable(WindowSample WindowSample.cc)
 endif()
 
-if(X_ENGINE_OPTION_USE_GLFW)
-    target_link_libraries(WindowSample xEngine EASTL glfw3)
-else()
-    target_link_libraries(WindowSample xEngine EASTL)
-endif()
+target_link_libraries(WindowSample xEngine EASTL)
 
 set_target_properties(WindowSample PROPERTIES FOLDER "sample")

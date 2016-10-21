@@ -31,8 +31,6 @@ class Window: public ResourceManager {
 
   const eastl::unique_ptr<WindowInterface> &Get(ResourceID id);
 
-  void MakeCurrent(ResourceID id);
-
   bool ShouldClose(ResourceID id);
 
   const eastl::unique_ptr<Graphics> &GetGraphics(ResourceID id);
@@ -40,8 +38,6 @@ class Window: public ResourceManager {
   bool IsAllClosed();
 
   void PollEvent();
-
-  void PresentAllWindow();
 
  private:
   bool available_{false};

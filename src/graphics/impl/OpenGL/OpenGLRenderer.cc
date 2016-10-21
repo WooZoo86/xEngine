@@ -4,6 +4,16 @@
 
 namespace xEngine {
 
+extern void *CreateOpenGLContext(const GraphicsConfig &config, void *native_handle);
+
+extern void DestroyOpenGLContext(void *context);
+
+extern void OpenGLContextSwapBuffers(void *context);
+
+extern void OpenGLContextMakeCurrent(void *context);
+
+extern void OpenGLContextSetSwapInterval(void *context, int32 interval);
+
 void OpenGLRenderer::PreOpenGLCallback(const char *name, void *function, int len_args, ...) {
   GLenum errorCode;
   errorCode = glad_glGetError();
@@ -24,6 +34,9 @@ void OpenGLRenderer::PostOpenGLCallback(const char *name, void *function, int le
 
 void OpenGLRenderer::Initialize(const GraphicsConfig &config) {
   config_ = config;
+  context_ = CreateOpenGLContext(config_, window()->GetNativeHandle());
+  OpenGLContextMakeCurrent(context_);
+  OpenGLContextSetSwapInterval(context_, config_.swap_interval);
   if (gladLoadGL() == 0) {
     x_error("OpenGL init error!\n");
   }
@@ -37,10 +50,15 @@ void OpenGLRenderer::Initialize(const GraphicsConfig &config) {
 void OpenGLRenderer::Finalize() {
   Reset();
   config_ = GraphicsConfig();
+  DestroyOpenGLContext(context_);
 }
 
 void OpenGLRenderer::Render() {
+  OpenGLContextSwapBuffers(context_);
+}
 
+void OpenGLRenderer::MakeCurrent() {
+  OpenGLContextMakeCurrent(context_);
 }
 
 void OpenGLRenderer::ApplyTarget(ResourceID id, const ClearState &state) {

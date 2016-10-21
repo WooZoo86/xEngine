@@ -81,8 +81,8 @@ class GraphicsSample : public Application {
     Log::GetInstance().Info("Initialize\n");
     Window::GetInstance().Initialize();
     window_id_ = Window::GetInstance().Create(WindowConfig::ForWindow(1024, 768, "GraphicsSample"));
-    Window::GetInstance().MakeCurrent(window_id_);
     Window::GetInstance().GetGraphics(window_id_)->Initialize(GraphicsConfig::ForWindow(window_id_));
+    Window::GetInstance().GetGraphics(window_id_)->renderer()->MakeCurrent();
 
     load_shader();
     load_texture();
@@ -100,12 +100,13 @@ class GraphicsSample : public Application {
     draw();
 
     Window::GetInstance().PollEvent();
-    Window::GetInstance().PresentAllWindow();
+
     if (Window::GetInstance().ShouldClose(window_id_)) {
       Window::GetInstance().GetGraphics(window_id_)->Finalize();
       Window::GetInstance().Destroy(window_id_);
       window_id_ = kInvalidResourceID;
     }
+
     return Window::GetInstance().IsAllClosed() ? ApplicationStatus::kFinalize : ApplicationStatus::kLoop;
   }
 

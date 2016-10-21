@@ -22,11 +22,7 @@ class MacOSWindow: public WindowInterface {
 
   virtual bool Available() const override;
 
-  virtual void MakeCurrent() override;
-
   virtual bool ShouldClose() override;
-
-  virtual void Present() override;
 
   virtual void SetTitle(const eastl::string &name) override;
 

@@ -76,13 +76,9 @@ bool Win32Window::Available() const {
   return window_ != nullptr;
 }
 
-void Win32Window::MakeCurrent() {}
-
 bool Win32Window::ShouldClose() {
   return closed_;
 }
-
-void Win32Window::Present() {}
 
 void Win32Window::SetTitle(const eastl::string &name) {}
 

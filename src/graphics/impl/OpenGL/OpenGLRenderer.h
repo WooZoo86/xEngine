@@ -26,6 +26,8 @@ class OpenGLRenderer: public RendererInterface {
 
   virtual void Render() override;
 
+  virtual void MakeCurrent() override;
+
   virtual void ApplyTarget(ResourceID id = kInvalidResourceID, const ClearState &state = ClearState()) override;
 
   virtual void ApplyViewPort(int32 x, int32 y, int32 width, int32 height) override;
@@ -110,6 +112,7 @@ class OpenGLRenderer: public RendererInterface {
   }
 
  private:
+  void *context_{nullptr};
   GraphicsConfig config_;
   OpenGLRendererCache cache_;
 };

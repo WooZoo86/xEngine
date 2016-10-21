@@ -1,8 +1,6 @@
 #include "WindowFactory.h"
 
-#if X_USE_GLFW
-# include "window/glfw/GLFWWindow.h"
-#elif X_WINDOWS
+#if X_WINDOWS
 # include "window/win32/Win32Window.h"
 #elif X_MACOS
 # include "window/macOS/MacOSWindow.h"
@@ -13,9 +11,7 @@ namespace xEngine {
 void WindowFactory::Create(WindowResource &resource) {
   x_assert(resource.status() == ResourceStatus::kPending);
   resource.Loading();
-#if X_USE_GLFW
-  resource.window.reset(new GLFWWindow);
-#elif X_WINDOWS
+#if X_WINDOWS
   resource.window.reset(new Win32Window);
 #elif X_MACOS
   resource.window.reset(new MacOSWindow);

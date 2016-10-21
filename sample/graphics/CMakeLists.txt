@@ -6,10 +6,6 @@ endif()
 
 target_link_libraries(GraphicsSample xEngine EASTL)
 
-if(X_ENGINE_OPTION_USE_GLFW)
-    target_link_libraries(GraphicsSample glfw3)
-endif()
-
 if(X_ENGINE_OPTION_OPENGL)
     target_link_libraries(GraphicsSample glad)
 endif()

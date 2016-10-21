@@ -160,14 +160,10 @@ bool MacOSWindow::Available() const {
   return window_ != nullptr;
 }
 
-void MacOSWindow::MakeCurrent() {}
-
 bool MacOSWindow::ShouldClose() {
   x_assert(Available());
   return should_close_;
 }
-
-void MacOSWindow::Present() {}
 
 void MacOSWindow::SetTitle(const eastl::string &name) {
   x_assert(Available());

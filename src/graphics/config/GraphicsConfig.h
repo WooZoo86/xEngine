@@ -31,6 +31,14 @@ struct GraphicsConfig {
 
   uint16 uniform_buffer_size{128};
 
+  PixelFormat color_format{PixelFormat::RGBA8};
+
+  PixelFormat depth_format{PixelFormat::D24S8};
+
+  uint8 sample_count{1};
+
+  int32 swap_interval{1};
+
 };
 
 inline GraphicsConfig GraphicsConfig::ForWindow(ResourceID id) {

@@ -26,15 +26,7 @@ struct WindowConfig {
 
   int32 frame_buffer_height{768};
 
-  PixelFormat color_format{PixelFormat::RGBA8};
-
-  PixelFormat depth_format{PixelFormat::D24S8};
-
-  uint8 sample_count{1};
-
   bool is_full_screen{false};
-
-  int32 swap_interval{1};
 
   eastl::string title{"xEngine"};
 

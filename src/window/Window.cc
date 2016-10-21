@@ -1,8 +1,6 @@
 #include "Window.h"
 
-#if X_USE_GLFW
-# include "window/glfw/GLFWWindow.h"
-#elif X_WINDOWS
+#if X_WINDOWS
 # include "window/win32/Win32Window.h"
 #elif X_MACOS
 # include "window/macOS/MacOSWindow.h"
@@ -15,9 +13,7 @@ static const ResourcePoolID g_window_pool_resource_id = GetResourcePoolID();
 
 void Window::Initialize(uint16 pool_size) {
   x_assert(!Available());
-#if X_USE_GLFW
-  GLFWWindow::Initialize();
-#elif X_WINDOWS
+#if X_WINDOWS
   Win32Window::Initialize();
 #elif X_MACOS
   MacOSWindow::Initialize();
@@ -37,9 +33,7 @@ void Window::Finalize() {
   }
   pool_.Finalize();
   RemoveAll();
-#if X_USE_GLFW
-  GLFWWindow::Finalize();
-#elif X_WINDOWS
+#if X_WINDOWS
   Win32Window::Finalize();
 #elif X_MACOS
   MacOSWindow::Finalize();
@@ -82,14 +76,6 @@ const eastl::unique_ptr<WindowInterface> &Window::Get(ResourceID id) {
   return invalid;
 }
 
-void Window::MakeCurrent(ResourceID id) {
-  x_assert(Available());
-  auto &resource = pool_.Find(id);
-  if (resource.status() != ResourceStatus::kInvalid) {
-    resource.window->MakeCurrent();
-  }
-}
-
 bool Window::ShouldClose(ResourceID id) {
   x_assert(Available());
   auto &resource = pool_.Find(id);
@@ -118,23 +104,11 @@ bool Window::IsAllClosed() {
 
 void Window::PollEvent() {
   x_assert(Available());
-#if X_USE_GLFW
-  GLFWWindow::PollEvent();
-#elif X_WINDOWS
+#if X_WINDOWS
   Win32Window::PollEvent();
 #elif X_MACOS
   MacOSWindow::PollEvent();
 #endif
-}
-
-void Window::PresentAllWindow() {
-  x_assert(Available());
-  for (auto &id : resource_id_cache_) {
-    auto &resource = pool_.Find(id);
-    if (resource.status() != ResourceStatus::kInvalid) {
-      resource.window->Present();
-    }
-  }
 }
 
 }

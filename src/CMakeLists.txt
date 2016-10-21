@@ -2,10 +2,6 @@ if(X_ENGINE_OPTION_DEBUG)
     add_definitions("-DX_DEBUG=1")
 endif()
 
-if(X_ENGINE_OPTION_USE_GLFW)
-    add_definitions("-DX_USE_GLFW=1")
-endif()
-
 if(X_ENGINE_OPTION_OPENGL)
     add_definitions("-DX_OPENGL=1")
 endif()

@@ -10,7 +10,6 @@ class WindowSample : public Application {
     Log::GetInstance().Info("Initialize\n");
     Window::GetInstance().Initialize();
     window_id_ = Window::GetInstance().Create(WindowConfig::ForWindow(1024, 768, "WindowSample"));
-    Window::GetInstance().MakeCurrent(window_id_);
     return Application::Initialize();
   }
   virtual ApplicationStatus Finalize() override {
@@ -20,7 +19,6 @@ class WindowSample : public Application {
   }
   virtual ApplicationStatus Loop() override {
     Window::GetInstance().PollEvent();
-    Window::GetInstance().PresentAllWindow();
     if (Window::GetInstance().ShouldClose(window_id_)) {
       Window::GetInstance().Destroy(window_id_);
       window_id_ = kInvalidResourceID;
