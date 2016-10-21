@@ -20,8 +20,8 @@ class NuklearSample: public Application {
     Log::GetInstance().Info("Initialize\n");
     Window::GetInstance().Initialize();
     window_id_ = Window::GetInstance().Create(WindowConfig::ForWindow(1024, 768, "NuklearSample"));
-    Window::GetInstance().MakeCurrent(window_id_);
     Window::GetInstance().GetGraphics(window_id_)->Initialize(GraphicsConfig::ForWindow(window_id_));
+    Window::GetInstance().GetGraphics(window_id_)->renderer()->MakeCurrent();
     NuklearGUI::GetInstance().Initialize(NuklearConfig::ForWindow(window_id_));
     return Application::Initialize();
   }
@@ -41,7 +41,6 @@ class NuklearSample: public Application {
     }
 
     Window::GetInstance().PollEvent();
-    Window::GetInstance().PresentAllWindow();
     if (Window::GetInstance().ShouldClose(window_id_)) {
       NuklearGUI::GetInstance().Finalize();
       Window::GetInstance().GetGraphics(window_id_)->Finalize();

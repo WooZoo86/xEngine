@@ -17,6 +17,8 @@ class Graphics {
 
   bool Available() const;
 
+  const GraphicsConfig &config() const { return config_; }
+
   const eastl::unique_ptr<RendererInterface> &renderer() const { return renderer_; }
 
   const eastl::unique_ptr<GraphicsResourceManagerInterface> &resource_manager() const { return resource_manager_; }

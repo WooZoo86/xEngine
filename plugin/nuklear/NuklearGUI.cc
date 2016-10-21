@@ -149,15 +149,15 @@ void NuklearGUI::Initialize(NuklearConfig config) {
   pipeline_config.blend_state.enable = true;
   pipeline_config.blend_state.src_rgb_factor = BlendFactor::kSrcAlpha;
   pipeline_config.blend_state.dst_rgb_factor = BlendFactor::kOneMinusSrcAlpha;
-  pipeline_config.blend_state.color_format = window_->config().color_format;
-  pipeline_config.blend_state.depth_format = window_->config().depth_format;
+  pipeline_config.blend_state.color_format = window_->graphics()->config().color_format;
+  pipeline_config.blend_state.depth_format = window_->graphics()->config().depth_format;
   pipeline_config.blend_state.color_mask = PixelChannel::kRGB;
 
   pipeline_config.depth_stencil_state.depth_enable = false;
 
   pipeline_config.rasterizer_state.scissor_test_enable = true;
   pipeline_config.rasterizer_state.cull_face_enable = false;
-  pipeline_config.rasterizer_state.sample = window_->config().sample_count;
+  pipeline_config.rasterizer_state.sample = window_->graphics()->config().sample_count;
 
   pipeline_ = graphics_->resource_manager()->Create(pipeline_config);
 
