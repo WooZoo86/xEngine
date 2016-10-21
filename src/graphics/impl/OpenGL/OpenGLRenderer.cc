@@ -358,7 +358,12 @@ void OpenGLRenderer::UpdateShaderUniformBlock(ResourceID shader_id, const eastl:
   }
 }
 
-void OpenGLRenderer::UpdateUniformBlockData(ResourceID id, size_t offset, size_t length, const void *buffer) {
+void OpenGLRenderer::ResetShader() {
+  cache_.program_id = 0;
+  glUseProgram(0);
+}
+
+void OpenGLRenderer::UpdateUniformBufferData(ResourceID id, size_t offset, size_t length, const void *buffer) {
   auto &uniform_buffer = resource_manager()->uniform_buffer_pool_.Find(id);
   if (uniform_buffer.status() == ResourceStatus::kCompleted) {
     if (uniform_buffer.config().size < offset + length) {
@@ -393,11 +398,6 @@ void OpenGLRenderer::ResetSampler() {
   for (auto i = 0; i < static_cast<uint16>(GraphicsMaxDefine::kMaxSamplerCount); ++i) {
     glBindSampler(static_cast<GLuint>(i), 0);
   }
-}
-
-void OpenGLRenderer::ResetShader() {
-  cache_.program_id = 0;
-  glUseProgram(0);
 }
 
 void OpenGLRenderer::ApplyMesh(ResourceID id) {

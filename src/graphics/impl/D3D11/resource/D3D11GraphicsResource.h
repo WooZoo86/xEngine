@@ -7,6 +7,8 @@
 #include "graphics/config/TextureConfig.h"
 #include "graphics/config/MeshConfig.h"
 #include "graphics/config/PipelineConfig.h"
+#include "graphics/config/SamplerConfig.h"
+#include "graphics/config/UniformBufferConfig.h"
 
 #include "resource/Resource.h"
 
@@ -21,6 +23,21 @@ namespace xEngine {
 
 struct D3D11Shader : public Resource<ShaderConfig> {
 
+  struct UniformElementInfo {
+    D3D_SHADER_VARIABLE_CLASS clazz;
+    D3D_SHADER_VARIABLE_TYPE type;
+    size_t rows{0};
+    size_t column{0};
+    size_t offset{0};
+    size_t size{0};
+  };
+
+  struct UniformBlockInfo {
+    size_t location{0};
+    size_t size{0};
+    eastl::hash_map<eastl::string, UniformElementInfo> elements;
+  };
+
   ID3D10Blob *vertex_blob{nullptr};
 
   ID3D10Blob *fragment_blob{nullptr};
@@ -29,13 +46,13 @@ struct D3D11Shader : public Resource<ShaderConfig> {
 
   ID3D11PixelShader *fragment_shader{nullptr};
 
-  ID3D11ShaderReflection *vertex_reflection{nullptr};
+  ID3D11Buffer *vertex_global_uniform_block{nullptr};
 
-  ID3D11ShaderReflection *fragment_reflection{nullptr};
+  ID3D11Buffer *fragment_global_uniform_block{nullptr};
 
-  eastl::hash_map<eastl::string, eastl::tuple<ID3D11Buffer *, size_t>> vertex_uniform_blocks;
+  eastl::hash_map<eastl::string, UniformBlockInfo> vertex_uniform_block_info;
 
-  eastl::hash_map<eastl::string, eastl::tuple<ID3D11Buffer *, size_t>> fragment_uniform_blocks;
+  eastl::hash_map<eastl::string, UniformBlockInfo> fragment_uniform_block_info;
 
   eastl::hash_map<eastl::string, uint32> vertex_texture_index;
 
@@ -50,10 +67,10 @@ struct D3D11Shader : public Resource<ShaderConfig> {
     fragment_blob = nullptr;
     vertex_shader = nullptr;
     fragment_shader = nullptr;
-    vertex_reflection = nullptr;
-    fragment_reflection = nullptr;
-    vertex_uniform_blocks.clear();
-    fragment_uniform_blocks.clear();
+    vertex_global_uniform_block = nullptr;
+    fragment_global_uniform_block = nullptr;
+    vertex_uniform_block_info.clear();
+    fragment_uniform_block_info.clear();
     vertex_texture_index.clear();
     vertex_sampler_index.clear();
     fragment_texture_index.clear();
@@ -72,14 +89,11 @@ struct D3D11Texture : public Resource<TextureConfig> {
 
   ID3D11ShaderResourceView *shader_resource_view{nullptr};
 
-  ID3D11SamplerState *sampler_state{nullptr};
-
   virtual void Reset() override {
     texture = nullptr;
     render_target_view = nullptr;
     depth_stencil_view = nullptr;
     shader_resource_view = nullptr;
-    sampler_state = nullptr;
   }
 
 };
@@ -112,6 +126,26 @@ struct D3D11Pipeline : public Resource<PipelineConfig> {
     blend_state = nullptr;
     depth_stencil_state = nullptr;
     rasterizer_state = nullptr;
+  }
+
+};
+
+struct D3D11Sampler : public Resource<SamplerConfig> {
+
+  ID3D11SamplerState *sampler_state{nullptr};
+
+  virtual void Reset() override {
+    sampler_state = nullptr;
+  }
+
+};
+
+struct D3D11UniformBuffer : public Resource<UniformBufferConfig> {
+  
+  ID3D11Buffer *uniform_buffer{nullptr};
+
+  virtual void Reset() override {
+    uniform_buffer = nullptr;
   }
 
 };

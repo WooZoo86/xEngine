@@ -52,13 +52,13 @@ class OpenGLRenderer: public RendererInterface {
 
   virtual void UpdateShaderUniformBlock(ResourceID shader_id, const eastl::string &name, ResourceID uniform_buffer_id) override;
 
-  virtual void UpdateUniformBlockData(ResourceID id, size_t offset, size_t length, const void *buffer) override;
+  virtual void ResetShader() override;
+
+  virtual void UpdateUniformBufferData(ResourceID id, size_t offset, size_t length, const void *buffer) override;
 
   virtual void ApplySampler(ResourceID id, uint8 index) override;
 
   virtual void ResetSampler() override;
-
-  virtual void ResetShader() override;
 
   virtual void ApplyMesh(ResourceID id) override;
 

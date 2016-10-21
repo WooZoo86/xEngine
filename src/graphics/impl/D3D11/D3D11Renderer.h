@@ -35,11 +35,27 @@ class D3D11Renderer: public RendererInterface {
 
    virtual void ApplyShader(ResourceID id) override;
 
-   virtual void UpdateShaderUniform(ResourceID id, eastl::string name, UniformFormat format, const void *buffer) override;
+   virtual void UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, uint32 value) override;
 
-   virtual void UpdateShaderUniformBlock(ResourceID id, eastl::string name, const void *buffer) override;
+   virtual void UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, float64 value) override;
+
+   virtual void UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, const glm::u32vec4 &value) override;
+
+   virtual void UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, const glm::f64vec4 &value) override;
+
+   virtual void UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, const glm::highp_dmat4x4 &value) override;
+
+   virtual void UpdateShaderUniformTexture(ResourceID shader_id, const eastl::string &name, ResourceID texture_id) override;
+
+   virtual void UpdateShaderUniformBlock(ResourceID shader_id, const eastl::string &name, ResourceID uniform_buffer_id) override;
 
    virtual void ResetShader() override;
+
+   virtual void UpdateUniformBufferData(ResourceID id, size_t offset, size_t length, const void *buffer) override;
+
+   virtual void ApplySampler(ResourceID id, uint8 index) override;
+
+   virtual void ResetSampler() override;
 
    virtual void ApplyMesh(ResourceID id) override;
 
@@ -58,13 +74,9 @@ class D3D11Renderer: public RendererInterface {
    virtual void Reset() override;
 
  private:
-   void ApplyTexture(const D3D11Texture &texture, int32 index, GraphicsPipelineStage stage);
+   void ApplyTexture(ResourceID id, int32 index, GraphicsPipelineStage stage);
 
    void ResetTexture();
-
-   void ApplySamplerState(const D3D11Texture &texture, int32 index, GraphicsPipelineStage stage);
-
-   void ResetSamplerState();
 
    WindowInterface *window() {
      static WindowInterface *pointer = nullptr;

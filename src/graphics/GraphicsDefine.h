@@ -5,6 +5,7 @@
 #include "core/Types.h"
 #include "resource/Resource.h"
 
+#define GLM_FORCE_LEFT_HANDED
 #include <glm.hpp>
 #include <gtc/type_ptr.hpp>
 

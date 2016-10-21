@@ -15,23 +15,6 @@ void D3D11TextureFactory::Create(D3D11Texture &resource) {
   auto &config = resource.config();
   auto face_count = config.type == TextureType::kTextureCube ? static_cast<uint16>(GraphicsMaxDefine::kMaxCubeTextureFaceCount) : 1;
 
-  if (config.mipmap_count != 1 &&
-      (IsTextureFilterModeUseMipmap(config.filter_mode_min) ||
-       IsTextureFilterModeUseMipmap(config.filter_mode_mag))) {
-    Log::GetInstance().Error("[D3D11TextureFactory::Create] error with mipmap\n");
-    resource.Failed();
-    return;
-  }
-
-  if (config.type == TextureType::kTextureCube &&
-      !(config.wrap_mod_s == TextureWrapMode::kClampToEdge &&
-        config.wrap_mod_t == TextureWrapMode::kClampToEdge &&
-        config.wrap_mod_r == TextureWrapMode::kClampToEdge)) {
-    Log::GetInstance().Error("[D3D11TextureFactory::Create] error with wrap mod\n");
-    resource.Failed();
-    return;
-  }
-
   for (auto i = 0; i < face_count; ++i) {
     for (auto j = 0; j < config.mipmap_count; ++j) {
       auto width = config.width >> j;
@@ -99,27 +82,6 @@ void D3D11TextureFactory::Create(D3D11Texture &resource) {
 
   resource.shader_resource_view = shader_resource_view;
 
-  ID3D11SamplerState *sampler_state = nullptr;
-
-  D3D11_SAMPLER_DESC sampler_desc;
-  ZeroMemory(&sampler_desc, sizeof(sampler_desc));
-  sampler_desc.Filter = EnumForTextureFilterMode(config.filter_mode_min, config.filter_mode_mag);
-  sampler_desc.AddressU = EnumForTextureWrapMode(config.wrap_mod_s);
-  sampler_desc.AddressV = EnumForTextureWrapMode(config.wrap_mod_t);
-  sampler_desc.AddressW = EnumForTextureWrapMode(config.wrap_mod_r);
-  sampler_desc.MipLODBias = 0.0f;
-  sampler_desc.MaxAnisotropy = 1;
-  sampler_desc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-  sampler_desc.BorderColor[0] = 1.0f;
-  sampler_desc.BorderColor[1] = 1.0f;
-  sampler_desc.BorderColor[2] = 1.0f;
-  sampler_desc.BorderColor[3] = 1.0f;
-  sampler_desc.MinLOD = -D3D11_FLOAT32_MAX;
-  sampler_desc.MaxLOD = D3D11_FLOAT32_MAX;
-  x_d3d11_assert_msg(device_->CreateSamplerState(&sampler_desc, &sampler_state), "create sampler state failed\n");
-
-  resource.sampler_state = sampler_state;
-
   resource.Complete();
 }
 
@@ -136,9 +98,6 @@ void D3D11TextureFactory::Destroy(D3D11Texture &resource) {
   }
   if (resource.shader_resource_view != nullptr) {
     resource.shader_resource_view->Release();
-  }
-  if (resource.sampler_state != nullptr) {
-    resource.sampler_state->Release();
   }
 }
 
