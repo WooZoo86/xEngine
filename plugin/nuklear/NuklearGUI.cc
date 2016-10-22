@@ -188,6 +188,15 @@ void NuklearGUI::Finalize() {
 }
 
 void NuklearGUI::BeginFrame() {
+  nk_input_begin(&context_);
+  auto &position = window_->GetMousePosition();
+  auto x = static_cast<int32>(position.x);
+  auto y = static_cast<int32>(position.y);
+  nk_input_motion(&context_, x, y);
+  nk_input_button(&context_, NK_BUTTON_LEFT, x, y, window_->IsMouseButtonDown(MouseButtonType::kLeft));
+  nk_input_button(&context_, NK_BUTTON_RIGHT, x, y, window_->IsMouseButtonDown(MouseButtonType::kRight));
+  nk_input_button(&context_, NK_BUTTON_MIDDLE, x, y, window_->IsMouseButtonDown(MouseButtonType::kMiddle));
+  nk_input_end(&context_);
 }
 
 void NuklearGUI::EndFrame() {

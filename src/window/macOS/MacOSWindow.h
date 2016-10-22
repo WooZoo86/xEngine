@@ -28,13 +28,31 @@ class MacOSWindow: public WindowInterface {
 
   virtual void *GetNativeHandle() override { return window_; }
 
+  virtual const glm::vec2 &GetMousePosition() override { return mouse_position_; }
+
  private:
   bool should_close_{false};
   void *window_{nullptr};
+  glm::vec2 mouse_position_;
 
   friend void SetShouldClose(MacOSWindow *window) { window->should_close_ = true; }
 
   friend WindowConfig &GetConfig(MacOSWindow *window) { return window->config_; }
+
+  friend void SetMousePosition(MacOSWindow *window, float32 x, float32 y) {
+    window->mouse_position_.x = x;
+    window->mouse_position_.y = y;
+  }
+
+  friend void SetMouseButtonDown(MacOSWindow *window, MouseButtonType type) {
+    window->mouse_button_down_status_ |= static_cast<uint8>(type);
+    window->mouse_button_status_cache_ |= static_cast<uint8>(type);
+  }
+
+  friend void SetMouseButtonUp(MacOSWindow *window, MouseButtonType type) {
+    window->mouse_button_up_status_ |= static_cast<uint8>(type);
+    window->mouse_button_status_cache_ ^= static_cast<uint8>(type);
+  }
 };
 
 } // namespace xEngine

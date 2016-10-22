@@ -12,10 +12,10 @@ enum class MouseCursorMode: uint8 {
 };
 
 enum class MouseButtonType: uint8 {
-  kUnknown,
-  kLeft,
-  kRight,
-  kMiddle,
+  kUnknown = 0,
+  kLeft = 1,
+  kRight = 2,
+  kMiddle = 4,
 };
 
 enum class KeyboardButtonType: uint8 {

@@ -76,6 +76,38 @@ using namespace xEngine;
   }
 }
 
+- (void) mouseMoved:(NSEvent *)event {
+  @autoreleasepool {
+    const NSRect content_rect = [self frame];
+    const NSPoint position = [event locationInWindow];
+    SetMousePosition(window, position.x, content_rect.size.height - position.y);
+   }
+}
+
+- (void) mouseDown:(NSEvent *)event {
+  SetMouseButtonDown(window, MouseButtonType::kLeft);
+}
+
+- (void) mouseUp:(NSEvent *)event {
+  SetMouseButtonUp(window, MouseButtonType::kLeft);
+}
+
+- (void) rightMouseDown:(NSEvent *)event {
+  SetMouseButtonDown(window, MouseButtonType::kRight);
+}
+
+- (void) rightMouseUp:(NSEvent *)event {
+  SetMouseButtonUp(window, MouseButtonType::kRight);
+}
+
+- (void) otherMouseDown:(NSEvent *)event {
+  SetMouseButtonDown(window, MouseButtonType::kMiddle);
+}
+
+- (void) otherMouseUp:(NSEvent *)event {
+  SetMouseButtonUp(window, MouseButtonType::kMiddle);
+}
+
 @end
 
 namespace xEngine {

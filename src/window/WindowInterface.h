@@ -26,13 +26,29 @@ class WindowInterface {
 
   virtual void *GetNativeHandle() = 0;
 
+  virtual const glm::vec2 &GetMousePosition() = 0;
+
+  bool IsMouseButtonDown(MouseButtonType type) { return mouse_button_down_status_ & static_cast<uint8>(type); }
+
+  bool IsMouseButtonUp(MouseButtonType type) { return mouse_button_up_status_ & static_cast<uint8>(type); }
+
+  bool IsMouseButtonPressed(MouseButtonType type) { return mouse_button_status_cache_ & static_cast<uint8>(type); }
+
   const WindowConfig &config() const { return config_; }
 
   const eastl::unique_ptr<Graphics> &graphics() const { return graphics_; }
 
+ private:
+  void ResetMouseStatus() { mouse_button_down_status_ = 0; mouse_button_up_status_ = 0; }
+
  protected:
   WindowConfig config_;
   eastl::unique_ptr<Graphics> graphics_{new Graphics};
+  uint8 mouse_button_down_status_{0};
+  uint8 mouse_button_up_status_{0};
+  uint8 mouse_button_status_cache_{0};
+
+  friend class Window;
 };
 
 } // namespace xEngine

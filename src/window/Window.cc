@@ -104,6 +104,12 @@ bool Window::IsAllClosed() {
 
 void Window::PollEvent() {
   x_assert(Available());
+  for (auto &id : resource_id_cache_) {
+    auto &resource = pool_.Find(id);
+    if (resource.status() != ResourceStatus::kInvalid) {
+      resource.window->ResetMouseStatus();
+    }
+  }
 #if X_WINDOWS
   Win32Window::PollEvent();
 #elif X_MACOS
