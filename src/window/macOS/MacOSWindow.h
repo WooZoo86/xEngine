@@ -20,20 +20,12 @@ class MacOSWindow: public WindowInterface {
 
   virtual void Destroy() override;
 
-  virtual bool Available() const override;
-
-  virtual bool ShouldClose() override;
-
   virtual void SetTitle(const eastl::string &name) override;
 
   virtual void *GetNativeHandle() override { return window_; }
 
-  virtual const glm::vec2 &GetMousePosition() override { return mouse_position_; }
-
  private:
-  bool should_close_{false};
   void *window_{nullptr};
-  glm::vec2 mouse_position_;
 
   friend void SetShouldClose(MacOSWindow *window) { window->should_close_ = true; }
 

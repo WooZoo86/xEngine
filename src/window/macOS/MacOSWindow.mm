@@ -156,7 +156,6 @@ void MacOSWindow::PollEvent() {
 }
 
 void MacOSWindow::Create(const WindowConfig &config) {
-  x_assert(!Available());
   @autoreleasepool {
     NSWindow *window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, config.width, config.height)
                                          styleMask:(NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable)
@@ -178,7 +177,6 @@ void MacOSWindow::Create(const WindowConfig &config) {
 }
 
 void MacOSWindow::Destroy() {
-  x_assert(Available());
   @autoreleasepool {
     NSWindow *window = static_cast<NSWindow *>(window_);
     [[window contentView] release];
@@ -188,17 +186,7 @@ void MacOSWindow::Destroy() {
   }
 }
 
-bool MacOSWindow::Available() const {
-  return window_ != nullptr;
-}
-
-bool MacOSWindow::ShouldClose() {
-  x_assert(Available());
-  return should_close_;
-}
-
 void MacOSWindow::SetTitle(const eastl::string &name) {
-  x_assert(Available());
   @autoreleasepool {
     NSWindow *window = static_cast<NSWindow *>(window_);
     [window setTitle:[NSString stringWithCString:name.c_str() encoding:[NSString defaultCStringEncoding]]];

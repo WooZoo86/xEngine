@@ -18,15 +18,13 @@ class WindowInterface {
 
   virtual void Destroy() = 0;
 
-  virtual bool Available() const = 0;
-
-  virtual bool ShouldClose() = 0;
-
   virtual void SetTitle(const eastl::string &name) = 0;
 
   virtual void *GetNativeHandle() = 0;
 
-  virtual const glm::vec2 &GetMousePosition() = 0;
+  bool ShouldClose() { return should_close_; }
+
+  const glm::vec2 &GetMousePosition() { return mouse_position_; }
 
   bool IsMouseButtonDown(MouseButtonType type) { return mouse_button_down_status_ & static_cast<uint8>(type); }
 
@@ -43,10 +41,16 @@ class WindowInterface {
 
  protected:
   WindowConfig config_;
-  eastl::unique_ptr<Graphics> graphics_{new Graphics};
+
+  bool should_close_{false};
+
+  glm::vec2 mouse_position_;
+
   uint8 mouse_button_down_status_{0};
   uint8 mouse_button_up_status_{0};
   uint8 mouse_button_status_cache_{0};
+
+  eastl::unique_ptr<Graphics> graphics_{new Graphics};
 
   friend class Window;
 };
