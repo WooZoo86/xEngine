@@ -17,28 +17,19 @@ class Win32Window : public WindowInterface {
 
   static void PollEvent();
 
- private:
-  static LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
-
  public:
   virtual void Create(const WindowConfig &config) override;
 
   virtual void Destroy() override;
-
-  virtual bool Available() const override;
-
-  virtual bool ShouldClose() override;
 
   virtual void SetTitle(const eastl::string &name) override;
 
   virtual void *GetNativeHandle() override { return window_; }
 
  private:
-   void CloseEvent() { closed_ = true; };
-
- private:
   HWND window_{nullptr};
-  bool closed_{false};
+
+  friend LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 };
 
 } // namespace xEngine

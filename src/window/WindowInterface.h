@@ -22,15 +22,15 @@ class WindowInterface {
 
   virtual void *GetNativeHandle() = 0;
 
-  bool ShouldClose() { return should_close_; }
+  bool ShouldClose() const { return should_close_; }
 
-  const glm::vec2 &GetMousePosition() { return mouse_position_; }
+  const glm::vec2 &GetMousePosition() const { return mouse_position_; }
 
-  bool IsMouseButtonDown(MouseButtonType type) { return mouse_button_down_status_ & static_cast<uint8>(type); }
+  bool IsMouseButtonDown(MouseButtonType type) const { return mouse_button_down_status_ & static_cast<uint8>(type); }
 
-  bool IsMouseButtonUp(MouseButtonType type) { return mouse_button_up_status_ & static_cast<uint8>(type); }
+  bool IsMouseButtonUp(MouseButtonType type) const { return mouse_button_up_status_ & static_cast<uint8>(type); }
 
-  bool IsMouseButtonPressed(MouseButtonType type) { return mouse_button_status_cache_ & static_cast<uint8>(type); }
+  bool IsMouseButtonPressed(MouseButtonType type) const { return mouse_button_status_cache_ & static_cast<uint8>(type); }
 
   const WindowConfig &config() const { return config_; }
 
