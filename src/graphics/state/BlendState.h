@@ -9,21 +9,21 @@ namespace xEngine {
 
 struct BlendState {
   union {
-#pragma pack(push,1)
+#pragma pack(push, 1)
     struct {
       bool enable : 1;
 
-      BlendFactor src_rgb_factor : 5;
-      BlendFactor dst_rgb_factor : 5;
-      BlendOperation rgb_operation : 3;
+      BlendFactor src_rgb_factor : 7;
+      BlendFactor dst_rgb_factor : 7;
+      BlendOperation rgb_operation : 7;
 
-      BlendFactor src_alpha_factor : 5;
-      BlendFactor dst_alpha_factor : 5;
-      BlendOperation alpha_operation : 3;
+      BlendFactor src_alpha_factor : 7;
+      BlendFactor dst_alpha_factor : 7;
+      BlendOperation alpha_operation : 7;
 
-      PixelChannel color_mask : 4;
-      PixelFormat color_format : 5;
-      PixelFormat depth_format : 5;
+      PixelChannel color_mask : 7;
+      PixelFormat color_format : 7;
+      PixelFormat depth_format : 7;
     };
 #pragma pack(pop)
     uint64 value;

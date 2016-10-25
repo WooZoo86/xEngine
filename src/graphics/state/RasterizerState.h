@@ -14,8 +14,8 @@ struct RasterizerState {
       bool scissor_test_enable : 1;
       bool dither_enable : 1;
       bool alpha_to_coverage_enable : 1;
-      FrontFaceType front_face : 2;
-      FaceSide cull_face : 2;
+      FrontFaceType front_face : 3;
+      FaceSide cull_face : 4;
       uint8 sample : 4;
     };
 #pragma pack(pop)

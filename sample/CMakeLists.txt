@@ -29,6 +29,7 @@ include_directories(
 )
 
 add_subdirectory(application)
+add_subdirectory(depth_stencil)
 add_subdirectory(graphics)
 add_subdirectory(http)
 add_subdirectory(nuklear)
