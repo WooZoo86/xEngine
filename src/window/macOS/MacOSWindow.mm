@@ -84,6 +84,10 @@ using namespace xEngine;
    }
 }
 
+- (void) mouseDragged:(NSEvent *)event {
+  [self mouseMoved:event];
+}
+
 - (void) mouseDown:(NSEvent *)event {
   SetMouseButtonDown(window, MouseButtonType::kLeft);
 }
