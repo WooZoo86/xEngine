@@ -107,7 +107,7 @@ class DepthStencilSample : public Application {
   }
 
   virtual ApplicationStatus Loop() override {
-    Window::GetInstance().PollEvent();
+    Window::GetInstance().Tick();
 
     draw();
 

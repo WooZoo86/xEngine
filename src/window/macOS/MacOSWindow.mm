@@ -112,6 +112,20 @@ using namespace xEngine;
   SetMouseButtonUp(window, MouseButtonType::kMiddle);
 }
 
+- (void) scrollWheel:(NSEvent *)event {
+  @autoreleasepool {
+    auto x = [event scrollingDeltaX];
+    auto y = [event scrollingDeltaY];
+    if ([event hasPreciseScrollingDeltas]) {
+        x *= 0.1;
+        y *= 0.1;
+    }
+    if (fabs(x) > 0.0 || fabs(y) > 0.0) {
+      SetMouseScroll(window, x, y);
+    }
+  }
+}
+
 @end
 
 namespace xEngine {
@@ -149,7 +163,7 @@ void MacOSWindow::Finalize() {
   }
 }
 
-void MacOSWindow::PollEvent() {
+void MacOSWindow::Tick() {
   @autoreleasepool {
     NSEvent *event;
     do {

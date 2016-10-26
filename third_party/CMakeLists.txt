@@ -1,4 +1,5 @@
 add_subdirectory(EASTL)
+add_subdirectory(spine-c)
 
 include_directories(mongoose)
 add_library(mongoose mongoose/mongoose.c)

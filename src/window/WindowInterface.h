@@ -26,6 +26,8 @@ class WindowInterface {
 
   const glm::vec2 &GetMousePosition() const { return mouse_position_; }
 
+  const glm::vec2 &GetMouseScroll() const { return mouse_scroll_; }
+
   bool IsMouseButtonDown(MouseButtonType type) const { return mouse_button_down_status_ & static_cast<uint8>(type); }
 
   bool IsMouseButtonUp(MouseButtonType type) const { return mouse_button_up_status_ & static_cast<uint8>(type); }
@@ -37,7 +39,10 @@ class WindowInterface {
   const eastl::unique_ptr<Graphics> &graphics() const { return graphics_; }
 
  private:
-  void ResetMouseStatus() { mouse_button_down_status_ = 0; mouse_button_up_status_ = 0; }
+  void Reset() {
+    mouse_scroll_.x = mouse_scroll_.y  = 0.0f;
+    mouse_button_down_status_ = mouse_button_up_status_ = 0;
+  }
 
  protected:
   WindowConfig config_;
@@ -45,6 +50,7 @@ class WindowInterface {
   bool should_close_{false};
 
   glm::vec2 mouse_position_;
+  glm::vec2 mouse_scroll_;
 
   uint8 mouse_button_down_status_{0};
   uint8 mouse_button_up_status_{0};

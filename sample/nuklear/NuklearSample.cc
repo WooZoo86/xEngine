@@ -40,7 +40,7 @@ class NuklearSample: public Application {
       renderer->Render();
     }
 
-    Window::GetInstance().PollEvent();
+    Window::GetInstance().Tick();
     if (Window::GetInstance().ShouldClose(window_id_)) {
       NuklearGUI::GetInstance().Finalize();
       Window::GetInstance().GetGraphics(window_id_)->Finalize();

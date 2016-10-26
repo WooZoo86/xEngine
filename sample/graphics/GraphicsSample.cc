@@ -99,7 +99,7 @@ class GraphicsSample : public Application {
   virtual ApplicationStatus Loop() override {
     draw();
 
-    Window::GetInstance().PollEvent();
+    Window::GetInstance().Tick();
 
     if (Window::GetInstance().ShouldClose(window_id_)) {
       Window::GetInstance().GetGraphics(window_id_)->Finalize();

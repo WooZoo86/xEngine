@@ -18,7 +18,7 @@ class WindowSample : public Application {
     return Application::Finalize();
   }
   virtual ApplicationStatus Loop() override {
-    Window::GetInstance().PollEvent();
+    Window::GetInstance().Tick();
     if (Window::GetInstance().ShouldClose(window_id_)) {
       Window::GetInstance().Destroy(window_id_);
       window_id_ = kInvalidResourceID;

@@ -15,7 +15,7 @@ class Win32Window : public WindowInterface {
 
   static void Finalize();
 
-  static void PollEvent();
+  static void Tick();
 
  public:
   virtual void Create(const WindowConfig &config) override;

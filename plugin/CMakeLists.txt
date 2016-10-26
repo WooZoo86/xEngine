@@ -25,6 +25,8 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/third_party/${GLAD_DIR}/include
     ${PROJECT_SOURCE_DIR}/third_party/stb_image
     ${PROJECT_SOURCE_DIR}/third_party/nuklear
+    ${PROJECT_SOURCE_DIR}/third_party/spine-c/include
 )
 
 add_subdirectory(nuklear)
+add_subdirectory(spine)

@@ -1,4 +1,4 @@
-add_library(xEngineNuklear NuklearGUI.cc)
+add_library(xEngineNuklear NuklearConfig.h NuklearGUI.h NuklearGUI.cc)
 
 target_link_libraries(xEngineNuklear xEngine EASTL)
 

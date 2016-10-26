@@ -13,7 +13,7 @@ class MacOSWindow: public WindowInterface {
 
   static void Finalize();
 
-  static void PollEvent();
+  static void Tick();
 
  public:
   virtual void Create(const WindowConfig &config) override;
@@ -44,6 +44,11 @@ class MacOSWindow: public WindowInterface {
   friend void SetMouseButtonUp(MacOSWindow *window, MouseButtonType type) {
     window->mouse_button_up_status_ |= static_cast<uint8>(type);
     window->mouse_button_status_cache_ ^= static_cast<uint8>(type);
+  }
+
+  friend void SetMouseScroll(MacOSWindow *window, float32 x, float32 y) {
+    window->mouse_scroll_.x = x;
+    window->mouse_scroll_.y = y;
   }
 };
 

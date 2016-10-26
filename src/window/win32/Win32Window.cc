@@ -81,7 +81,7 @@ void Win32Window::Finalize() {
   UnregisterClass("xEngine", GetModuleHandle(nullptr));
 }
 
-void Win32Window::PollEvent() {
+void Win32Window::Tick() {
   MSG msg;
   while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
     TranslateMessage(&msg);

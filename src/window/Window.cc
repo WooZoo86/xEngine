@@ -102,18 +102,18 @@ bool Window::IsAllClosed() {
   return resource_id_cache_.empty();
 }
 
-void Window::PollEvent() {
+void Window::Tick() {
   x_assert(Available());
   for (auto &id : resource_id_cache_) {
     auto &resource = pool_.Find(id);
     if (resource.status() != ResourceStatus::kInvalid) {
-      resource.window->ResetMouseStatus();
+      resource.window->Reset();
     }
   }
 #if X_WINDOWS
-  Win32Window::PollEvent();
+  Win32Window::Tick();
 #elif X_MACOS
-  MacOSWindow::PollEvent();
+  MacOSWindow::Tick();
 #endif
 }
 

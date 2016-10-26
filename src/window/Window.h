@@ -37,7 +37,7 @@ class Window: public ResourceManager {
 
   bool IsAllClosed();
 
-  void PollEvent();
+  void Tick();
 
  private:
   bool available_{false};

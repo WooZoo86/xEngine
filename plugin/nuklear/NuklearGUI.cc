@@ -193,6 +193,7 @@ void NuklearGUI::BeginFrame() {
   auto x = static_cast<int32>(position.x);
   auto y = static_cast<int32>(position.y);
   nk_input_motion(&context_, x, y);
+  nk_input_scroll(&context_, window_->GetMouseScroll().y);
   nk_input_button(&context_, NK_BUTTON_LEFT, x, y, window_->IsMouseButtonDown(MouseButtonType::kLeft) || window_->IsMouseButtonPressed(MouseButtonType::kLeft));
   nk_input_button(&context_, NK_BUTTON_RIGHT, x, y, window_->IsMouseButtonDown(MouseButtonType::kRight) || window_->IsMouseButtonPressed(MouseButtonType::kRight));
   nk_input_button(&context_, NK_BUTTON_MIDDLE, x, y, window_->IsMouseButtonDown(MouseButtonType::kMiddle) || window_->IsMouseButtonPressed(MouseButtonType::kMiddle));
