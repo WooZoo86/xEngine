@@ -3,7 +3,8 @@
 #if X_OPENGL
 #include "graphics/impl/OpenGL/OpenGLRenderer.h"
 #include "graphics/impl/OpenGL/resource/OpenGLGraphicsResourceManager.h"
-#elif X_D3D11
+#endif
+#if X_D3D11
 #include "graphics/impl/D3D11/D3D11Renderer.h"
 #include "graphics/impl/D3D11/resource/D3D11GraphicsResourceManager.h"
 #endif

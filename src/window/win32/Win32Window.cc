@@ -25,6 +25,14 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM l
       self->mouse_position_.y = GET_Y_LPARAM(lParam);
       break;
     }
+		case WM_MOUSEWHEEL: {
+			self->mouse_scroll_.y = static_cast<int16>(HIWORD(wParam)) / static_cast<float32>(WHEEL_DELTA);
+			break;
+    }
+		case WM_MOUSEHWHEEL: {
+			self->mouse_scroll_.x = -static_cast<int16>(HIWORD(wParam)) / static_cast<float32>(WHEEL_DELTA);
+			break;
+    }
     case WM_LBUTTONDOWN: {
       self->mouse_button_down_status_ |= static_cast<uint8>(MouseButtonType::kLeft);
       self->mouse_button_status_cache_ |= static_cast<uint8>(MouseButtonType::kLeft);

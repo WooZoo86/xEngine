@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.4)
 project(xEngine)
 
 set(CMAKE_CXX_STANDARD 11)
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 option(X_ENGINE_OPTION_OPENGL "Use OpenGL" ON)
 option(X_ENGINE_OPTION_D3D11 "Use DirectX3D 11" OFF)
