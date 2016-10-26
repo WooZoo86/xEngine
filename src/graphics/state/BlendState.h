@@ -13,13 +13,13 @@ struct BlendState {
     struct {
       bool enable : 1;
 
-      BlendFactor src_rgb_factor : 7;
-      BlendFactor dst_rgb_factor : 7;
-      BlendOperation rgb_operation : 7;
+      BlendFactor src_rgb_factor : 4;
+      BlendFactor dst_rgb_factor : 4;
+      BlendOperation rgb_operation : 3;
 
-      BlendFactor src_alpha_factor : 7;
-      BlendFactor dst_alpha_factor : 7;
-      BlendOperation alpha_operation : 7;
+      BlendFactor src_alpha_factor : 4;
+      BlendFactor dst_alpha_factor : 4;
+      BlendOperation alpha_operation : 3;
 
       PixelChannel color_mask : 7;
       PixelFormat color_format : 7;
