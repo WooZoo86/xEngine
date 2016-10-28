@@ -197,14 +197,6 @@ static int8 ChannelBitOfPixelFormat(PixelFormat format, PixelChannel channel) {
   return count;
 }
 
-enum class GraphicsResourceType: uint16 {
-  kVertexBuffer,
-  kIndexBuffer,
-  kShader,
-  kProgram,
-  kTexture,
-};
-
 enum class BlendFactor: uint8 {
   kZero,
   kOne,
@@ -397,47 +389,6 @@ static size_t SizeOfVertexElementFormat(VertexElementFormat format) {
   }
 }
 
-enum class UniformFormat: uint8 {
-  kInvalid,
-  kInt,
-  kBool,
-  kVector1,
-  kVector2,
-  kVector3,
-  kVector4,
-  kMatrix2,
-  kMatrix3,
-  kMatrix4,
-  kTexture,
-};
-
-static int32 SizeOfUniformFormat(UniformFormat format) {
-  switch (format) {
-    case UniformFormat::kInt:
-      return sizeof(int32);
-    case UniformFormat::kBool:
-      return sizeof(int32);
-    case UniformFormat::kVector1:
-      return sizeof(float32);
-    case UniformFormat::kVector2:
-      return 2 * sizeof(float32);
-    case UniformFormat::kVector3:
-      return 3 * sizeof(float32);
-    case UniformFormat::kVector4:
-      return 4 * sizeof(float32);
-    case UniformFormat::kMatrix2:
-      return 2 * 2 * sizeof(int32);
-    case UniformFormat::kMatrix3:
-      return 3 * 3 * sizeof(int32);
-    case UniformFormat::kMatrix4:
-      return 4 * 4 * sizeof(int32);
-    case UniformFormat::kTexture:
-    default:
-      x_error("unknown UniformFormat\n");
-      return 0;
-  }
-}
-
 enum class VertexTopology: uint8 {
   kPoints,
   kLines,
@@ -462,10 +413,6 @@ enum class TextureFilterMode: uint8 {
   kLinearMipmapNearest,
   kLinearMipmapLinear,
 };
-
-static bool IsTextureFilterModeUseMipmap(TextureFilterMode mode) {
-  return !(mode == TextureFilterMode::kNearest || mode == TextureFilterMode::kLinear);
-}
 
 enum class ClearType: uint8 {
   kNone = 0,

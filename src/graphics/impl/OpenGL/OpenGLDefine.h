@@ -497,6 +497,50 @@ static const char *AttributeNameForVertexElementSemantic(VertexElementSemantic s
   }
 }
 
+static size_t SizeOfOpenGLType(GLenum type) {
+  switch (type) {
+    case GL_INT:
+    case GL_UNSIGNED_INT:
+    case GL_BOOL:
+    case GL_FLOAT: return 4;
+    case GL_INT_VEC2:
+    case GL_BOOL_VEC2:
+    case GL_UNSIGNED_INT_VEC2:
+    case GL_FLOAT_VEC2: return 8;
+    case GL_INT_VEC3:
+    case GL_UNSIGNED_INT_VEC3:
+    case GL_BOOL_VEC3:
+    case GL_FLOAT_VEC3: return 12;
+    case GL_INT_VEC4:
+    case GL_UNSIGNED_INT_VEC4:
+    case GL_BOOL_VEC4:
+    case GL_FLOAT_VEC4: return 16;
+    case GL_DOUBLE: return 8;
+    case GL_DOUBLE_VEC2: return 16;
+    case GL_DOUBLE_VEC3: return 24;
+    case GL_DOUBLE_VEC4: return 32;
+    case GL_FLOAT_MAT2: return 16;
+    case GL_FLOAT_MAT3: return 36;
+    case GL_FLOAT_MAT4: return 64;
+    case GL_FLOAT_MAT2x3: return 24;
+    case GL_FLOAT_MAT2x4: return 32;
+    case GL_FLOAT_MAT3x2: return 24;
+    case GL_FLOAT_MAT3x4: return 48;
+    case GL_FLOAT_MAT4x2: return 32;
+    case GL_FLOAT_MAT4x3: return 48;
+    case GL_DOUBLE_MAT2: return 32;
+    case GL_DOUBLE_MAT3: return 72;
+    case GL_DOUBLE_MAT4: return 128;
+    case GL_DOUBLE_MAT2x3: return 48;
+    case GL_DOUBLE_MAT2x4: return 64;
+    case GL_DOUBLE_MAT3x2: return 48;
+    case GL_DOUBLE_MAT3x4: return 96;
+    case GL_DOUBLE_MAT4x2: return 64;
+    case GL_DOUBLE_MAT4x3: return 96;
+    default: return 0;
+  }
+}
+
 }
 
 #endif // X_OPENGL

@@ -40,15 +40,7 @@ class OpenGLRenderer: public RendererInterface {
 
   virtual void ApplyShader(ResourceID id) override;
 
-  virtual void UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, uint32 value) override;
-
-  virtual void UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, float64 value) override;
-
-  virtual void UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, const glm::u32vec4 &value) override;
-
-  virtual void UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, const glm::f64vec4 &value) override;
-
-  virtual void UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, const glm::highp_dmat4x4 &value) override;
+  virtual void UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, const void *buffer, size_t size) override;
 
   virtual void UpdateShaderUniformTexture(ResourceID shader_id, const eastl::string &name, ResourceID texture_id) override;
 
@@ -58,7 +50,7 @@ class OpenGLRenderer: public RendererInterface {
 
   virtual void UpdateUniformBufferData(ResourceID id, size_t offset, size_t length, const void *buffer) override;
 
-  virtual void ApplySampler(ResourceID id, uint8 index) override;
+  virtual void ApplySampler(ResourceID shader_id, const eastl::string &name, ResourceID sampler_id) override;
 
   virtual void ResetSampler() override;
 

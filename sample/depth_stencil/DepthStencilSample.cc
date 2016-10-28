@@ -130,9 +130,9 @@ class DepthStencilSample : public Application {
         glm::vec3(0.0f, 0.0f, 0.0f),
         glm::vec3(0.0f, 0.0f, 1.0f)
     );
-    Window::GetInstance().GetGraphics(window_id_)->renderer()->UpdateShaderUniformData(shader_, "uView", view);
+    Window::GetInstance().GetGraphics(window_id_)->renderer()->UpdateShaderUniformData(shader_, "uView", glm::value_ptr(view), sizeof(view));
     auto projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 1.0f, 10.0f);
-    Window::GetInstance().GetGraphics(window_id_)->renderer()->UpdateShaderUniformData(shader_, "uProjection", projection);
+    Window::GetInstance().GetGraphics(window_id_)->renderer()->UpdateShaderUniformData(shader_, "uProjection", glm::value_ptr(projection), sizeof(projection));
   }
 
   void load_sampler() {
@@ -274,17 +274,16 @@ class DepthStencilSample : public Application {
     renderer->ApplyTarget(kInvalidResourceID, ClearState::ClearAll());
     renderer->ApplyShader(shader_);
     renderer->ApplyMesh(mesh_);
-    renderer->ApplySampler(sampler_, 0);
-    renderer->ApplySampler(sampler_, 1);
-    renderer->UpdateShaderUniformData(shader_, "uModel", model);
+    renderer->UpdateShaderUniformData(shader_, "uModel", glm::value_ptr(model), sizeof(model));
     renderer->UpdateShaderUniformTexture(shader_, "uTexture", texture_);
+    renderer->ApplySampler(shader_, "uTexture", sampler_);
 
     renderer->ApplyPipeline(cube_pipeline_);
-    renderer->UpdateShaderUniformData(shader_, "uColor", glm::f64vec4(1.0, 1.0, 1.0, 1.0));
+    renderer->UpdateShaderUniformData(shader_, "uColor", glm::value_ptr(Color(1.0, 1.0, 1.0, 1.0)), sizeof(Color));
     renderer->DrawTopology(VertexTopology::kTriangles, 0, 36);
 
     renderer->ApplyPipeline(floor_pipeline_);
-    renderer->UpdateShaderUniformData(shader_, "uColor", glm::f64vec4(0.0, 0.0, 0.0, 1.0));
+    renderer->UpdateShaderUniformData(shader_, "uColor", glm::value_ptr(Color(0.0, 0.0, 0.0, 1.0)), sizeof(Color));
     renderer->DrawTopology(VertexTopology::kTriangles, 36, 6);
 
 
@@ -293,8 +292,8 @@ class DepthStencilSample : public Application {
         glm::translate(model, glm::vec3(0, 0, -1)),
         glm::vec3(1, 1, -1)
     );
-    renderer->UpdateShaderUniformData(shader_, "uModel", model);
-    renderer->UpdateShaderUniformData(shader_, "uColor", glm::f64vec4(0.3, 0.3, 0.3, 1.0));
+    renderer->UpdateShaderUniformData(shader_, "uModel", glm::value_ptr(model), sizeof(model));
+    renderer->UpdateShaderUniformData(shader_, "uColor", glm::value_ptr(Color(0.3, 0.3, 0.3, 1.0)), sizeof(Color));
     renderer->DrawTopology(VertexTopology::kTriangles, 0, 36);
 
     renderer->Render();

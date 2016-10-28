@@ -177,8 +177,8 @@ class GraphicsSample : public Application {
       renderer->ApplyShader(shader_);
       renderer->ApplyMesh(mesh_);
       renderer->ApplyPipeline(pipeline_);
-      renderer->ApplySampler(sampler_, 0);
       renderer->UpdateShaderUniformTexture(shader_, "uTexture", texture_);
+      renderer->ApplySampler(shader_, "uTexture", sampler_);
       renderer->DrawTopology(VertexTopology::kTriangles, 0, 6);
       renderer->Render();
     }
