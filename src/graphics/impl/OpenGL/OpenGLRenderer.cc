@@ -96,8 +96,8 @@ void OpenGLRenderer::ApplyTarget(ResourceID id, const ClearState &state) {
   if (static_cast<uint8>(state.type) & static_cast<uint8>(ClearType::kDepth)) {
     clear_mask |= GL_DEPTH_BUFFER_BIT;
     glClearDepth(state.depth);
-    if (!cache_.depth_stencil_state.depth_mask) {
-      cache_.depth_stencil_state.depth_mask = true;
+    if (!cache_.depth_stencil_state.depth_write_enable) {
+      cache_.depth_stencil_state.depth_write_enable = true;
       glDepthMask(GL_TRUE);
     }
   }
@@ -105,10 +105,8 @@ void OpenGLRenderer::ApplyTarget(ResourceID id, const ClearState &state) {
   if (static_cast<uint8>(state.type) & static_cast<uint8>(ClearType::kStencil)) {
     clear_mask |= GL_STENCIL_BUFFER_BIT;
     glClearStencil(state.stencil);
-    if (cache_.depth_stencil_state.front.write_mask != 0xff ||
-        cache_.depth_stencil_state.back.write_mask != 0xff) {
-      cache_.depth_stencil_state.front.write_mask = 0xff;
-      cache_.depth_stencil_state.back.write_mask = 0xff;
+    if (cache_.depth_stencil_state.stencil_write_mask != 0xff) {
+      cache_.depth_stencil_state.stencil_write_mask = 0xff;
       glStencilMask(0xff);
     }
   }
@@ -615,8 +613,8 @@ void OpenGLRenderer::ResetBlendState() {
 void OpenGLRenderer::ApplyDepthStencilState(const DepthStencilState &depth_stencil_state) {
   if (cache_.depth_stencil_state != depth_stencil_state) {
     if (cache_.depth_stencil_state.value != depth_stencil_state.value) {
-      if (depth_stencil_state.compare != cache_.depth_stencil_state.compare) {
-        glDepthFunc(GLEnumForCompareFunction(depth_stencil_state.compare));
+      if (depth_stencil_state.depth_compare != cache_.depth_stencil_state.depth_compare) {
+        glDepthFunc(GLEnumForCompareFunction(depth_stencil_state.depth_compare));
       }
       if (depth_stencil_state.depth_enable != cache_.depth_stencil_state.depth_enable) {
         if (depth_stencil_state.depth_enable) {
@@ -625,8 +623,8 @@ void OpenGLRenderer::ApplyDepthStencilState(const DepthStencilState &depth_stenc
           glDisable(GL_DEPTH_TEST);
         }
       }
-      if (depth_stencil_state.depth_mask != cache_.depth_stencil_state.depth_mask) {
-        glDepthMask(static_cast<GLboolean>(depth_stencil_state.depth_mask));
+      if (depth_stencil_state.depth_write_enable != cache_.depth_stencil_state.depth_write_enable) {
+        glDepthMask(static_cast<GLboolean>(depth_stencil_state.depth_write_enable));
       }
       if (depth_stencil_state.stencil_enable != cache_.depth_stencil_state.stencil_enable) {
         if (depth_stencil_state.stencil_enable) {
@@ -635,16 +633,12 @@ void OpenGLRenderer::ApplyDepthStencilState(const DepthStencilState &depth_stenc
           glDisable(GL_STENCIL_TEST);
         }
       }
+      if (depth_stencil_state.stencil_write_mask != cache_.depth_stencil_state.stencil_write_mask) {
+        glStencilMask(depth_stencil_state.stencil_write_mask);
+        cache_.depth_stencil_state.stencil_write_mask = depth_stencil_state.stencil_write_mask;
+      }
     }
     if (cache_.depth_stencil_state.front != depth_stencil_state.front) {
-      if (depth_stencil_state.front.compare != cache_.depth_stencil_state.compare ||
-          depth_stencil_state.front.stencil_value != cache_.depth_stencil_state.front.stencil_value ||
-          depth_stencil_state.front.read_mask != cache_.depth_stencil_state.front.read_mask) {
-        glStencilFuncSeparate(GL_FRONT,
-                              GLEnumForCompareFunction(depth_stencil_state.front.compare),
-                              depth_stencil_state.front.stencil_value,
-                              depth_stencil_state.front.read_mask);
-      }
       if (depth_stencil_state.front.fail != cache_.depth_stencil_state.front.fail ||
           depth_stencil_state.front.depth_fail != cache_.depth_stencil_state.front.depth_fail ||
           depth_stencil_state.front.pass != cache_.depth_stencil_state.front.pass) {
@@ -653,19 +647,16 @@ void OpenGLRenderer::ApplyDepthStencilState(const DepthStencilState &depth_stenc
                             GLEnumForStencilOperation(depth_stencil_state.front.depth_fail),
                             GLEnumForStencilOperation(depth_stencil_state.front.pass));
       }
-      if (depth_stencil_state.front.write_mask != cache_.depth_stencil_state.front.write_mask) {
-        glStencilMaskSeparate(GL_FRONT, depth_stencil_state.front.write_mask);
-      }
+    }
+    if (depth_stencil_state.stencil_read_mask != cache_.depth_stencil_state.stencil_read_mask ||
+        depth_stencil_state.front.compare != cache_.depth_stencil_state.front.compare ||
+        depth_stencil_state.stencil_value != cache_.depth_stencil_state.stencil_value) {
+      glStencilFuncSeparate(GL_FRONT,
+                            GLEnumForCompareFunction(depth_stencil_state.front.compare),
+                            depth_stencil_state.stencil_value,
+                            depth_stencil_state.stencil_read_mask);
     }
     if (cache_.depth_stencil_state.back != depth_stencil_state.back) {
-      if (depth_stencil_state.back.compare != cache_.depth_stencil_state.compare ||
-          depth_stencil_state.back.stencil_value != cache_.depth_stencil_state.back.stencil_value ||
-          depth_stencil_state.back.read_mask != cache_.depth_stencil_state.back.read_mask) {
-        glStencilFuncSeparate(GL_BACK,
-                              GLEnumForCompareFunction(depth_stencil_state.back.compare),
-                              depth_stencil_state.back.stencil_value,
-                              depth_stencil_state.back.read_mask);
-      }
       if (depth_stencil_state.back.fail != cache_.depth_stencil_state.back.fail ||
           depth_stencil_state.back.depth_fail != cache_.depth_stencil_state.back.depth_fail ||
           depth_stencil_state.back.pass != cache_.depth_stencil_state.back.pass) {
@@ -674,9 +665,14 @@ void OpenGLRenderer::ApplyDepthStencilState(const DepthStencilState &depth_stenc
                             GLEnumForStencilOperation(depth_stencil_state.back.depth_fail),
                             GLEnumForStencilOperation(depth_stencil_state.back.pass));
       }
-      if (depth_stencil_state.back.write_mask != cache_.depth_stencil_state.back.write_mask) {
-        glStencilMaskSeparate(GL_BACK, depth_stencil_state.back.write_mask);
-      }
+    }
+    if (depth_stencil_state.stencil_read_mask != cache_.depth_stencil_state.stencil_read_mask ||
+        depth_stencil_state.back.compare != cache_.depth_stencil_state.back.compare ||
+        depth_stencil_state.stencil_value != cache_.depth_stencil_state.stencil_value) {
+      glStencilFuncSeparate(GL_BACK,
+                            GLEnumForCompareFunction(depth_stencil_state.back.compare),
+                            depth_stencil_state.stencil_value,
+                            depth_stencil_state.stencil_read_mask);
     }
     cache_.depth_stencil_state = depth_stencil_state;
   }

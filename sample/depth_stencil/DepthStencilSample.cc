@@ -229,15 +229,15 @@ class DepthStencilSample : public Application {
 
     auto pipeline_config = PipelineConfig::ShaderWithLayout(shader_, mesh_config.layout);
     pipeline_config.depth_stencil_state.depth_enable = true;
-    pipeline_config.depth_stencil_state.depth_mask = true;
+    pipeline_config.depth_stencil_state.depth_write_enable = true;
     cube_pipeline_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(pipeline_config);
 
     pipeline_config.depth_stencil_state.depth_enable = true;
-    pipeline_config.depth_stencil_state.depth_mask = false;
+    pipeline_config.depth_stencil_state.depth_write_enable = false;
     pipeline_config.depth_stencil_state.stencil_enable = true;
-    pipeline_config.depth_stencil_state.front.read_mask = 0xff;
-    pipeline_config.depth_stencil_state.front.write_mask = 0xff;
-    pipeline_config.depth_stencil_state.front.stencil_value = 1;
+    pipeline_config.depth_stencil_state.stencil_read_mask = 0xff;
+    pipeline_config.depth_stencil_state.stencil_write_mask = 0xff;
+    pipeline_config.depth_stencil_state.stencil_value = 1;
     pipeline_config.depth_stencil_state.front.compare = CompareFunction::kAlways;
     pipeline_config.depth_stencil_state.front.fail = StencilOperation::kKeep;
     pipeline_config.depth_stencil_state.front.depth_fail = StencilOperation::kKeep;
@@ -246,11 +246,11 @@ class DepthStencilSample : public Application {
     floor_pipeline_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(pipeline_config);
 
     pipeline_config.depth_stencil_state.depth_enable = true;
-    pipeline_config.depth_stencil_state.depth_mask = true;
+    pipeline_config.depth_stencil_state.depth_write_enable = true;
     pipeline_config.depth_stencil_state.stencil_enable = true;
-    pipeline_config.depth_stencil_state.front.read_mask = 0xff;
-    pipeline_config.depth_stencil_state.front.write_mask = 0x00;
-    pipeline_config.depth_stencil_state.front.stencil_value = 1;
+    pipeline_config.depth_stencil_state.stencil_read_mask = 0xff;
+    pipeline_config.depth_stencil_state.stencil_write_mask = 0x00;
+    pipeline_config.depth_stencil_state.stencil_value = 1;
     pipeline_config.depth_stencil_state.front.compare = CompareFunction::kEqual;
     pipeline_config.depth_stencil_state.front.fail = StencilOperation::kKeep;
     pipeline_config.depth_stencil_state.front.depth_fail = StencilOperation::kKeep;
