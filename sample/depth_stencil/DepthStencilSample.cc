@@ -42,39 +42,39 @@ static const char *fragment_shader =
 #elif X_D3D11
 
 static const char *vertex_shader =
+  "float4x4 uModel;\n"
+	"float4x4 uView;\n"
+	"float4x4 uProjection;\n"
   "struct VS_INPUT\n"
   "{\n"
-  "    float2 aPosition: POSITION;\n"
+  "    float3 aPosition: POSITION;\n"
   "    float2 aTexcoord0: TEXCOORD;\n"
-  "    float3 aColor0: COLOR;\n"
   "};\n"
   "struct VS_OUTPUT\n"
   "{\n"
   "    float4 Position: SV_POSITION;\n"
   "    float2 Texcoord: TEXCOORD;\n"
-  "    float3 Color: COLOR;\n"
   "};\n"
   "VS_OUTPUT main(const VS_INPUT input)\n"
   "{\n"
   "    VS_OUTPUT output;\n"
   "    output.Texcoord = input.aTexcoord0;\n"
-  "    output.Color = input.aColor0;\n"
-  "    output.Position = float4(input.aPosition, 0.0, 1.0);\n"
+	"    output.Position = mul(uProjection, mul(uView, mul(uModel, float4(input.aPosition, 1.0))));\n"
   "    return output;\n"
   "}\n";
 
 static const char *fragment_shader =
+	"float3 uColor;\n"
   "Texture2D uTexture;\n"
   "SamplerState uTexture_sampler;\n"
   "struct PS_INPUT\n"
   "{\n"
   "    float4 Position: SV_POSITION;\n"
   "    float2 Texcoord: TEXCOORD;\n"
-  "    float3 Color: COLOR;\n"
   "};\n"
   "float4 main(const PS_INPUT input): SV_TARGET\n"
   "{\n"
-  "    return uTexture.Sample(uTexture_sampler, input.Texcoord) * float4(input.Color, 1.0);\n"
+  "    return uTexture.Sample(uTexture_sampler, input.Texcoord) * float4(uColor, 1.0);\n"
   "}\n";
 
 #endif

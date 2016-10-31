@@ -50,7 +50,7 @@ static ID3D10Blob *CompileShader(const char *type, const char *source) {
 static void ReflectShader(ID3D11Device *device, ID3D10Blob *blob, ID3D11Buffer **buffer,
                           eastl::hash_map<eastl::string, D3D11Shader::UniformBlockInfo> &block_map,
                           eastl::hash_map<eastl::string, uint32> &texture_map,
-                          eastl::hash_map<eastl::string, uint32> sampler_map) {
+                          eastl::hash_map<eastl::string, uint32> &sampler_map) {
   ID3D11ShaderReflection *reflection = nullptr;
 
   x_d3d11_assert_msg(D3DReflect(
@@ -94,8 +94,6 @@ static void ReflectShader(ID3D11Device *device, ID3D10Blob *blob, ID3D11Buffer *
         D3D11Shader::UniformElementInfo element_info;
         element_info.clazz = variable_type_desc.Class;
         element_info.type = variable_type_desc.Type;
-        element_info.rows = variable_type_desc.Rows;
-        element_info.column = variable_type_desc.Columns;
         element_info.offset = variable_desc.StartOffset;
         element_info.size = variable_desc.Size;
 

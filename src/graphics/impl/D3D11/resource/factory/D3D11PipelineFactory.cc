@@ -73,7 +73,7 @@ void D3D11PipelineFactory::Create(D3D11Pipeline &resource) {
   ZeroMemory(&depth_stencil_desc, sizeof(depth_stencil_desc));
   depth_stencil_desc.DepthEnable = depth_stencil_config.depth_enable;
   depth_stencil_desc.DepthWriteMask = depth_stencil_config.depth_enable ? D3D11_DEPTH_WRITE_MASK_ALL : D3D11_DEPTH_WRITE_MASK_ZERO;
-  depth_stencil_desc.DepthFunc = EnumForCompareFunction(depth_stencil_config.compare);
+  depth_stencil_desc.DepthFunc = EnumForCompareFunction(depth_stencil_config.depth_compare);
   depth_stencil_desc.StencilEnable = depth_stencil_config.stencil_enable;
   depth_stencil_desc.StencilReadMask = depth_stencil_config.stencil_read_mask;
   depth_stencil_desc.StencilWriteMask = depth_stencil_config.stencil_write_mask;

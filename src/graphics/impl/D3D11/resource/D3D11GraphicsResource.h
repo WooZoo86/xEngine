@@ -26,8 +26,6 @@ struct D3D11Shader : public Resource<ShaderConfig> {
   struct UniformElementInfo {
     D3D_SHADER_VARIABLE_CLASS clazz;
     D3D_SHADER_VARIABLE_TYPE type;
-    size_t rows{0};
-    size_t column{0};
     size_t offset{0};
     size_t size{0};
   };

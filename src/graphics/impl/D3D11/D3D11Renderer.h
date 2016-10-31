@@ -13,8 +13,6 @@ namespace xEngine {
 
 class WindowInterface;
 
-class D3D11GraphicsResourceManager;
-
 class D3D11Renderer: public RendererInterface {
  public:
    virtual void Initialize(const GraphicsConfig &config) override;
@@ -22,6 +20,8 @@ class D3D11Renderer: public RendererInterface {
    virtual void Finalize() override;
 
    virtual void Render() override;
+
+	 virtual void MakeCurrent() override;
 
    virtual void ApplyTarget(ResourceID id = kInvalidResourceID, const ClearState &state = ClearState()) override;
 
@@ -35,15 +35,7 @@ class D3D11Renderer: public RendererInterface {
 
    virtual void ApplyShader(ResourceID id) override;
 
-   virtual void UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, uint32 value) override;
-
-   virtual void UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, float64 value) override;
-
-   virtual void UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, const glm::u32vec4 &value) override;
-
-   virtual void UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, const glm::f64vec4 &value) override;
-
-   virtual void UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, const glm::highp_dmat4x4 &value) override;
+   virtual void UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, const void *buffer, size_t size) override;
 
    virtual void UpdateShaderUniformTexture(ResourceID shader_id, const eastl::string &name, ResourceID texture_id) override;
 
@@ -53,7 +45,7 @@ class D3D11Renderer: public RendererInterface {
 
    virtual void UpdateUniformBufferData(ResourceID id, size_t offset, size_t length, const void *buffer) override;
 
-   virtual void ApplySampler(ResourceID id, uint8 index) override;
+   virtual void ApplySampler(ResourceID shader_id, const eastl::string &name, ResourceID sampler_id) override;
 
    virtual void ResetSampler() override;
 

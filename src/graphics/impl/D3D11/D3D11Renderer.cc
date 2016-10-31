@@ -29,13 +29,13 @@ void D3D11Renderer::Initialize(const GraphicsConfig &config) {
   swap_chain_desc.BufferCount = 1;
   swap_chain_desc.BufferDesc.Width = window()->config().width;
   swap_chain_desc.BufferDesc.Height = window()->config().height;
-  swap_chain_desc.BufferDesc.Format = SwapChainFormatForPixelFormat(window()->config().color_format);
+  swap_chain_desc.BufferDesc.Format = SwapChainFormatForPixelFormat(config_.color_format);
   swap_chain_desc.BufferDesc.RefreshRate.Numerator = 60;
   swap_chain_desc.BufferDesc.RefreshRate.Denominator = 1;
   swap_chain_desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
   swap_chain_desc.OutputWindow = static_cast<HWND>(window()->GetNativeHandle());
   swap_chain_desc.SampleDesc.Count = 1;
-  swap_chain_desc.SampleDesc.Quality = window()->config().sample_count > 1 ? D3D11_STANDARD_MULTISAMPLE_PATTERN : 0;
+  swap_chain_desc.SampleDesc.Quality = config_.sample_count > 1 ? D3D11_STANDARD_MULTISAMPLE_PATTERN : 0;
   swap_chain_desc.Windowed = !window()->config().is_full_screen;
 
   D3D_FEATURE_LEVEL feature_level;
@@ -72,14 +72,14 @@ void D3D11Renderer::Initialize(const GraphicsConfig &config) {
 
   x_assert(render_target_view_);
 
-  if (window()->config().depth_format != PixelFormat::NONE) {
+  if (config_.depth_format != PixelFormat::NONE) {
     D3D11_TEXTURE2D_DESC depth_stencil_desc;
     ZeroMemory(&depth_stencil_desc, sizeof(depth_stencil_desc));
     depth_stencil_desc.Width = window()->config().width;
     depth_stencil_desc.Height = window()->config().height;
     depth_stencil_desc.MipLevels = 1;
     depth_stencil_desc.ArraySize = 1;
-    depth_stencil_desc.Format = RenderTargetFormatForPixelFormat(window()->config().depth_format);
+    depth_stencil_desc.Format = RenderTargetFormatForPixelFormat(config_.depth_format);
     depth_stencil_desc.SampleDesc = swap_chain_desc.SampleDesc;
     depth_stencil_desc.Usage = D3D11_USAGE_DEFAULT;
     depth_stencil_desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
@@ -97,8 +97,7 @@ void D3D11Renderer::Initialize(const GraphicsConfig &config) {
     D3D11_DEPTH_STENCIL_VIEW_DESC depth_stencil_view_desc;
     ZeroMemory(&depth_stencil_view_desc, sizeof(depth_stencil_view_desc));
     depth_stencil_view_desc.Format = depth_stencil_desc.Format;
-    depth_stencil_view_desc.ViewDimension =
-        window()->config().sample_count > 1 ? D3D11_DSV_DIMENSION_TEXTURE2DMS : D3D11_DSV_DIMENSION_TEXTURE2D;
+    depth_stencil_view_desc.ViewDimension = config_.sample_count > 1 ? D3D11_DSV_DIMENSION_TEXTURE2DMS : D3D11_DSV_DIMENSION_TEXTURE2D;
     depth_stencil_view_desc.Texture2D.MipSlice = 0;
 
     x_d3d11_assert_msg(device_->CreateDepthStencilView(
@@ -157,8 +156,10 @@ void D3D11Renderer::Finalize() {
 }
 
 void D3D11Renderer::Render() {
-  swap_chain_->Present(window()->config().swap_interval, 0);
+  swap_chain_->Present(config_.swap_interval, 0);
 }
+
+void D3D11Renderer::MakeCurrent() {}
 
 void D3D11Renderer::ApplyTarget(ResourceID id, const ClearState &state) {
   if (id != kInvalidResourceID) {
@@ -281,7 +282,7 @@ void D3D11Renderer::ApplyShader(ResourceID id) {
   }
 }
 
-void D3D11Renderer::UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, uint32 value) {
+void D3D11Renderer::UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, const void *buffer, size_t size) {
   auto &shader = resource_manager()->shader_pool_.Find(shader_id);
   if (shader.status() == ResourceStatus::kCompleted) {
     if (shader.vertex_shader != cache_.vertex_shader) {
@@ -301,15 +302,14 @@ void D3D11Renderer::UpdateShaderUniformData(ResourceID shader_id, const eastl::s
       if (element_pair != vertex_pair->second.elements.end()) {
         find = true;
         auto info = element_pair->second;
-        if (info.clazz == D3D_SVC_SCALAR &&
-           (info.type == D3D_SVT_BOOL || info.type == D3D_SVT_INT || info.type == D3D_SVT_UINT)) {
+        if (size >= info.size) {
           D3D11_MAPPED_SUBRESOURCE source;
           x_d3d11_assert_msg(context_->Map(shader.vertex_global_uniform_block, 0, D3D11_MAP_WRITE_DISCARD, 0, &source), "map vertex global uniform buffer falied!\n");
           auto pointer = reinterpret_cast<char *>(source.pData) + info.offset;
-          memcpy(pointer, &value, info.size);
+          memcpy(pointer, buffer, info.size);
           context_->Unmap(shader.vertex_global_uniform_block, 0);
         } else {
-          Log::GetInstance().Error("uniform should not be placed with uint32\n");
+          Log::GetInstance().Error("buffer size is too small to fit into uniform: %s\n", name.c_str());
         }
       }
     }
@@ -320,399 +320,16 @@ void D3D11Renderer::UpdateShaderUniformData(ResourceID shader_id, const eastl::s
       if (element_pair != fragment_pair->second.elements.end()) {
         find = true;
         auto info = element_pair->second;
-        if (info.clazz == D3D_SVC_SCALAR &&
-          (info.type == D3D_SVT_BOOL || info.type == D3D_SVT_INT || info.type == D3D_SVT_UINT)) {
+				if (size >= info.size) {
           D3D11_MAPPED_SUBRESOURCE source;
           x_d3d11_assert_msg(context_->Map(shader.fragment_global_uniform_block, 0, D3D11_MAP_WRITE_DISCARD, 0, &source), "map fragment global uniform buffer falied!\n");
           auto pointer = reinterpret_cast<char *>(source.pData) + info.offset;
-          memcpy(pointer, &value, info.size);
+          memcpy(pointer, buffer, info.size);
           context_->Unmap(shader.fragment_global_uniform_block, 0);
         }
         else {
-          Log::GetInstance().Error("uniform should not be placed with uint32\n");
+					Log::GetInstance().Error("buffer size is too small to fit into uniform: %s\n", name.c_str());
         }
-      }
-    }
-
-    if (!find) {
-      Log::GetInstance().Error("cannot find uniform: %s\n", name.c_str());
-    }
-  }
-}
-
-void D3D11Renderer::UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, float64 value) {
-  auto &shader = resource_manager()->shader_pool_.Find(shader_id);
-  if (shader.status() == ResourceStatus::kCompleted) {
-    if (shader.vertex_shader != cache_.vertex_shader) {
-      context_->VSSetShader(shader.vertex_shader, nullptr, 0);
-      cache_.vertex_shader = shader.vertex_shader;
-    }
-    if (shader.fragment_shader != cache_.fragment_shader) {
-      context_->PSSetShader(shader.fragment_shader, nullptr, 0);
-      cache_.fragment_shader = shader.fragment_shader;
-    }
-
-    auto find = false;
-
-    auto vertex_pair = shader.vertex_uniform_block_info.find(g_d3d11_global_uniform_block_name);
-    if (vertex_pair != shader.vertex_uniform_block_info.end()) {
-      auto element_pair = vertex_pair->second.elements.find(name.c_str());
-      if (element_pair != vertex_pair->second.elements.end()) {
-        find = true;
-        auto info = element_pair->second;
-        if (info.clazz == D3D_SVC_SCALAR) {
-          D3D11_MAPPED_SUBRESOURCE source;
-          x_d3d11_assert_msg(context_->Map(shader.vertex_global_uniform_block, 0, D3D11_MAP_WRITE_DISCARD, 0, &source), "map vertex global uniform buffer falied!\n");
-          auto pointer = reinterpret_cast<char *>(source.pData) + info.offset;
-          if (info.type == D3D_SVT_FLOAT) {
-            auto temp = static_cast<float32>(value);
-            memcpy(pointer, &temp, info.size);
-          } else if (info.type == D3D_SVT_DOUBLE) {
-            memcpy(pointer, &value, info.size);
-          }
-          context_->Unmap(shader.vertex_global_uniform_block, 0);
-        } else {
-          Log::GetInstance().Error("uniform should not be placed with float64\n");
-        }
-      }
-    }
-
-    auto fragment_pair = shader.fragment_uniform_block_info.find(g_d3d11_global_uniform_block_name);
-    if (fragment_pair != shader.fragment_uniform_block_info.end()) {
-      auto element_pair = fragment_pair->second.elements.find(name.c_str());
-      if (element_pair != fragment_pair->second.elements.end()) {
-        auto info = element_pair->second;
-        if (info.clazz == D3D_SVC_SCALAR) {
-          D3D11_MAPPED_SUBRESOURCE source;
-          x_d3d11_assert_msg(context_->Map(shader.fragment_global_uniform_block, 0, D3D11_MAP_WRITE_DISCARD, 0, &source), "map fragment global uniform buffer falied!\n");
-          auto pointer = reinterpret_cast<char *>(source.pData) + info.offset;
-          if (info.type == D3D_SVT_FLOAT) {
-            auto temp = static_cast<float32>(value);
-            memcpy(pointer, &temp, info.size);
-          } else if (info.type == D3D_SVT_DOUBLE) {
-            memcpy(pointer, &value, info.size);
-          }
-          context_->Unmap(shader.fragment_global_uniform_block, 0);
-        } else {
-          Log::GetInstance().Error("uniform should not be placed with float64\n");
-        }
-      }
-    }
-
-    if (!find) {
-      Log::GetInstance().Error("cannot find uniform: %s\n", name.c_str());
-    }
-  }
-}
-
-void D3D11Renderer::UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, const glm::u32vec4 &value) {
-  auto &shader = resource_manager()->shader_pool_.Find(shader_id);
-  if (shader.status() == ResourceStatus::kCompleted) {
-    if (shader.vertex_shader != cache_.vertex_shader) {
-      context_->VSSetShader(shader.vertex_shader, nullptr, 0);
-      cache_.vertex_shader = shader.vertex_shader;
-    }
-    if (shader.fragment_shader != cache_.fragment_shader) {
-      context_->PSSetShader(shader.fragment_shader, nullptr, 0);
-      cache_.fragment_shader = shader.fragment_shader;
-    }
-
-    auto find = false;
-
-    auto vertex_pair = shader.vertex_uniform_block_info.find(g_d3d11_global_uniform_block_name);
-    if (vertex_pair != shader.vertex_uniform_block_info.end()) {
-      auto element_pair = vertex_pair->second.elements.find(name.c_str());
-      if (element_pair != vertex_pair->second.elements.end()) {
-        find = true;
-        auto info = element_pair->second;
-        if (info.clazz == D3D_SVC_VECTOR && 
-           (info.type == D3D_SVT_INT || info.type == D3D_SVT_UINT || info.type == D3D_SVT_BOOL)) {
-          D3D11_MAPPED_SUBRESOURCE source;
-          x_d3d11_assert_msg(context_->Map(shader.vertex_global_uniform_block, 0, D3D11_MAP_WRITE_DISCARD, 0, &source), "map vertex global uniform buffer falied!\n");
-          auto pointer = reinterpret_cast<char *>(source.pData) + info.offset;
-          memcpy(pointer, glm::value_ptr(value), info.size);
-          context_->Unmap(shader.vertex_global_uniform_block, 0);
-        } else {
-          Log::GetInstance().Error("uniform should not be placed with float64\n");
-        }
-      }
-    }
-
-    auto fragment_pair = shader.fragment_uniform_block_info.find(g_d3d11_global_uniform_block_name);
-    if (fragment_pair != shader.fragment_uniform_block_info.end()) {
-      auto element_pair = fragment_pair->second.elements.find(name.c_str());
-      if (element_pair != fragment_pair->second.elements.end()) {
-        auto info = element_pair->second;
-        if (info.clazz == D3D_SVC_VECTOR &&
-          (info.type == D3D_SVT_INT || info.type == D3D_SVT_UINT || info.type == D3D_SVT_BOOL)) {
-          D3D11_MAPPED_SUBRESOURCE source;
-          x_d3d11_assert_msg(context_->Map(shader.fragment_global_uniform_block, 0, D3D11_MAP_WRITE_DISCARD, 0, &source), "map fragment global uniform buffer falied!\n");
-          auto pointer = reinterpret_cast<char *>(source.pData) + info.offset;
-          memcpy(pointer, glm::value_ptr(value), info.size);
-          context_->Unmap(shader.fragment_global_uniform_block, 0);
-        } else {
-          Log::GetInstance().Error("uniform should not be placed with float64\n");
-        }
-      }
-    }
-
-    if (!find) {
-      Log::GetInstance().Error("cannot find uniform: %s\n", name.c_str());
-    }
-  }
-}
-
-void D3D11Renderer::UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, const glm::f64vec4 &value) {
-    auto &shader = resource_manager()->shader_pool_.Find(shader_id);
-  if (shader.status() == ResourceStatus::kCompleted) {
-    if (shader.vertex_shader != cache_.vertex_shader) {
-      context_->VSSetShader(shader.vertex_shader, nullptr, 0);
-      cache_.vertex_shader = shader.vertex_shader;
-    }
-    if (shader.fragment_shader != cache_.fragment_shader) {
-      context_->PSSetShader(shader.fragment_shader, nullptr, 0);
-      cache_.fragment_shader = shader.fragment_shader;
-    }
-
-    auto find = false;
-
-    auto vertex_pair = shader.vertex_uniform_block_info.find(g_d3d11_global_uniform_block_name);
-    if (vertex_pair != shader.vertex_uniform_block_info.end()) {
-      auto element_pair = vertex_pair->second.elements.find(name.c_str());
-      if (element_pair != vertex_pair->second.elements.end()) {
-        find = true;
-        auto info = element_pair->second;
-        if (info.clazz == D3D_SVC_VECTOR) {
-          D3D11_MAPPED_SUBRESOURCE source;
-          x_d3d11_assert_msg(context_->Map(shader.vertex_global_uniform_block, 0, D3D11_MAP_WRITE_DISCARD, 0, &source), "map vertex global uniform buffer falied!\n");
-          auto pointer = reinterpret_cast<char *>(source.pData) + info.offset;
-          if (info.type == D3D_SVT_FLOAT) {
-            auto temp = glm::f32vec4(value);
-            memcpy(pointer, glm::value_ptr(temp), info.size);
-          } else if (info.type == D3D_SVT_DOUBLE) {
-            memcpy(pointer, glm::value_ptr(value), info.size);
-          }
-          context_->Unmap(shader.vertex_global_uniform_block, 0);
-        } else {
-          Log::GetInstance().Error("uniform should not be placed with float64\n");
-        }
-      }
-    }
-
-    auto fragment_pair = shader.fragment_uniform_block_info.find(g_d3d11_global_uniform_block_name);
-    if (fragment_pair != shader.fragment_uniform_block_info.end()) {
-      auto element_pair = fragment_pair->second.elements.find(name.c_str());
-      if (element_pair != fragment_pair->second.elements.end()) {
-        auto info = element_pair->second;
-        if (info.clazz == D3D_SVC_VECTOR &&
-          (info.type == D3D_SVT_INT || info.type == D3D_SVT_UINT || info.type == D3D_SVT_BOOL)) {
-          D3D11_MAPPED_SUBRESOURCE source;
-          x_d3d11_assert_msg(context_->Map(shader.fragment_global_uniform_block, 0, D3D11_MAP_WRITE_DISCARD, 0, &source), "map fragment global uniform buffer falied!\n");
-          auto pointer = reinterpret_cast<char *>(source.pData) + info.offset;
-          if (info.type == D3D_SVT_FLOAT) {
-            auto temp = glm::f32vec4(value);
-            memcpy(pointer, glm::value_ptr(temp), info.size);
-          } else if (info.type == D3D_SVT_DOUBLE) {
-            memcpy(pointer, glm::value_ptr(value), info.size);
-          }
-          context_->Unmap(shader.fragment_global_uniform_block, 0);
-        } else {
-          Log::GetInstance().Error("uniform should not be placed with float64\n");
-        }
-      }
-    }
-
-    if (!find) {
-      Log::GetInstance().Error("cannot find uniform: %s\n", name.c_str());
-    }
-  }
-}
-
-void D3D11Renderer::UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, const glm::highp_dmat4x4 &value) {
-  auto &shader = resource_manager()->shader_pool_.Find(shader_id);
-  if (shader.status() == ResourceStatus::kCompleted) {
-    if (shader.vertex_shader != cache_.vertex_shader) {
-      context_->VSSetShader(shader.vertex_shader, nullptr, 0);
-      cache_.vertex_shader = shader.vertex_shader;
-    }
-    if (shader.fragment_shader != cache_.fragment_shader) {
-      context_->PSSetShader(shader.fragment_shader, nullptr, 0);
-      cache_.fragment_shader = shader.fragment_shader;
-    }
-
-    auto find = false;
-
-    auto vertex_pair = shader.vertex_uniform_block_info.find(g_d3d11_global_uniform_block_name);
-    if (vertex_pair != shader.vertex_uniform_block_info.end()) {
-      auto element_pair = vertex_pair->second.elements.find(name.c_str());
-      if (element_pair != vertex_pair->second.elements.end()) {
-        find = true;
-        auto info = element_pair->second;
-        D3D11_MAPPED_SUBRESOURCE source;
-        x_d3d11_assert_msg(context_->Map(shader.vertex_global_uniform_block, 0, D3D11_MAP_WRITE_DISCARD, 0, &source), "map vertex global uniform buffer falied!\n");
-        auto pointer = reinterpret_cast<char *>(source.pData) + info.offset;
-        if (info.clazz == D3D_SVC_MATRIX_COLUMNS) {
-          if (info.type == D3D_SVT_FLOAT) {
-            if (info.rows == 2) {
-              if (info.column == 2) {
-                auto temp = glm::mat2x2(value);
-                memcpy(pointer, glm::value_ptr(temp), info.size);
-              } else if (info.column == 3) {
-                auto temp = glm::mat2x3(value);
-                memcpy(pointer, glm::value_ptr(temp), info.size);
-              } else if (info.column == 4) {
-                auto temp = glm::mat2x4(value);
-                memcpy(pointer, glm::value_ptr(temp), info.size);
-              }
-            } else if (info.rows == 3) {
-              if (info.column == 2) {
-                auto temp = glm::mat3x2(value);
-                memcpy(pointer, glm::value_ptr(temp), info.size);
-              } else if (info.column == 3) {
-                auto temp = glm::mat3x3(value);
-                memcpy(pointer, glm::value_ptr(temp), info.size);
-              } else if (info.column == 4) {
-                auto temp = glm::mat3x4(value);
-                memcpy(pointer, glm::value_ptr(temp), info.size);
-              }
-            } else if (info.rows == 4) {
-              if (info.column == 2) {
-                auto temp = glm::mat4x2(value);
-                memcpy(pointer, glm::value_ptr(temp), info.size);
-              } else if (info.column == 3) {
-                auto temp = glm::mat4x3(value);
-                memcpy(pointer, glm::value_ptr(temp), info.size);
-              } else if (info.column == 4) {
-                auto temp = glm::mat4x4(value);
-                memcpy(pointer, glm::value_ptr(temp), info.size);
-              }
-            }
-          } else if (info.type == D3D_SVT_DOUBLE) {
-            if (info.rows == 2) {
-              if (info.column == 2) {
-                auto temp = glm::highp_dmat2x2(value);
-                memcpy(pointer, glm::value_ptr(temp), info.size);
-              } else if (info.column == 3) {
-                auto temp = glm::highp_dmat2x3(value);
-                memcpy(pointer, glm::value_ptr(temp), info.size);
-              } else if (info.column == 4) {
-                auto temp = glm::highp_dmat2x4(value);
-                memcpy(pointer, glm::value_ptr(temp), info.size);
-              }
-            } else if (info.rows == 3) {
-              if (info.column == 2) {
-                auto temp = glm::highp_dmat3x2(value);
-                memcpy(pointer, glm::value_ptr(temp), info.size);
-              } else if (info.column == 3) {
-                auto temp = glm::highp_dmat3x3(value);
-                memcpy(pointer, glm::value_ptr(temp), info.size);
-              } else if (info.column == 4) {
-                auto temp = glm::highp_dmat3x4(value);
-                memcpy(pointer, glm::value_ptr(temp), info.size);
-              }
-            } else if (info.rows == 4) {
-              if (info.column == 2) {
-                auto temp = glm::highp_dmat4x2(value);
-                memcpy(pointer, glm::value_ptr(temp), info.size);
-              } else if (info.column == 3) {
-                auto temp = glm::highp_dmat4x3(value);
-                memcpy(pointer, glm::value_ptr(temp), info.size);
-              } else if (info.column == 4) {
-                memcpy(pointer, glm::value_ptr(value), info.size);
-              }
-            }
-          }
-        } else {
-          Log::GetInstance().Error("uniform should not be placed with glm::u32vec4\n");
-        }
-        context_->Unmap(shader.vertex_global_uniform_block, 0);
-      }
-    }
-
-    auto fragment_pair = shader.fragment_uniform_block_info.find(g_d3d11_global_uniform_block_name);
-    if (fragment_pair != shader.fragment_uniform_block_info.end()) {
-      auto element_pair = fragment_pair->second.elements.find(name.c_str());
-      if (element_pair != fragment_pair->second.elements.end()) {
-        find = true;
-        auto info = element_pair->second;
-        D3D11_MAPPED_SUBRESOURCE source;
-        x_d3d11_assert_msg(context_->Map(shader.fragment_global_uniform_block, 0, D3D11_MAP_WRITE_DISCARD, 0, &source), "map fragment global uniform buffer falied!\n");
-        auto pointer = reinterpret_cast<char *>(source.pData) + info.offset;
-        if (info.clazz == D3D_SVC_MATRIX_COLUMNS) {
-          if (info.type == D3D_SVT_FLOAT) {
-            if (info.rows == 2) {
-              if (info.column == 2) {
-                auto temp = glm::mat2x2(value);
-                memcpy(pointer, glm::value_ptr(temp), info.size);
-              } else if (info.column == 3) {
-                auto temp = glm::mat2x3(value);
-                memcpy(pointer, glm::value_ptr(temp), info.size);
-              } else if (info.column == 4) {
-                auto temp = glm::mat2x4(value);
-                memcpy(pointer, glm::value_ptr(temp), info.size);
-              }
-            } else if (info.rows == 3) {
-              if (info.column == 2) {
-                auto temp = glm::mat3x2(value);
-                memcpy(pointer, glm::value_ptr(temp), info.size);
-              } else if (info.column == 3) {
-                auto temp = glm::mat3x3(value);
-                memcpy(pointer, glm::value_ptr(temp), info.size);
-              } else if (info.column == 4) {
-                auto temp = glm::mat3x4(value);
-                memcpy(pointer, glm::value_ptr(temp), info.size);
-              }
-            } else if (info.rows == 4) {
-              if (info.column == 2) {
-                auto temp = glm::mat4x2(value);
-                memcpy(pointer, glm::value_ptr(temp), info.size);
-              } else if (info.column == 3) {
-                auto temp = glm::mat4x3(value);
-                memcpy(pointer, glm::value_ptr(temp), info.size);
-              } else if (info.column == 4) {
-                auto temp = glm::mat4x4(value);
-                memcpy(pointer, glm::value_ptr(temp), info.size);
-              }
-            }
-          } else if (info.type == D3D_SVT_DOUBLE) {
-            if (info.rows == 2) {
-              if (info.column == 2) {
-                auto temp = glm::highp_dmat2x2(value);
-                memcpy(pointer, glm::value_ptr(temp), info.size);
-              } else if (info.column == 3) {
-                auto temp = glm::highp_dmat2x3(value);
-                memcpy(pointer, glm::value_ptr(temp), info.size);
-              } else if (info.column == 4) {
-                auto temp = glm::highp_dmat2x4(value);
-                memcpy(pointer, glm::value_ptr(temp), info.size);
-              }
-            } else if (info.rows == 3) {
-              if (info.column == 2) {
-                auto temp = glm::highp_dmat3x2(value);
-                memcpy(pointer, glm::value_ptr(temp), info.size);
-              } else if (info.column == 3) {
-                auto temp = glm::highp_dmat3x3(value);
-                memcpy(pointer, glm::value_ptr(temp), info.size);
-              } else if (info.column == 4) {
-                auto temp = glm::highp_dmat3x4(value);
-                memcpy(pointer, glm::value_ptr(temp), info.size);
-              }
-            } else if (info.rows == 4) {
-              if (info.column == 2) {
-                auto temp = glm::highp_dmat4x2(value);
-                memcpy(pointer, glm::value_ptr(temp), info.size);
-              } else if (info.column == 3) {
-                auto temp = glm::highp_dmat4x3(value);
-                memcpy(pointer, glm::value_ptr(temp), info.size);
-              } else if (info.column == 4) {
-                memcpy(pointer, glm::value_ptr(value), info.size);
-              }
-            }
-          }
-        } else {
-          Log::GetInstance().Error("uniform should not be placed with glm::u32vec4\n");
-        }
-        context_->Unmap(shader.fragment_global_uniform_block, 0);
       }
     }
 
@@ -808,21 +425,57 @@ void D3D11Renderer::UpdateUniformBufferData(ResourceID id, size_t offset, size_t
   }
 }
 
-void D3D11Renderer::ApplySampler(ResourceID id, uint8 index) {
-  auto &sampler = resource_manager()->sampler_pool_.Find(id);
-  if (sampler.status() == ResourceStatus::kCompleted) {
-//    if (stage == GraphicsPipelineStage::kVertexShader) {
-      if (sampler.sampler_state != cache_.vertex_sampler_state[index]) {
-        context_->PSSetSamplers(index, 1, &sampler.sampler_state);
-        cache_.vertex_sampler_state[index] = sampler.sampler_state;
-      }
-//    } else if (stage == GraphicsPipelineStage::kFragmentShader) {
-      if (sampler.sampler_state != cache_.fragment_sampler_state[index]) {
-        context_->PSSetSamplers(index, 1, &sampler.sampler_state);
-        cache_.fragment_sampler_state[index] = sampler.sampler_state;
-      }
-//    }
-  }
+void D3D11Renderer::ApplySampler(ResourceID shader_id, const eastl::string &name, ResourceID sampler_id) {
+	auto &shader = resource_manager()->shader_pool_.Find(shader_id);
+	if (shader.status() == ResourceStatus::kCompleted) {
+		if (shader.vertex_shader != cache_.vertex_shader) {
+			context_->VSSetShader(shader.vertex_shader, nullptr, 0);
+			cache_.vertex_shader = shader.vertex_shader;
+		}
+		if (shader.fragment_shader != cache_.fragment_shader) {
+			context_->PSSetShader(shader.fragment_shader, nullptr, 0);
+			cache_.fragment_shader = shader.fragment_shader;
+		}
+		auto vertex_index = -1;
+		auto sampler_name = name + "_sampler";
+		auto vertex_pair = shader.vertex_sampler_index.find(name.c_str());
+		if (vertex_pair != shader.vertex_sampler_index.end()) {
+			vertex_index = vertex_pair->second;
+		} else {
+			vertex_pair = shader.vertex_sampler_index.find(sampler_name.c_str());
+			if (vertex_pair != shader.vertex_sampler_index.end()) {
+				vertex_index = vertex_pair->second;
+			}
+		}
+		auto fragment_index = -1;
+		auto fragment_pair = shader.fragment_sampler_index.find(name.c_str());
+		if (fragment_pair != shader.fragment_sampler_index.end()) {
+			fragment_index = fragment_pair->second;
+		} else {
+			fragment_pair = shader.fragment_sampler_index.find(sampler_name.c_str());
+			if (fragment_pair != shader.fragment_sampler_index.end()) {
+				fragment_index = fragment_pair->second;
+			}
+		}
+		auto &sampler = resource_manager()->sampler_pool_.Find(sampler_id);
+		if (sampler.status() == ResourceStatus::kCompleted) {
+			if (vertex_index != -1) {
+				if (sampler.sampler_state != cache_.vertex_sampler_state[vertex_index]) {
+					context_->PSSetSamplers(vertex_index, 1, &sampler.sampler_state);
+					cache_.vertex_sampler_state[vertex_index] = sampler.sampler_state;
+				}
+			}
+			if (fragment_index != -1) {
+				if (sampler.sampler_state != cache_.fragment_sampler_state[fragment_index]) {
+					context_->PSSetSamplers(fragment_index, 1, &sampler.sampler_state);
+					cache_.fragment_sampler_state[fragment_index] = sampler.sampler_state;
+				}
+			}
+		}
+		if (vertex_index == -1 && fragment_index == -1) {
+			Log::GetInstance().Error("cannot find sampler state: %s or %s\n", name.c_str(), sampler_name.c_str());
+		}
+	}
 }
 
 void D3D11Renderer::ResetSampler() {
