@@ -48,6 +48,7 @@ static ID3D10Blob *CompileShader(const char *type, const char *source) {
 }
 
 static void ReflectShader(ID3D11Device *device, ID3D10Blob *blob, ID3D11Buffer **buffer,
+													D3D11Shader::UniformBlockInfo &global_info,
                           eastl::hash_map<eastl::string, D3D11Shader::UniformBlockInfo> &block_map,
                           eastl::hash_map<eastl::string, uint32> &texture_map,
                           eastl::hash_map<eastl::string, uint32> &sampler_map) {
@@ -100,8 +101,6 @@ static void ReflectShader(ID3D11Device *device, ID3D10Blob *blob, ID3D11Buffer *
         info.elements.insert({ variable_desc.Name, element_info });
       }
 
-      block_map.insert({ uniform_block_desc.Name, info });
-
       if (strcmp(uniform_block_desc.Name, "$Globals") == 0 && uniform_block_desc.Size > 0) {
         ID3D11Buffer *uniform_buffer = nullptr;
 
@@ -116,6 +115,9 @@ static void ReflectShader(ID3D11Device *device, ID3D10Blob *blob, ID3D11Buffer *
         x_d3d11_assert_msg(device->CreateBuffer(&uniform_buffer_desc, nullptr, &uniform_buffer), "create global uniform buffer failed\n");
 
         *buffer = uniform_buffer;
+				global_info = info;
+      } else {
+				block_map.insert({ uniform_block_desc.Name, info });
       }
     }
     else if (resource_desc.Type == D3D_SIT_TEXTURE) {
@@ -156,6 +158,7 @@ void D3D11ShaderFactory::Create(D3D11Shader &resource) {
     ), "create vertex shader failed\n");
 
     ReflectShader(device_, vertex_blob, &resource.vertex_global_uniform_block,
+			resource.vertex_global_uniform_block_info,
       resource.vertex_uniform_block_info,
       resource.vertex_texture_index,
       resource.vertex_sampler_index);
@@ -170,6 +173,7 @@ void D3D11ShaderFactory::Create(D3D11Shader &resource) {
     ), "create fragment shader failed\n");
 
     ReflectShader(device_, fragment_blob, &resource.fragment_global_uniform_block,
+			resource.fragment_global_uniform_block_info,
       resource.fragment_uniform_block_info,
       resource.fragment_texture_index,
       resource.fragment_sampler_index);

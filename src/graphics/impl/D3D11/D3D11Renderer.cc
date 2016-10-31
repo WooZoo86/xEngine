@@ -14,8 +14,6 @@
 
 namespace xEngine {
 
-static const char *g_d3d11_global_uniform_block_name = "$Globals";
-
 void D3D11Renderer::Initialize(const GraphicsConfig &config) {
   config_ = config;
 
@@ -213,7 +211,7 @@ void D3D11Renderer::ApplyViewPort(int32 x, int32 y, int32 width, int32 height) {
       cache_.viewport.Width != width ||
       cache_.viewport.Height != height) {
     cache_.viewport.TopLeftX = static_cast<FLOAT>(x);
-    cache_.viewport.TopLeftY = static_cast<FLOAT>(y);
+    cache_.viewport.TopLeftY = static_cast<FLOAT>(window()->config().frame_buffer_height - y - height);
     cache_.viewport.Width = static_cast<FLOAT>(width);
     cache_.viewport.Height = static_cast<FLOAT>(height);
     cache_.viewport.MinDepth = 0.0f;
@@ -228,9 +226,9 @@ void D3D11Renderer::ApplyScissor(int32 x, int32 y, int32 width, int32 height) {
       cache_.scissor.right != x + width ||
       cache_.scissor.bottom != y + height) {
     cache_.scissor.left = static_cast<FLOAT>(x);
-    cache_.scissor.top = static_cast<FLOAT>(y);
+    cache_.scissor.top = static_cast<FLOAT>(window()->config().frame_buffer_height - y - height);
     cache_.scissor.right = static_cast<FLOAT>(x + width);
-    cache_.scissor.bottom = static_cast<FLOAT>(y + height);
+    cache_.scissor.bottom = static_cast<FLOAT>(window()->config().frame_buffer_height - y);
     context_->RSSetScissorRects(1, &cache_.scissor);
   }
 }
@@ -273,10 +271,16 @@ void D3D11Renderer::ApplyShader(ResourceID id) {
   if (shader.status() == ResourceStatus::kCompleted) {
     if (shader.vertex_shader != cache_.vertex_shader) {
       context_->VSSetShader(shader.vertex_shader, nullptr, 0);
+			if (shader.vertex_global_uniform_block != nullptr) {
+				context_->VSSetConstantBuffers(shader.vertex_global_uniform_block_info.location, 1, &shader.vertex_global_uniform_block);
+			}
       cache_.vertex_shader = shader.vertex_shader;
     }
     if (shader.fragment_shader != cache_.fragment_shader) {
       context_->PSSetShader(shader.fragment_shader, nullptr, 0);
+			if (shader.fragment_global_uniform_block != nullptr) {
+				context_->PSSetConstantBuffers(shader.fragment_global_uniform_block_info.location, 1, &shader.fragment_global_uniform_block);
+			}
       cache_.fragment_shader = shader.fragment_shader;
     }
   }
@@ -285,21 +289,26 @@ void D3D11Renderer::ApplyShader(ResourceID id) {
 void D3D11Renderer::UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, const void *buffer, size_t size) {
   auto &shader = resource_manager()->shader_pool_.Find(shader_id);
   if (shader.status() == ResourceStatus::kCompleted) {
-    if (shader.vertex_shader != cache_.vertex_shader) {
-      context_->VSSetShader(shader.vertex_shader, nullptr, 0);
-      cache_.vertex_shader = shader.vertex_shader;
-    }
-    if (shader.fragment_shader != cache_.fragment_shader) {
-      context_->PSSetShader(shader.fragment_shader, nullptr, 0);
-      cache_.fragment_shader = shader.fragment_shader;
-    }
+		if (shader.vertex_shader != cache_.vertex_shader) {
+			context_->VSSetShader(shader.vertex_shader, nullptr, 0);
+			if (shader.vertex_global_uniform_block != nullptr) {
+				context_->VSSetConstantBuffers(shader.vertex_global_uniform_block_info.location, 1, &shader.vertex_global_uniform_block);
+			}
+			cache_.vertex_shader = shader.vertex_shader;
+		}
+		if (shader.fragment_shader != cache_.fragment_shader) {
+			context_->PSSetShader(shader.fragment_shader, nullptr, 0);
+			if (shader.fragment_global_uniform_block != nullptr) {
+				context_->PSSetConstantBuffers(shader.fragment_global_uniform_block_info.location, 1, &shader.fragment_global_uniform_block);
+			}
+			cache_.fragment_shader = shader.fragment_shader;
+		}
 
     auto find = false;
 
-    auto vertex_pair = shader.vertex_uniform_block_info.find(g_d3d11_global_uniform_block_name);
-    if (vertex_pair != shader.vertex_uniform_block_info.end()) {
-      auto element_pair = vertex_pair->second.elements.find(name.c_str());
-      if (element_pair != vertex_pair->second.elements.end()) {
+    if (shader.vertex_global_uniform_block != nullptr) {
+      auto element_pair = shader.vertex_global_uniform_block_info.elements.find(name.c_str());
+      if (element_pair != shader.vertex_global_uniform_block_info.elements.end()) {
         find = true;
         auto info = element_pair->second;
         if (size >= info.size) {
@@ -314,10 +323,9 @@ void D3D11Renderer::UpdateShaderUniformData(ResourceID shader_id, const eastl::s
       }
     }
 
-    auto fragment_pair = shader.fragment_uniform_block_info.find(g_d3d11_global_uniform_block_name);
-    if (fragment_pair != shader.fragment_uniform_block_info.end()) {
-      auto element_pair = fragment_pair->second.elements.find(name.c_str());
-      if (element_pair != fragment_pair->second.elements.end()) {
+    if (shader.fragment_global_uniform_block != nullptr) {
+      auto element_pair = shader.fragment_global_uniform_block_info.elements.find(name.c_str());
+      if (element_pair != shader.fragment_global_uniform_block_info.elements.end()) {
         find = true;
         auto info = element_pair->second;
 				if (size >= info.size) {
@@ -342,14 +350,20 @@ void D3D11Renderer::UpdateShaderUniformData(ResourceID shader_id, const eastl::s
 void D3D11Renderer::UpdateShaderUniformTexture(ResourceID shader_id, const eastl::string &name, ResourceID texture_id) {
   auto &shader = resource_manager()->shader_pool_.Find(shader_id);
   if (shader.status() == ResourceStatus::kCompleted) {
-    if (shader.vertex_shader != cache_.vertex_shader) {
-      context_->VSSetShader(shader.vertex_shader, nullptr, 0);
-      cache_.vertex_shader = shader.vertex_shader;
-    }
-    if (shader.fragment_shader != cache_.fragment_shader) {
-      context_->PSSetShader(shader.fragment_shader, nullptr, 0);
-      cache_.fragment_shader = shader.fragment_shader;
-    }
+		if (shader.vertex_shader != cache_.vertex_shader) {
+			context_->VSSetShader(shader.vertex_shader, nullptr, 0);
+			if (shader.vertex_global_uniform_block != nullptr) {
+				context_->VSSetConstantBuffers(shader.vertex_global_uniform_block_info.location, 1, &shader.vertex_global_uniform_block);
+			}
+			cache_.vertex_shader = shader.vertex_shader;
+		}
+		if (shader.fragment_shader != cache_.fragment_shader) {
+			context_->PSSetShader(shader.fragment_shader, nullptr, 0);
+			if (shader.fragment_global_uniform_block != nullptr) {
+				context_->PSSetConstantBuffers(shader.fragment_global_uniform_block_info.location, 1, &shader.fragment_global_uniform_block);
+			}
+			cache_.fragment_shader = shader.fragment_shader;
+		}
 
     auto vertex_pair = shader.vertex_texture_index.find(name.c_str());
     if (vertex_pair != shader.vertex_texture_index.end()) {
@@ -366,14 +380,20 @@ void D3D11Renderer::UpdateShaderUniformTexture(ResourceID shader_id, const eastl
 void D3D11Renderer::UpdateShaderUniformBlock(ResourceID shader_id, const eastl::string &name, ResourceID uniform_buffer_id) {
   auto &shader = resource_manager()->shader_pool_.Find(shader_id);
   if (shader.status() == ResourceStatus::kCompleted) {
-    if (shader.vertex_shader != cache_.vertex_shader) {
-      context_->VSSetShader(shader.vertex_shader, nullptr, 0);
-      cache_.vertex_shader = shader.vertex_shader;
-    }
-    if (shader.fragment_shader != cache_.fragment_shader) {
-      context_->PSSetShader(shader.fragment_shader, nullptr, 0);
-      cache_.fragment_shader = shader.fragment_shader;
-    }
+		if (shader.vertex_shader != cache_.vertex_shader) {
+			context_->VSSetShader(shader.vertex_shader, nullptr, 0);
+			if (shader.vertex_global_uniform_block != nullptr) {
+				context_->VSSetConstantBuffers(shader.vertex_global_uniform_block_info.location, 1, &shader.vertex_global_uniform_block);
+			}
+			cache_.vertex_shader = shader.vertex_shader;
+		}
+		if (shader.fragment_shader != cache_.fragment_shader) {
+			context_->PSSetShader(shader.fragment_shader, nullptr, 0);
+			if (shader.fragment_global_uniform_block != nullptr) {
+				context_->PSSetConstantBuffers(shader.fragment_global_uniform_block_info.location, 1, &shader.fragment_global_uniform_block);
+			}
+			cache_.fragment_shader = shader.fragment_shader;
+		}
 
     auto &uniform_buffer = resource_manager()->uniform_buffer_pool_.Find(uniform_buffer_id);
     if (uniform_buffer.status() == ResourceStatus::kCompleted) {
@@ -430,10 +450,16 @@ void D3D11Renderer::ApplySampler(ResourceID shader_id, const eastl::string &name
 	if (shader.status() == ResourceStatus::kCompleted) {
 		if (shader.vertex_shader != cache_.vertex_shader) {
 			context_->VSSetShader(shader.vertex_shader, nullptr, 0);
+			if (shader.vertex_global_uniform_block != nullptr) {
+				context_->VSSetConstantBuffers(shader.vertex_global_uniform_block_info.location, 1, &shader.vertex_global_uniform_block);
+			}
 			cache_.vertex_shader = shader.vertex_shader;
 		}
 		if (shader.fragment_shader != cache_.fragment_shader) {
 			context_->PSSetShader(shader.fragment_shader, nullptr, 0);
+			if (shader.fragment_global_uniform_block != nullptr) {
+				context_->PSSetConstantBuffers(shader.fragment_global_uniform_block_info.location, 1, &shader.fragment_global_uniform_block);
+			}
 			cache_.fragment_shader = shader.fragment_shader;
 		}
 		auto vertex_index = -1;
