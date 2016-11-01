@@ -313,7 +313,8 @@ void D3D11Renderer::UpdateShaderUniformData(ResourceID shader_id, const eastl::s
         auto info = element_pair->second;
         if (size >= info.size) {
           D3D11_MAPPED_SUBRESOURCE source;
-          x_d3d11_assert_msg(context_->Map(shader.vertex_global_uniform_block, 0, D3D11_MAP_WRITE_DISCARD, 0, &source), "map vertex global uniform buffer falied!\n");
+					ZeroMemory(&source, sizeof(source));
+          x_d3d11_assert_msg(context_->Map(shader.vertex_global_uniform_block, 0, D3D11_MAP_WRITE_NO_OVERWRITE, 0, &source), "map vertex global uniform buffer falied!\n");
           auto pointer = reinterpret_cast<char *>(source.pData) + info.offset;
           memcpy(pointer, buffer, info.size);
           context_->Unmap(shader.vertex_global_uniform_block, 0);
@@ -330,7 +331,8 @@ void D3D11Renderer::UpdateShaderUniformData(ResourceID shader_id, const eastl::s
         auto info = element_pair->second;
 				if (size >= info.size) {
           D3D11_MAPPED_SUBRESOURCE source;
-          x_d3d11_assert_msg(context_->Map(shader.fragment_global_uniform_block, 0, D3D11_MAP_WRITE_DISCARD, 0, &source), "map fragment global uniform buffer falied!\n");
+					ZeroMemory(&source, sizeof(source));
+          x_d3d11_assert_msg(context_->Map(shader.fragment_global_uniform_block, 0, D3D11_MAP_WRITE_NO_OVERWRITE, 0, &source), "map fragment global uniform buffer falied!\n");
           auto pointer = reinterpret_cast<char *>(source.pData) + info.offset;
           memcpy(pointer, buffer, info.size);
           context_->Unmap(shader.fragment_global_uniform_block, 0);
@@ -436,7 +438,8 @@ void D3D11Renderer::UpdateUniformBufferData(ResourceID id, size_t offset, size_t
         Log::GetInstance().Error("update uniform buffer data, but size < offset + length\n");
       } else {
         D3D11_MAPPED_SUBRESOURCE uniform_buffer_source;
-        x_d3d11_assert_msg(context_->Map(uniform_buffer.uniform_buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &uniform_buffer_source), "map uniform buffer falied!\n");
+				ZeroMemory(&uniform_buffer_source, sizeof(uniform_buffer_source));
+        x_d3d11_assert_msg(context_->Map(uniform_buffer.uniform_buffer, 0, D3D11_MAP_WRITE_NO_OVERWRITE, 0, &uniform_buffer_source), "map uniform buffer falied!\n");
         auto pointer = reinterpret_cast<char *>(uniform_buffer_source.pData) + offset;
         memcpy(pointer, buffer, length);
         context_->Unmap(uniform_buffer.uniform_buffer, 0);
@@ -542,7 +545,8 @@ void D3D11Renderer::UpdateMesh(ResourceID id, const void *vertex_buffer, size_t 
         Log::GetInstance().Error("update vertex buffer data, but size < offset + length\n");
       } else {
         D3D11_MAPPED_SUBRESOURCE vertex_source;
-        x_d3d11_assert_msg(context_->Map(mesh.vertex_buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &vertex_source), "map vertex buffer falied!\n");
+				ZeroMemory(&vertex_source, sizeof(vertex_source));
+        x_d3d11_assert_msg(context_->Map(mesh.vertex_buffer, 0, D3D11_MAP_WRITE_NO_OVERWRITE, 0, &vertex_source), "map vertex buffer falied!\n");
         auto pointer = reinterpret_cast<char *>(vertex_source.pData) + vertex_offset;
         memcpy(pointer, vertex_buffer, vertex_size);
         context_->Unmap(mesh.vertex_buffer, 0);
@@ -558,7 +562,8 @@ void D3D11Renderer::UpdateMesh(ResourceID id, const void *vertex_buffer, size_t 
         Log::GetInstance().Error("update index buffer data, but size < offset + length\n");
       } else {
         D3D11_MAPPED_SUBRESOURCE index_source;
-        x_d3d11_assert_msg(context_->Map(mesh.index_buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &index_source), "map index buffer falied!\n");
+				ZeroMemory(&index_source, sizeof(index_source));
+        x_d3d11_assert_msg(context_->Map(mesh.index_buffer, 0, D3D11_MAP_WRITE_NO_OVERWRITE, 0, &index_source), "map index buffer falied!\n");
         auto pointer = reinterpret_cast<char *>(index_source.pData) + index_offset;
         memcpy(pointer, index_buffer, index_size);
         context_->Unmap(mesh.index_buffer, 0);
