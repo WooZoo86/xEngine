@@ -10,17 +10,17 @@ namespace xEngine {
 
 struct ShaderConfig {
 
-  static ShaderConfig FromData(const char *vertex, const char *fragment);
+  static ShaderConfig FromData(DataPtr vertex, DataPtr fragment);
 
   ResourceIdentity identity{ResourceIdentity::Shared(ShaderSignature)};
 
-  const char *vertex;
+  DataPtr vertex;
 
-  const char *fragment;
+  DataPtr fragment;
 
 };
 
-inline ShaderConfig ShaderConfig::FromData(const char *vertex, const char *fragment) {
+inline ShaderConfig ShaderConfig::FromData(DataPtr vertex, DataPtr fragment) {
   ShaderConfig config;
   config.vertex = vertex;
   config.fragment = fragment;

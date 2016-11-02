@@ -3,65 +3,41 @@
 
 #include "Core.h"
 
-#include <EASTL/allocator.h>
 #include <EASTL/shared_ptr.h>
 
 namespace xEngine {
 
-class Data final {
+class Data {
  public:
   CREATE_FUNC_DECLARE(Data)
 
-  Data() {}
+  Data();
 
-  explicit Data(size_t size) : size_(size) {
-    if (size_ > 0)
-      buffer_ = static_cast<char *>(eastl::GetDefaultAllocator()->allocate(size_));
-  }
+  explicit Data(size_t size);
 
-  Data(const char *buffer, size_t size) { Copy(buffer, size); }
+  Data(const void *buffer, size_t size);
 
-  Data(Data &other) { Copy(other.buffer_, other.size_); }
+  Data(Data &other);
 
-  Data(Data &&other) noexcept {
-    Assign(other.buffer_, other.size_);
-    other.buffer_ = nullptr;
-    other.size_ = 0;
-  }
+  Data(Data &&other);
 
-  ~Data() { if (buffer_ != nullptr) eastl::GetDefaultAllocator()->deallocate(buffer_, size_); }
+  ~Data();
 
-  void operator=(Data &other) { Copy(other.buffer_, other.size_); }
+  void operator=(Data &other);
 
-  void operator=(Data &&other) noexcept {
-    Assign(other.buffer_, other.size_);
-    other.buffer_ = nullptr;
-    other.size_ = 0;
-  }
+  void operator=(Data &&other);
 
-  bool operator==(const Data &other) const { return size_ == other.size_ && buffer_ == other.buffer_; }
+  Data SubData(size_t offset, size_t size);
 
-  bool Empty() const { return buffer_ == nullptr || size_ == 0; }
+  size_t size() const { return size_ ;}
 
-  void Assign(char *buffer, size_t size);
-
-  void Copy(const char *buffer, size_t size, size_t offset = 0);
-
-  void Append(const char *buffer, size_t size, size_t offset = 0);
-
-  void Append(const Data &other) { Append(other.buffer_, other.size_); }
-
-  size_t size() const { return size_; }
-
-  void set_size(size_t size);
-
-  const char *buffer(const size_t offset = 0) const { x_assert(offset < size_); return buffer_ + offset; }
-
-  char *buffer(const size_t offset = 0) { x_assert(offset < size_); return buffer_ + offset; }
+  void *buffer();
 
  private:
+  struct Base;
+  Base *base_{nullptr};
+  size_t offset_{0};
   size_t size_{0};
-  char *buffer_{nullptr};
 };
 
 typedef eastl::shared_ptr<Data> DataPtr;

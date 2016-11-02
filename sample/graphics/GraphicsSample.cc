@@ -112,7 +112,7 @@ class GraphicsSample : public Application {
 
  private:
   void load_shader() {
-    auto shader_config = ShaderConfig::FromData(vertex_shader, fragment_shader);
+    auto shader_config = ShaderConfig::FromData(Data::Create(vertex_shader, strlen(vertex_shader) + 1), Data::Create(fragment_shader, strlen(fragment_shader) + 1));
     shader_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(shader_config);
   }
 
@@ -129,13 +129,13 @@ class GraphicsSample : public Application {
       auto buffer = stbi_load_from_memory(reinterpret_cast<const stbi_uc *>(data->buffer()),
         static_cast<int>(data->size()),
         &width, &height, &components, STBI_rgb_alpha);
-      data->Copy(reinterpret_cast<const char *>(buffer), static_cast<size_t>(width * height * 4));
+      auto pixel_data = Data::Create(reinterpret_cast<const char *>(buffer), static_cast<size_t>(width * height * 4));
       stbi_image_free(buffer);
       TextureConfig config;
       config.width = width;
       config.height = height;
       config.color_format = PixelFormat::RGBA8;
-      config.data[0][0] = data;
+      config.data[0][0] = pixel_data;
       texture_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(config);
       sampler_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(SamplerConfig());
     }
@@ -155,9 +155,9 @@ class GraphicsSample : public Application {
     MeshConfig mesh_config;
     mesh_config.index_type = IndexFormat::kUint16;
     mesh_config.index_count = sizeof(indices) / sizeof(uint16);
-    mesh_config.index_data = indices;
+    mesh_config.index_data = Data::Create(indices, sizeof(indices));
     mesh_config.vertex_count = 4;
-    mesh_config.vertex_data = vertices;
+    mesh_config.vertex_data = Data::Create(vertices, sizeof(vertices));
     mesh_config.layout.AddElement(VertexElementSemantic::kPosition, VertexElementFormat::kFloat2)
         .AddElement(VertexElementSemantic::kColor0, VertexElementFormat::kFloat3)
         .AddElement(VertexElementSemantic::kTexcoord0, VertexElementFormat::kFloat2);

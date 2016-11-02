@@ -18,8 +18,7 @@ class StorageSample : public Application {
     IO::GetInstance().RegisterFilesystem("storage", StorageFilesystem::Creator);
 
     auto hello = "hello world!";
-    auto test_data = Data::Create();
-    test_data->Copy(hello, strlen(hello) + 1);
+    auto test_data = Data::Create(hello, strlen(hello) + 1);
     IO::GetInstance().Write("local:test.txt", test_data, [&](Location location1, IOStatus status1, DataPtr data1) {
       if (status1 == IOStatus::kSuccess) {
         Log::GetInstance().Debug("write complete.\n");

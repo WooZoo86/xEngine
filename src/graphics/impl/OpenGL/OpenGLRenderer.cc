@@ -168,7 +168,7 @@ void OpenGLRenderer::ApplyShader(ResourceID id) {
   }
 }
 
-void OpenGLRenderer::UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, const void *buffer, size_t size) {
+void OpenGLRenderer::UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, DataPtr data) {
   auto &shader = resource_manager()->shader_pool_.Find(shader_id);
   if (shader.status() == ResourceStatus::kCompleted) {
     if (shader.program_id != cache_.program_id) {
@@ -178,146 +178,146 @@ void OpenGLRenderer::UpdateShaderUniformData(ResourceID shader_id, const eastl::
     auto pair = shader.uniform_info.find(name);
     if (pair != shader.uniform_info.end()) {
       auto &info = pair->second;
-      if (size >= info.size * SizeOfOpenGLType(info.type)) {
+      if (data->size() >= info.size * SizeOfOpenGLType(info.type)) {
         switch (info.type) {
           case GL_FLOAT: {
-            glUniform1fv(info.location, info.size, reinterpret_cast<const GLfloat *>(buffer));
+            glUniform1fv(info.location, info.size, reinterpret_cast<const GLfloat *>(data->buffer()));
             break;
           }
           case GL_FLOAT_VEC2: {
-            glUniform2fv(info.location, info.size, reinterpret_cast<const GLfloat *>(buffer));
+            glUniform2fv(info.location, info.size, reinterpret_cast<const GLfloat *>(data->buffer()));
             break;
           }
           case GL_FLOAT_VEC3: {
-            glUniform3fv(info.location, info.size, reinterpret_cast<const GLfloat *>(buffer));
+            glUniform3fv(info.location, info.size, reinterpret_cast<const GLfloat *>(data->buffer()));
             break;
           }
           case GL_FLOAT_VEC4: {
-            glUniform4fv(info.location, info.size, reinterpret_cast<const GLfloat *>(buffer));
+            glUniform4fv(info.location, info.size, reinterpret_cast<const GLfloat *>(data->buffer()));
             break;
           }
           case GL_DOUBLE: {
-            glUniform1dv(info.location, info.size, reinterpret_cast<const GLdouble *>(buffer));
+            glUniform1dv(info.location, info.size, reinterpret_cast<const GLdouble *>(data->buffer()));
             break;
           }
           case GL_DOUBLE_VEC2: {
-            glUniform2dv(info.location, info.size, reinterpret_cast<const GLdouble *>(buffer));
+            glUniform2dv(info.location, info.size, reinterpret_cast<const GLdouble *>(data->buffer()));
             break;
           }
           case GL_DOUBLE_VEC3: {
-            glUniform3dv(info.location, info.size, reinterpret_cast<const GLdouble *>(buffer));
+            glUniform3dv(info.location, info.size, reinterpret_cast<const GLdouble *>(data->buffer()));
             break;
           }
           case GL_DOUBLE_VEC4: {
-            glUniform4dv(info.location, info.size, reinterpret_cast<const GLdouble *>(buffer));
+            glUniform4dv(info.location, info.size, reinterpret_cast<const GLdouble *>(data->buffer()));
             break;
           }
           case GL_BOOL:
           case GL_INT: {
-            glUniform1iv(info.location, info.size, reinterpret_cast<const GLint *>(buffer));
+            glUniform1iv(info.location, info.size, reinterpret_cast<const GLint *>(data->buffer()));
             break;
           }
           case GL_BOOL_VEC2:
           case GL_INT_VEC2: {
-            glUniform2iv(info.location, info.size, reinterpret_cast<const GLint *>(buffer));
+            glUniform2iv(info.location, info.size, reinterpret_cast<const GLint *>(data->buffer()));
             break;
           }
           case GL_BOOL_VEC3:
           case GL_INT_VEC3: {
-            glUniform3iv(info.location, info.size, reinterpret_cast<const GLint *>(buffer));
+            glUniform3iv(info.location, info.size, reinterpret_cast<const GLint *>(data->buffer()));
             break;
           }
           case GL_BOOL_VEC4:
           case GL_INT_VEC4: {
-            glUniform4iv(info.location, info.size, reinterpret_cast<const GLint *>(buffer));
+            glUniform4iv(info.location, info.size, reinterpret_cast<const GLint *>(data->buffer()));
             break;
           }
           case GL_UNSIGNED_INT: {
-            glUniform1uiv(info.location, info.size, reinterpret_cast<const GLuint *>(buffer));
+            glUniform1uiv(info.location, info.size, reinterpret_cast<const GLuint *>(data->buffer()));
             break;
           }
           case GL_UNSIGNED_INT_VEC2: {
-            glUniform2uiv(info.location, info.size, reinterpret_cast<const GLuint *>(buffer));
+            glUniform2uiv(info.location, info.size, reinterpret_cast<const GLuint *>(data->buffer()));
             break;
           }
           case GL_UNSIGNED_INT_VEC3: {
-            glUniform3uiv(info.location, info.size, reinterpret_cast<const GLuint *>(buffer));
+            glUniform3uiv(info.location, info.size, reinterpret_cast<const GLuint *>(data->buffer()));
             break;
           }
           case GL_UNSIGNED_INT_VEC4: {
-            glUniform4uiv(info.location, info.size, reinterpret_cast<const GLuint *>(buffer));
+            glUniform4uiv(info.location, info.size, reinterpret_cast<const GLuint *>(data->buffer()));
             break;
           }
           case GL_FLOAT_MAT2: {
-            glUniformMatrix2fv(info.location, info.size, GL_FALSE, reinterpret_cast<const GLfloat *>(buffer));
+            glUniformMatrix2fv(info.location, info.size, GL_FALSE, reinterpret_cast<const GLfloat *>(data->buffer()));
             break;
           }
           case GL_FLOAT_MAT3: {
-            glUniformMatrix3fv(info.location, info.size, GL_FALSE, reinterpret_cast<const GLfloat *>(buffer));
+            glUniformMatrix3fv(info.location, info.size, GL_FALSE, reinterpret_cast<const GLfloat *>(data->buffer()));
             break;
           }
           case GL_FLOAT_MAT4: {
-            glUniformMatrix4fv(info.location, info.size, GL_FALSE, reinterpret_cast<const GLfloat *>(buffer));
+            glUniformMatrix4fv(info.location, info.size, GL_FALSE, reinterpret_cast<const GLfloat *>(data->buffer()));
             break;
           }
           case GL_FLOAT_MAT2x3: {
-            glUniformMatrix2x3fv(info.location, info.size, GL_FALSE, reinterpret_cast<const GLfloat *>(buffer));
+            glUniformMatrix2x3fv(info.location, info.size, GL_FALSE, reinterpret_cast<const GLfloat *>(data->buffer()));
             break;
           }
           case GL_FLOAT_MAT2x4: {
-            glUniformMatrix2x4fv(info.location, info.size, GL_FALSE, reinterpret_cast<const GLfloat *>(buffer));
+            glUniformMatrix2x4fv(info.location, info.size, GL_FALSE, reinterpret_cast<const GLfloat *>(data->buffer()));
             break;
           }
           case GL_FLOAT_MAT3x2: {
-            glUniformMatrix3x2fv(info.location, info.size, GL_FALSE, reinterpret_cast<const GLfloat *>(buffer));
+            glUniformMatrix3x2fv(info.location, info.size, GL_FALSE, reinterpret_cast<const GLfloat *>(data->buffer()));
             break;
           }
           case GL_FLOAT_MAT3x4: {
-            glUniformMatrix3x4fv(info.location, info.size, GL_FALSE, reinterpret_cast<const GLfloat *>(buffer));
+            glUniformMatrix3x4fv(info.location, info.size, GL_FALSE, reinterpret_cast<const GLfloat *>(data->buffer()));
             break;
           }
           case GL_FLOAT_MAT4x2: {
-            glUniformMatrix4x2fv(info.location, info.size, GL_FALSE, reinterpret_cast<const GLfloat *>(buffer));
+            glUniformMatrix4x2fv(info.location, info.size, GL_FALSE, reinterpret_cast<const GLfloat *>(data->buffer()));
             break;
           }
           case GL_FLOAT_MAT4x3: {
-            glUniformMatrix4x3fv(info.location, info.size, GL_FALSE, reinterpret_cast<const GLfloat *>(buffer));
+            glUniformMatrix4x3fv(info.location, info.size, GL_FALSE, reinterpret_cast<const GLfloat *>(data->buffer()));
             break;
           }
           case GL_DOUBLE_MAT2: {
-            glUniformMatrix2dv(info.location, info.size, GL_FALSE, reinterpret_cast<const GLdouble *>(buffer));
+            glUniformMatrix2dv(info.location, info.size, GL_FALSE, reinterpret_cast<const GLdouble *>(data->buffer()));
             break;
           }
           case GL_DOUBLE_MAT3: {
-            glUniformMatrix3dv(info.location, info.size, GL_FALSE, reinterpret_cast<const GLdouble *>(buffer));
+            glUniformMatrix3dv(info.location, info.size, GL_FALSE, reinterpret_cast<const GLdouble *>(data->buffer()));
             break;
           }
           case GL_DOUBLE_MAT4: {
-            glUniformMatrix4dv(info.location, info.size, GL_FALSE, reinterpret_cast<const GLdouble *>(buffer));
+            glUniformMatrix4dv(info.location, info.size, GL_FALSE, reinterpret_cast<const GLdouble *>(data->buffer()));
             break;
           }
           case GL_DOUBLE_MAT2x3: {
-            glUniformMatrix2x3dv(info.location, info.size, GL_FALSE, reinterpret_cast<const GLdouble *>(buffer));
+            glUniformMatrix2x3dv(info.location, info.size, GL_FALSE, reinterpret_cast<const GLdouble *>(data->buffer()));
             break;
           }
           case GL_DOUBLE_MAT2x4: {
-            glUniformMatrix2x4dv(info.location, info.size, GL_FALSE, reinterpret_cast<const GLdouble *>(buffer));
+            glUniformMatrix2x4dv(info.location, info.size, GL_FALSE, reinterpret_cast<const GLdouble *>(data->buffer()));
             break;
           }
           case GL_DOUBLE_MAT3x2: {
-            glUniformMatrix3x2dv(info.location, info.size, GL_FALSE, reinterpret_cast<const GLdouble *>(buffer));
+            glUniformMatrix3x2dv(info.location, info.size, GL_FALSE, reinterpret_cast<const GLdouble *>(data->buffer()));
             break;
           }
           case GL_DOUBLE_MAT3x4: {
-            glUniformMatrix3x4dv(info.location, info.size, GL_FALSE, reinterpret_cast<const GLdouble *>(buffer));
+            glUniformMatrix3x4dv(info.location, info.size, GL_FALSE, reinterpret_cast<const GLdouble *>(data->buffer()));
             break;
           }
           case GL_DOUBLE_MAT4x2: {
-            glUniformMatrix4x2dv(info.location, info.size, GL_FALSE, reinterpret_cast<const GLdouble *>(buffer));
+            glUniformMatrix4x2dv(info.location, info.size, GL_FALSE, reinterpret_cast<const GLdouble *>(data->buffer()));
             break;
           }
           case GL_DOUBLE_MAT4x3: {
-            glUniformMatrix4x3dv(info.location, info.size, GL_FALSE, reinterpret_cast<const GLdouble *>(buffer));
+            glUniformMatrix4x3dv(info.location, info.size, GL_FALSE, reinterpret_cast<const GLdouble *>(data->buffer()));
             break;
           }
           default: {
@@ -383,10 +383,10 @@ void OpenGLRenderer::ResetShader() {
   glUseProgram(0);
 }
 
-void OpenGLRenderer::UpdateUniformBufferData(ResourceID id, size_t offset, size_t length, const void *buffer) {
+void OpenGLRenderer::UpdateUniformBufferData(ResourceID id, size_t offset, DataPtr data) {
   auto &uniform_buffer = resource_manager()->uniform_buffer_pool_.Find(id);
   if (uniform_buffer.status() == ResourceStatus::kCompleted) {
-    if (uniform_buffer.config().size < offset + length) {
+    if (uniform_buffer.config().size < offset + data->size()) {
       Log::GetInstance().Error("uniform buffer size is smaller then offset + length\n");
     } else {
       GLint current_uniform_buffer;
@@ -394,8 +394,8 @@ void OpenGLRenderer::UpdateUniformBufferData(ResourceID id, size_t offset, size_
 
       glBindBuffer(GL_UNIFORM_BUFFER, uniform_buffer.uniform_buffer_id);
 
-      auto source = glMapBufferRange(GL_UNIFORM_BUFFER, offset, length, GL_MAP_WRITE_BIT);
-      memcpy(source, buffer, length);
+      auto source = glMapBufferRange(GL_UNIFORM_BUFFER, offset, data->size(), GL_MAP_WRITE_BIT);
+      memcpy(source, data->buffer(), data->size());
       glUnmapBuffer(GL_UNIFORM_BUFFER);
 
       glBindBuffer(GL_UNIFORM_BUFFER, static_cast<GLuint>(current_uniform_buffer));
@@ -460,26 +460,20 @@ void OpenGLRenderer::ApplyMesh(ResourceID id) {
   }
 }
 
-void OpenGLRenderer::UpdateMesh(ResourceID id,
-                                const void *vertex_buffer,
-                                size_t vertex_offset,
-                                size_t vertex_size,
-                                const void *index_buffer,
-                                size_t index_offset,
-                                size_t index_size) {
+void OpenGLRenderer::UpdateMesh(ResourceID id, DataPtr vertex_data, size_t vertex_offset, DataPtr index_data, size_t index_offset) {
   auto &mesh = resource_manager()->mesh_pool_.Find(id);
   if (mesh.status() == ResourceStatus::kCompleted) {
     if (mesh.vertex_buffer_id != cache_.vertex_buffer) {
       glBindBuffer(GL_ARRAY_BUFFER, mesh.vertex_buffer_id);
       cache_.vertex_buffer = mesh.vertex_buffer_id;
     }
-    if (vertex_buffer != nullptr && vertex_size != 0) {
-      if (mesh.config().vertex_count * mesh.config().layout.size < vertex_offset + vertex_size) {
+    if (vertex_data != nullptr && vertex_data->size() != 0) {
+      if (mesh.config().vertex_count * mesh.config().layout.size < vertex_offset + vertex_data->size()) {
         Log::GetInstance().Error("UpdateMesh failed, vertex size: %d, but want offset: %d, length: %d\n",
-                                 mesh.config().vertex_count * mesh.config().layout.size, vertex_offset, vertex_size);
+                                 mesh.config().vertex_count * mesh.config().layout.size, vertex_offset, vertex_data->buffer());
       } else {
-        auto vertex_source = glMapBufferRange(GL_ARRAY_BUFFER, vertex_offset, vertex_size, GL_MAP_WRITE_BIT);
-        memcpy(vertex_source, vertex_buffer, vertex_size);
+        auto vertex_source = glMapBufferRange(GL_ARRAY_BUFFER, vertex_offset, vertex_data->size(), GL_MAP_WRITE_BIT);
+        memcpy(vertex_source, vertex_data->buffer(), vertex_data->size());
         glUnmapBuffer(GL_ARRAY_BUFFER);
       }
     }
@@ -490,13 +484,13 @@ void OpenGLRenderer::UpdateMesh(ResourceID id,
     if (mesh.config().index_type != cache_.index_type) {
       cache_.index_type = mesh.config().index_type;
     }
-    if (index_buffer != nullptr && index_size != 0) {
-      if (mesh.config().index_count * SizeOfIndexFormat(mesh.config().index_type) < index_offset + index_size) {
+    if (index_data != nullptr && index_data->size() != 0) {
+      if (mesh.config().index_count * SizeOfIndexFormat(mesh.config().index_type) < index_offset + index_data->size()) {
         Log::GetInstance().Error("UpdateMesh failed, index size: %d, but want offset: %d, length: %d\n",
-                                 mesh.config().index_count * SizeOfIndexFormat(mesh.config().index_type), index_offset, index_size);
+                                 mesh.config().index_count * SizeOfIndexFormat(mesh.config().index_type), index_offset, index_data->buffer());
       } else {
-        auto index_source = glMapBufferRange(GL_ELEMENT_ARRAY_BUFFER, index_offset, index_size, GL_MAP_WRITE_BIT);
-        memcpy(index_source, index_buffer, index_size);
+        auto index_source = glMapBufferRange(GL_ELEMENT_ARRAY_BUFFER, index_offset, index_data->size(), GL_MAP_WRITE_BIT);
+        memcpy(index_source, index_data->buffer(), index_data->size());
         glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
       }
     }

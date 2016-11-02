@@ -4,6 +4,8 @@
 #include "graphics/GraphicsDefine.h"
 #include "graphics/GraphicsResourceSignature.h"
 
+#include "core/Data.h"
+
 namespace xEngine {
 
 struct VertexLayout {
@@ -44,13 +46,13 @@ struct MeshConfig {
 
   int32 index_count{0};
 
-  const void *index_data{nullptr};
+  DataPtr index_data;
 
   BufferUsage vertex_usage{BufferUsage::kImmutable};
 
   int32 vertex_count{0};
 
-  const void *vertex_data{nullptr};
+  DataPtr vertex_data;
 
   VertexLayout layout;
 

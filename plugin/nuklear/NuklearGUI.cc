@@ -130,7 +130,7 @@ void NuklearGUI::Initialize(NuklearConfig config) {
 
   sampler_ = graphics_->resource_manager()->Create(SamplerConfig());
 
-  auto shader_config = ShaderConfig::FromData(vertex_shader, fragment_shader);
+  auto shader_config = ShaderConfig::FromData(Data::Create(vertex_shader, strlen(vertex_shader) + 1), Data::Create(fragment_shader, strlen(fragment_shader) + 1));
   shader_ = graphics_->resource_manager()->Create(shader_config);
 
   MeshConfig mesh_config;
@@ -164,12 +164,12 @@ void NuklearGUI::Initialize(NuklearConfig config) {
   auto vertex_size = mesh_config.vertex_count * mesh_config.layout.size;
   auto index_size = mesh_config.index_count * SizeOfIndexFormat(mesh_config.index_type);
 
-  vertex_data = malloc(vertex_size);
-  index_data = malloc(index_size);
+  vertex_data = Data::Create(vertex_size);
+  index_data = Data::Create(index_size);
 
   nk_buffer_init_default(&command);
-  nk_buffer_init_fixed(&vertex_buffer, vertex_data, vertex_size);
-  nk_buffer_init_fixed(&index_buffer, index_data, index_size);
+  nk_buffer_init_fixed(&vertex_buffer, vertex_data->buffer(), vertex_data->size());
+  nk_buffer_init_fixed(&index_buffer, index_data->buffer(), index_data->size());
 }
 
 void NuklearGUI::Finalize() {
@@ -212,8 +212,8 @@ void NuklearGUI::EndFrame() {
   nk_buffer_clear(&vertex_buffer);
   nk_buffer_clear(&index_buffer);
   nk_convert(&context_, &command, &vertex_buffer, &index_buffer, &config_);
-  graphics_->renderer()->UpdateMesh(mesh_, vertex_data, 0, vertex_buffer.needed, index_data, 0, index_buffer.needed);
-  graphics_->renderer()->UpdateShaderUniformData(shader_, "uProjectionMatrix", glm::value_ptr(matrix), sizeof(matrix));
+  graphics_->renderer()->UpdateMesh(mesh_, vertex_data, 0, index_data, 0);
+  graphics_->renderer()->UpdateShaderUniformData(shader_, "uProjectionMatrix", Data::Create(glm::value_ptr(matrix), sizeof(matrix)));
   graphics_->renderer()->ApplyPipeline(pipeline_);
   const struct nk_draw_command *cmd = nullptr;
   ResourceID current_texture = kInvalidResourceID;

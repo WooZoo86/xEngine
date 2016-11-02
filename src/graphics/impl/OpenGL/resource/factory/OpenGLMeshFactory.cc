@@ -39,7 +39,7 @@ void OpenGLMeshFactory::Create(OpenGLMesh &resource) {
 
   glBufferData(GL_ARRAY_BUFFER,
                resource.config().vertex_count * resource.config().layout.size,
-               resource.config().vertex_data,
+               resource.config().vertex_data ? resource.config().vertex_data->buffer() : nullptr,
                GLEnumForBufferUsage(resource.config().vertex_usage));
 
   for (auto index = 0; index < layout.element_count; ++index) {
@@ -67,7 +67,7 @@ void OpenGLMeshFactory::Create(OpenGLMesh &resource) {
 
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,
                  SizeOfIndexFormat(resource.config().index_type) * resource.config().index_count,
-                 resource.config().index_data,
+                 resource.config().index_data ? resource.config().index_data->buffer() : nullptr,
                  GLEnumForBufferUsage(resource.config().index_usage));
 
     resource.config().index_data = nullptr;

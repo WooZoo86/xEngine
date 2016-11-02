@@ -1,37 +1,97 @@
 #include "core/Data.h"
 
+#include <EASTL/allocator.h>
+
 namespace xEngine {
 
-void Data::Assign(char *buffer, size_t size) {
-  if (buffer_ != nullptr) {
-    eastl::GetDefaultAllocator()->deallocate(buffer_, size_);
+struct Data::Base {
+  Base() {}
+  Base(size_t size) : size(size) {
+    if (size > 0) {
+      buffer = eastl::GetDefaultAllocator()->allocate(size);
+    }
   }
-  buffer_ = buffer;
+  ~Base() {
+    if (buffer != nullptr) {
+      eastl::GetDefaultAllocator()->deallocate(buffer, size);
+    }
+  }
+  void Retain() {
+    ++ref;
+  }
+  void Release() {
+    if (--ref == 0) {
+      delete this;
+    }
+  }
+  size_t ref{0};
+  size_t size{0};
+  void *buffer{nullptr};
+};
+
+Data::Data() {
+  base_ = new Base;
+  base_->Retain();
+}
+
+Data::Data(size_t size) {
+  base_ = new Base(size);
+  base_->Retain();
   size_ = size;
 }
 
-void Data::Copy(const char *buffer, size_t size, size_t offset) {
-  set_size(size);
-  eastl::copy(buffer + offset, buffer + offset + size_, buffer_);
+Data::Data(const void *buffer, size_t size) {
+  base_ = new Base(size);
+  base_->Retain();
+  size_ = size;
+  memcpy(base_->buffer, buffer, size);
 }
 
-void Data::Append(const char *buffer, size_t size, size_t offset) {
-  auto orig_size = size_;
-  set_size(size_ + size);
-  eastl::copy(buffer + offset, buffer + offset + size, buffer_ + orig_size);
+Data::Data(Data &other) {
+  base_ = other.base_;
+  offset_ = other.offset_;
+  size_ = other.size_;
 }
 
-void Data::set_size(size_t size) {
-  if (size_ != size) {
-    if (buffer_ != nullptr) {
-      eastl::GetDefaultAllocator()->deallocate(buffer_, size_);
-      buffer_ = nullptr;
-    }
-    size_ = size;
-    if (size_ > 0) {
-      buffer_ = static_cast<char *>(eastl::GetDefaultAllocator()->allocate(size_));
-    }
-  }
+Data::Data(Data &&other) {
+  base_ = other.base_;
+  offset_ = other.offset_;
+  size_ = other.size_;
+  other.base_ = nullptr;
+  other.offset_ = 0;
+  other.size_ = 0;
+}
+
+Data::~Data() {
+  base_->Release();
+}
+
+void Data::operator=(Data &other) {
+  base_ = other.base_;
+  offset_ = other.offset_;
+  size_ = other.size_;
+}
+
+void Data::operator=(Data &&other) {
+  base_ = other.base_;
+  offset_ = other.offset_;
+  size_ = other.size_;
+  other.base_ = nullptr;
+  other.offset_ = 0;
+  other.size_ = 0;
+}
+
+Data Data::SubData(size_t offset, size_t size) {
+  Data data;
+  base_->Retain();
+  data.base_ = base_;
+  data.offset_ = eastl::min(offset, base_->size);
+  data.size_ = eastl::min(size, base_->size - data.offset_);
+  return data;
+}
+
+void *Data::buffer() {
+  return static_cast<uint8 *>(base_->buffer) + offset_;
 }
 
 } // namespace xEngine

@@ -15,15 +15,12 @@ HTTPFilesystem::~HTTPFilesystem() {
 DataPtr HTTPFilesystem::Read(Location location) {
   last_status_ = IOStatus::kFailed;
   auto path = location.path();
-  data_ = Data::Create();
   polling_ = true;
   auto connection = mg_connect_http(&context_, Handle, path.c_str(), nullptr, nullptr);
   connection->user_data = this;
   while (polling_) mg_mgr_poll(&context_, 1000);
   mg_mgr_poll(&context_, 1000);
-  auto temp_data = data_;
-  data_.reset();
-  return temp_data;
+  return data_;
 }
 
 void HTTPFilesystem::Write(Location location, DataPtr data) {
@@ -46,7 +43,7 @@ void HTTPFilesystem::Handle(mg_connection *connection, int event, void *eventDat
       auto message = static_cast<http_message *>(eventData);
       if (message->resp_code == 200) {
         self->last_status_ = IOStatus::kSuccess;
-        self->data_->Copy(message->body.p, message->body.len);
+        self->data_ = Data::Create(message->body.p, message->body.len);
       } else if (message->resp_code == 301) {
         auto location = mg_get_http_header(message, "Location");
         if (location) {

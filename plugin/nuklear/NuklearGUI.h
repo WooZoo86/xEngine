@@ -50,8 +50,8 @@ class NuklearGUI {
   nk_context context_;
   nk_font_atlas font_atlas_;
   nk_buffer command;
-  void *vertex_data{nullptr};
-  void *index_data{nullptr};
+  DataPtr vertex_data;
+  DataPtr index_data;
   nk_buffer vertex_buffer;
   nk_buffer index_buffer;
   eastl::vector<ResourceID> image_;
