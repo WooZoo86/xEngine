@@ -11,7 +11,7 @@ class MeshUtil {
  public:
   static MeshUtil Cube(bool uv);
 
-  static MeshUtil Sphere(bool uv, size_t divisions);
+  static MeshUtil Sphere(size_t divisions, bool uv);
 
   static MeshUtil Capsule();
 

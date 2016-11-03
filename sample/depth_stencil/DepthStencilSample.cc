@@ -213,8 +213,6 @@ class DepthStencilSample : public Application {
     auto now = eastl::chrono::high_resolution_clock::now();
     auto time = eastl::chrono::duration_cast<eastl::chrono::duration<float>>(now - start_time_).count();
 
-
-
     auto &renderer = Window::GetInstance().GetGraphics(window_id_)->renderer();
     renderer->ApplyTarget(kInvalidResourceID, ClearState::ClearAll());
     renderer->ApplyShader(shader_);

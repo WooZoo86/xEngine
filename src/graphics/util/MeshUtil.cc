@@ -2,6 +2,36 @@
 
 namespace xEngine {
 
+static struct {
+  // left-top point of face
+  glm::vec3 p[6] = {
+      glm::vec3(-0.5f,  0.5f,  0.5f), // front
+      glm::vec3( 0.5f,  0.5f, -0.5f), // back
+      glm::vec3(-0.5f,  0.5f, -0.5f), // top
+      glm::vec3(-0.5f, -0.5f,  0.5f), // bottom
+      glm::vec3(-0.5f,  0.5f, -0.5f), // left
+      glm::vec3( 0.5f,  0.5f,  0.5f), // right
+  };
+  // right-direction vector
+  glm::vec3 u[6] = {
+      glm::vec3( 1.0f,  0.0f,  0.0f), // front
+      glm::vec3(-1.0f,  0.0f,  0.0f), // back
+      glm::vec3( 1.0f,  0.0f,  0.0f), // top
+      glm::vec3( 1.0f,  0.0f,  0.0f), // bottom
+      glm::vec3( 0.0f,  0.0f,  1.0f), // left
+      glm::vec3( 0.0f,  0.0f, -1.0f), // right
+  };
+  // bottom-direction vector
+  glm::vec3 v[6] = {
+      glm::vec3( 0.0f, -1.0f,  0.0f), // front
+      glm::vec3( 0.0f, -1.0f,  0.0f), // back
+      glm::vec3( 0.0f,  0.0f,  1.0f), // top
+      glm::vec3( 0.0f,  0.0f, -1.0f), // bottom
+      glm::vec3( 0.0f, -1.0f,  0.0f), // left
+      glm::vec3( 0.0f, -1.0f,  0.0f), // right
+  };
+} g_cube_prototype;
+
 MeshUtil MeshUtil::Cube(bool uv) {
   MeshUtil mesh;
   mesh.config_.layout.AddElement(VertexElementSemantic::kPosition, VertexElementFormat::kFloat3);
@@ -15,152 +45,56 @@ MeshUtil MeshUtil::Cube(bool uv) {
   mesh.config_.index_usage = BufferUsage::kImmutable;
   mesh.BeginVertex();
   mesh.BeginIndex();
-  size_t vertex_count = 0;
-  size_t index_count = 0;
-  // front
-  mesh.Vertex(VertexElementSemantic::kPosition, vertex_count, -0.5f, 0.5f, 0.5f);
-  if (uv) {
-    mesh.Vertex(VertexElementSemantic::kTexcoord0, vertex_count, 0.0f, 0.0f);
+  for (size_t face = 0; face < 6; ++face) {
+    mesh.Vertex(VertexElementSemantic::kPosition, face * 4,
+                g_cube_prototype.p[face].x,
+                g_cube_prototype.p[face].y,
+                g_cube_prototype.p[face].z)
+        .Vertex(VertexElementSemantic::kPosition, face * 4 + 1,
+                g_cube_prototype.p[face].x + g_cube_prototype.u[face].x,
+                g_cube_prototype.p[face].y + g_cube_prototype.u[face].y,
+                g_cube_prototype.p[face].z + g_cube_prototype.u[face].z)
+        .Vertex(VertexElementSemantic::kPosition, face * 4 + 2,
+                g_cube_prototype.p[face].x + g_cube_prototype.u[face].x + g_cube_prototype.v[face].x,
+                g_cube_prototype.p[face].y + g_cube_prototype.u[face].y + g_cube_prototype.v[face].y,
+                g_cube_prototype.p[face].z + g_cube_prototype.u[face].z + g_cube_prototype.v[face].z)
+        .Vertex(VertexElementSemantic::kPosition, face * 4 + 3,
+                g_cube_prototype.p[face].x + g_cube_prototype.v[face].x,
+                g_cube_prototype.p[face].y + g_cube_prototype.v[face].y,
+                g_cube_prototype.p[face].z + g_cube_prototype.v[face].z)
+        .Quad16(face * 6,
+                static_cast<uint16>(face * 4),
+                static_cast<uint16>(face * 4 + 1),
+                static_cast<uint16>(face * 4 + 2),
+                static_cast<uint16>(face * 4 + 3));
+    if (uv) {
+      mesh.Vertex(VertexElementSemantic::kTexcoord0, face * 4, 0.0f, 0.0f)
+          .Vertex(VertexElementSemantic::kTexcoord0, face * 4 + 1, 1.0f, 0.0f)
+          .Vertex(VertexElementSemantic::kTexcoord0, face * 4 + 2, 1.0f, 1.0f)
+          .Vertex(VertexElementSemantic::kTexcoord0, face * 4 + 3, 0.0f, 1.0f);
+    }
   }
-  ++vertex_count;
-  mesh.Vertex(VertexElementSemantic::kPosition, vertex_count, 0.5f, 0.5f, 0.5f);
-  if (uv) {
-    mesh.Vertex(VertexElementSemantic::kTexcoord0, vertex_count, 1.0f, 0.0f);
-  }
-  ++vertex_count;
-  mesh.Vertex(VertexElementSemantic::kPosition, vertex_count, 0.5f, -0.5f, 0.5f);
-  if (uv) {
-    mesh.Vertex(VertexElementSemantic::kTexcoord0, vertex_count, 1.0f, 1.0f);
-  }
-  ++vertex_count;
-  mesh.Vertex(VertexElementSemantic::kPosition, vertex_count, -0.5f, -0.5f, 0.5f);
-  if (uv) {
-    mesh.Vertex(VertexElementSemantic::kTexcoord0, vertex_count, 0.0f, 1.0f);
-  }
-  ++vertex_count;
-  mesh.Quad16(index_count, 0, 1, 2, 3);
-  index_count += 6;
-  // back
-  mesh.Vertex(VertexElementSemantic::kPosition, vertex_count, 0.5f, 0.5f, -0.5f);
-  if (uv) {
-    mesh.Vertex(VertexElementSemantic::kTexcoord0, vertex_count, 0.0f, 0.0f);
-  }
-  ++vertex_count;
-  mesh.Vertex(VertexElementSemantic::kPosition, vertex_count, -0.5f, 0.5f, -0.5f);
-  if (uv) {
-    mesh.Vertex(VertexElementSemantic::kTexcoord0, vertex_count, 1.0f, 0.0f);
-  }
-  ++vertex_count;
-  mesh.Vertex(VertexElementSemantic::kPosition, vertex_count, -0.5f, -0.5f, -0.5f);
-  if (uv) {
-    mesh.Vertex(VertexElementSemantic::kTexcoord0, vertex_count, 1.0f, 1.0f);
-  }
-  ++vertex_count;
-  mesh.Vertex(VertexElementSemantic::kPosition, vertex_count, 0.5f, -0.5f, -0.5f);
-  if (uv) {
-    mesh.Vertex(VertexElementSemantic::kTexcoord0, vertex_count, 0.0f, 1.0f);
-  }
-  ++vertex_count;
-  mesh.Quad16(index_count, 4, 5, 6, 7);
-  index_count += 6;
-  // top
-  mesh.Vertex(VertexElementSemantic::kPosition, vertex_count, -0.5f, 0.5f, -0.5f);
-  if (uv) {
-    mesh.Vertex(VertexElementSemantic::kTexcoord0, vertex_count, 0.0f, 0.0f);
-  }
-  ++vertex_count;
-  mesh.Vertex(VertexElementSemantic::kPosition, vertex_count, 0.5f, 0.5f, -0.5f);
-  if (uv) {
-    mesh.Vertex(VertexElementSemantic::kTexcoord0, vertex_count, 1.0f, 0.0f);
-  }
-  ++vertex_count;
-  mesh.Vertex(VertexElementSemantic::kPosition, vertex_count, 0.5f, 0.5f, 0.5f);
-  if (uv) {
-    mesh.Vertex(VertexElementSemantic::kTexcoord0, vertex_count, 1.0f, 1.0f);
-  }
-  ++vertex_count;
-  mesh.Vertex(VertexElementSemantic::kPosition, vertex_count, -0.5f, 0.5f, 0.5f);
-  if (uv) {
-    mesh.Vertex(VertexElementSemantic::kTexcoord0, vertex_count, 0.0f, 1.0f);
-  }
-  ++vertex_count;
-  mesh.Quad16(index_count, 8, 9, 10, 11);
-  index_count += 6;
-  // bottom
-  mesh.Vertex(VertexElementSemantic::kPosition, vertex_count, -0.5f, -0.5f, 0.5f);
-  if (uv) {
-    mesh.Vertex(VertexElementSemantic::kTexcoord0, vertex_count, 0.0f, 0.0f);
-  }
-  ++vertex_count;
-  mesh.Vertex(VertexElementSemantic::kPosition, vertex_count, 0.5f, -0.5f, 0.5f);
-  if (uv) {
-    mesh.Vertex(VertexElementSemantic::kTexcoord0, vertex_count, 1.0f, 0.0f);
-  }
-  ++vertex_count;
-  mesh.Vertex(VertexElementSemantic::kPosition, vertex_count, 0.5f, -0.5f, -0.5f);
-  if (uv) {
-    mesh.Vertex(VertexElementSemantic::kTexcoord0, vertex_count, 1.0f, 1.0f);
-  }
-  ++vertex_count;
-  mesh.Vertex(VertexElementSemantic::kPosition, vertex_count, -0.5f, -0.5f, -0.5f);
-  if (uv) {
-    mesh.Vertex(VertexElementSemantic::kTexcoord0, vertex_count, 0.0f, 1.0f);
-  }
-  ++vertex_count;
-  mesh.Quad16(index_count, 12, 13, 14, 15);
-  index_count += 6;
-  // left
-  mesh.Vertex(VertexElementSemantic::kPosition, vertex_count, -0.5f, 0.5f, -0.5f);
-  if (uv) {
-    mesh.Vertex(VertexElementSemantic::kTexcoord0, vertex_count, 0.0f, 0.0f);
-  }
-  ++vertex_count;
-  mesh.Vertex(VertexElementSemantic::kPosition, vertex_count, -0.5f, 0.5f, 0.5f);
-  if (uv) {
-    mesh.Vertex(VertexElementSemantic::kTexcoord0, vertex_count, 1.0f, 0.0f);
-  }
-  ++vertex_count;
-  mesh.Vertex(VertexElementSemantic::kPosition, vertex_count, -0.5f, -0.5f, 0.5f);
-  if (uv) {
-    mesh.Vertex(VertexElementSemantic::kTexcoord0, vertex_count, 1.0f, 1.0f);
-  }
-  ++vertex_count;
-  mesh.Vertex(VertexElementSemantic::kPosition, vertex_count, -0.5f, -0.5f, -0.5f);
-  if (uv) {
-    mesh.Vertex(VertexElementSemantic::kTexcoord0, vertex_count, 0.0f, 1.0f);
-  }
-  ++vertex_count;
-  mesh.Quad16(index_count, 16, 17, 18, 19);
-  index_count += 6;
-  // right
-  mesh.Vertex(VertexElementSemantic::kPosition, vertex_count, 0.5f, 0.5f, 0.5f);
-  if (uv) {
-    mesh.Vertex(VertexElementSemantic::kTexcoord0, vertex_count, 0.0f, 0.0f);
-  }
-  ++vertex_count;
-  mesh.Vertex(VertexElementSemantic::kPosition, vertex_count, 0.5f, 0.5f, -0.5f);
-  if (uv) {
-    mesh.Vertex(VertexElementSemantic::kTexcoord0, vertex_count, 1.0f, 0.0f);
-  }
-  ++vertex_count;
-  mesh.Vertex(VertexElementSemantic::kPosition, vertex_count, 0.5f, -0.5f, -0.5f);
-  if (uv) {
-    mesh.Vertex(VertexElementSemantic::kTexcoord0, vertex_count, 1.0f, 1.0f);
-  }
-  ++vertex_count;
-  mesh.Vertex(VertexElementSemantic::kPosition, vertex_count, 0.5f, -0.5f, 0.5f);
-  if (uv) {
-    mesh.Vertex(VertexElementSemantic::kTexcoord0, vertex_count, 0.0f, 1.0f);
-  }
-  mesh.Quad16(index_count, 20, 21, 22, 23);
   mesh.EndVertex();
   mesh.EndIndex();
   return mesh;
 }
 
-// https://gamedevdaily.io/four-ways-to-create-a-mesh-for-a-sphere-d7956b825db4
-MeshUtil MeshUtil::Sphere(bool uv, size_t divisions) {
-  return MeshUtil();
+MeshUtil MeshUtil::Sphere(size_t divisions, bool uv) {
+  MeshUtil mesh;
+  mesh.config_.layout.AddElement(VertexElementSemantic::kPosition, VertexElementFormat::kFloat3);
+  if (uv) {
+    mesh.config_.layout.AddElement(VertexElementSemantic::kTexcoord0, VertexElementFormat::kFloat2);
+  }
+  mesh.config_.vertex_count = 4;
+  mesh.config_.vertex_usage = BufferUsage::kImmutable;
+  mesh.config_.index_count = 6;
+  mesh.config_.index_type = IndexFormat::kUint16;
+  mesh.config_.index_usage = BufferUsage::kImmutable;
+  mesh.BeginVertex();
+  mesh.BeginIndex();
+  mesh.EndVertex();
+  mesh.EndIndex();
+  return mesh;
 }
 
 MeshUtil MeshUtil::Capsule() {

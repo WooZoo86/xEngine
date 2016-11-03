@@ -44,13 +44,13 @@ struct MeshConfig {
 
   IndexFormat index_type{IndexFormat::kNone};
 
-  int32 index_count{0};
+  size_t index_count{0};
 
   DataPtr index_data;
 
   BufferUsage vertex_usage{BufferUsage::kImmutable};
 
-  int32 vertex_count{0};
+  size_t vertex_count{0};
 
   DataPtr vertex_data;
 
