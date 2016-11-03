@@ -16,29 +16,29 @@
 #if X_OPENGL
 
 static const char *vertex_shader =
-  "#version 410 core\n"
-  "in vec3 aPosition;\n"
-  "in vec2 aTexcoord0;\n"
-  "out vec2 Texcoord;\n"
-  "uniform mat4 uModel;\n"
-  "uniform mat4 uView;\n"
-  "uniform mat4 uProjection;\n"
-  "void main()\n"
-  "{\n"
-  "    Texcoord = aTexcoord0;\n"
-  "    gl_Position = uProjection * uView * uModel * vec4(aPosition, 1.0);\n"
-  "}\n";
+    "#version 410 core\n"
+        "in vec3 aPosition;\n"
+        "in vec2 aTexcoord0;\n"
+        "out vec2 Texcoord;\n"
+        "uniform mat4 uModel;\n"
+        "uniform mat4 uView;\n"
+        "uniform mat4 uProjection;\n"
+        "void main()\n"
+        "{\n"
+        "    Texcoord = aTexcoord0;\n"
+        "    gl_Position = uProjection * uView * uModel * vec4(aPosition, 1.0);\n"
+        "}\n";
 
 static const char *fragment_shader =
-  "#version 410 core\n"
-  "in vec2 Texcoord;\n"
-  "out vec4 outColor;\n"
-  "uniform sampler2D uTexture;\n"
-  "uniform vec3 uColor;\n"
-  "void main()\n"
-  "{\n"
-  "    outColor = vec4(uColor, 1.0) * texture(uTexture, Texcoord);\n"
-  "}\n";
+    "#version 410 core\n"
+        "in vec2 Texcoord;\n"
+        "out vec4 outColor;\n"
+        "uniform sampler2D uTexture;\n"
+        "uniform vec3 uColor;\n"
+        "void main()\n"
+        "{\n"
+        "    outColor = vec4(uColor, 1.0) * texture(uTexture, Texcoord);\n"
+        "}\n";
 
 #elif X_D3D11
 
@@ -82,12 +82,12 @@ static const char *fragment_shader =
 
 using namespace xEngine;
 
-class DepthStencilSample : public Application {
+class ShapeSample : public Application {
  public:
   virtual ApplicationStatus Initialize() override {
     Log::GetInstance().Info("Initialize\n");
     Window::GetInstance().Initialize();
-    window_id_ = Window::GetInstance().Create(WindowConfig::ForWindow(1024, 768, "DepthStencilSample"));
+    window_id_ = Window::GetInstance().Create(WindowConfig::ForWindow(1024, 768, "ShapeSample"));
     Window::GetInstance().GetGraphics(window_id_)->Initialize(GraphicsConfig::ForWindow(window_id_));
     Window::GetInstance().GetGraphics(window_id_)->renderer()->MakeCurrent();
 
@@ -127,7 +127,7 @@ class DepthStencilSample : public Application {
     shader_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(shader_config);
     Window::GetInstance().GetGraphics(window_id_)->renderer()->ApplyShader(shader_);
     auto view = glm::lookAt(
-        glm::vec3(5.0f, 5.0f, 4.0f),
+        glm::vec3(2.5f, 2.5f, 2.5f),
         glm::vec3(0.0f, 0.0f, 0.0f),
         glm::vec3(0.0f, 1.0f, 0.0f)
     );
@@ -171,42 +171,19 @@ class DepthStencilSample : public Application {
   }
 
   void load_mesh() {
-    auto cube_mesh_config = MeshUtil::Cube(true).config();
-    cube_mesh_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(cube_mesh_config);
+//    auto cube_mesh_config = MeshUtil::Cube(true).config();
+//    cube_mesh_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(cube_mesh_config);
+//
+//    auto plane_mesh_config = MeshUtil::Plane(true).config();
+//    plane_mesh_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(plane_mesh_config);
 
-    auto plane_mesh_config = MeshUtil::Plane(true).config();
-    plane_mesh_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(plane_mesh_config);
+    auto sphere_mesh_config = MeshUtil::Sphere(8, true).config();
+    sphere_mesh_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(sphere_mesh_config);
 
-    auto pipeline_config = PipelineConfig::ShaderWithLayout(shader_, cube_mesh_config.layout);
+    auto pipeline_config = PipelineConfig::ShaderWithLayout(shader_, sphere_mesh_config.layout);
     pipeline_config.depth_stencil_state.depth_enable = true;
     pipeline_config.depth_stencil_state.depth_write_enable = true;
-    cube_pipeline_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(pipeline_config);
-
-    pipeline_config.depth_stencil_state.depth_enable = true;
-    pipeline_config.depth_stencil_state.depth_write_enable = false;
-    pipeline_config.depth_stencil_state.stencil_enable = true;
-    pipeline_config.depth_stencil_state.stencil_read_mask = 0xff;
-    pipeline_config.depth_stencil_state.stencil_write_mask = 0xff;
-    pipeline_config.depth_stencil_state.stencil_value = 1;
-    pipeline_config.depth_stencil_state.front.compare = CompareFunction::kAlways;
-    pipeline_config.depth_stencil_state.front.fail = StencilOperation::kKeep;
-    pipeline_config.depth_stencil_state.front.depth_fail = StencilOperation::kKeep;
-    pipeline_config.depth_stencil_state.front.pass = StencilOperation::kReplace;
-    pipeline_config.depth_stencil_state.back = pipeline_config.depth_stencil_state.front;
-    floor_pipeline_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(pipeline_config);
-
-    pipeline_config.depth_stencil_state.depth_enable = true;
-    pipeline_config.depth_stencil_state.depth_write_enable = true;
-    pipeline_config.depth_stencil_state.stencil_enable = true;
-    pipeline_config.depth_stencil_state.stencil_read_mask = 0xff;
-    pipeline_config.depth_stencil_state.stencil_write_mask = 0x00;
-    pipeline_config.depth_stencil_state.stencil_value = 1;
-    pipeline_config.depth_stencil_state.front.compare = CompareFunction::kEqual;
-    pipeline_config.depth_stencil_state.front.fail = StencilOperation::kKeep;
-    pipeline_config.depth_stencil_state.front.depth_fail = StencilOperation::kKeep;
-    pipeline_config.depth_stencil_state.front.pass = StencilOperation::kReplace;
-    pipeline_config.depth_stencil_state.back = pipeline_config.depth_stencil_state.front;
-    reflection_pipeline_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(pipeline_config);
+    pipeline_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(pipeline_config);
   }
 
   void draw() {
@@ -219,40 +196,16 @@ class DepthStencilSample : public Application {
     renderer->UpdateShaderUniformTexture(shader_, "uTexture", texture_);
     renderer->ApplySampler(shader_, "uTexture", sampler_);
 
-    renderer->ApplyMesh(cube_mesh_);
-    renderer->ApplyPipeline(cube_pipeline_);
-    auto cube_model = glm::rotate(
-        glm::translate(glm::mat4(), glm::vec3(0.0f, 1.0f, 0.0f)),
+    renderer->ApplyMesh(sphere_mesh_);
+    renderer->ApplyPipeline(pipeline_);
+    auto sphere_model = glm::rotate(
+        glm::mat4(),
         time * glm::radians(180.0f),
         glm::vec3(0.0f, 1.0f, 0.0f)
     );
-    renderer->UpdateShaderUniformData(shader_, "uModel", Data::Create(glm::value_ptr(cube_model), sizeof(cube_model)));
+    renderer->UpdateShaderUniformData(shader_, "uModel", Data::Create(glm::value_ptr(sphere_model), sizeof(sphere_model)));
     renderer->UpdateShaderUniformData(shader_, "uColor", Data::Create(glm::value_ptr(Color(1.0, 1.0, 1.0, 1.0)), sizeof(Color)));
-    renderer->DrawTopology(VertexTopology::kTriangles, 0, 36);
-
-    renderer->ApplyMesh(plane_mesh_);
-    renderer->ApplyPipeline(floor_pipeline_);
-    auto plane_model = glm::scale(
-        glm::mat4(),
-        glm::vec3(4.0f, 4.0f, 4.0f)
-    );
-    renderer->UpdateShaderUniformData(shader_, "uModel", Data::Create(glm::value_ptr(plane_model), sizeof(plane_model)));
-    renderer->UpdateShaderUniformData(shader_, "uColor", Data::Create(glm::value_ptr(Color(0.0, 0.0, 0.0, 1.0)), sizeof(Color)));
-    renderer->DrawTopology(VertexTopology::kTriangles, 0, 6);
-
-    renderer->ApplyMesh(cube_mesh_);
-    renderer->ApplyPipeline(reflection_pipeline_);
-    auto reflection_model = glm::scale(
-        glm::rotate(
-            glm::translate(glm::mat4(), glm::vec3(0.0f, -1.0f, 0.0f)),
-            time * glm::radians(180.0f),
-            glm::vec3(0.0f, 1.0f, 0.0f)
-        ),
-        glm::vec3(1, -1, 1)
-    );
-    renderer->UpdateShaderUniformData(shader_, "uModel", Data::Create(glm::value_ptr(reflection_model), sizeof(reflection_model)));
-    renderer->UpdateShaderUniformData(shader_, "uColor", Data::Create(glm::value_ptr(Color(0.3, 0.3, 0.3, 1.0)), sizeof(Color)));
-    renderer->DrawTopology(VertexTopology::kTriangles, 0, 36);
+    renderer->DrawTopology(VertexTopology::kTriangles, 0, 6 * 6 * 8 * 8);
 
     renderer->Render();
   }
@@ -264,10 +217,9 @@ class DepthStencilSample : public Application {
   ResourceID sampler_{kInvalidResourceID};
   ResourceID cube_mesh_{kInvalidResourceID};
   ResourceID plane_mesh_{kInvalidResourceID};
-  ResourceID cube_pipeline_{kInvalidResourceID};
-  ResourceID floor_pipeline_{kInvalidResourceID};
-  ResourceID reflection_pipeline_{kInvalidResourceID};
+  ResourceID sphere_mesh_{kInvalidResourceID};
+  ResourceID pipeline_{kInvalidResourceID};
   ResourceID window_id_{kInvalidResourceID};
 };
 
-XENGINE_WINDOW_APPLICATION(DepthStencilSample)
+XENGINE_WINDOW_APPLICATION(ShapeSample)

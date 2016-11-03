@@ -34,17 +34,17 @@ class MeshUtil {
 
   MeshUtil &BeginIndex();
 
-  MeshUtil &Index16(size_t index, uint16 value);
+  MeshUtil &Index16(uint16 value);
 
-  MeshUtil &Index32(size_t index, uint32 value);
+  MeshUtil &Index32(uint32 value);
 
-  MeshUtil &Triangle16(size_t index, uint16 a, uint16 b, uint16 c);
+  MeshUtil &Triangle16(uint16 a, uint16 b, uint16 c);
 
-  MeshUtil &Triangle32(size_t index, uint32 a, uint32 b, uint32 c);
+  MeshUtil &Triangle32(uint32 a, uint32 b, uint32 c);
 
-  MeshUtil &Quad16(size_t index, uint16 a, uint16 b, uint16 c, uint16 d);
+  MeshUtil &Quad16(uint16 a, uint16 b, uint16 c, uint16 d);
 
-  MeshUtil &Quad32(size_t index, uint32 a, uint32 b, uint32 c, uint32 d);
+  MeshUtil &Quad32(uint32 a, uint32 b, uint32 c, uint32 d);
 
   MeshUtil &EndIndex();
 
@@ -58,6 +58,7 @@ class MeshUtil {
  private:
   MeshConfig config_;
   DataPtr vertex_data_;
+  size_t index_index_{0};
   DataPtr index_data_;
 };
 

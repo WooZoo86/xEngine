@@ -5,30 +5,30 @@ namespace xEngine {
 static struct {
   // left-top point of face
   glm::vec3 p[6] = {
-      glm::vec3(-0.5f,  0.5f,  0.5f), // front
-      glm::vec3( 0.5f,  0.5f, -0.5f), // back
-      glm::vec3(-0.5f,  0.5f, -0.5f), // top
-      glm::vec3(-0.5f, -0.5f,  0.5f), // bottom
-      glm::vec3(-0.5f,  0.5f, -0.5f), // left
-      glm::vec3( 0.5f,  0.5f,  0.5f), // right
+      glm::vec3(-1.0f,  1.0f,  1.0f), // front
+      glm::vec3( 1.0f,  1.0f, -1.0f), // back
+      glm::vec3(-1.0f,  1.0f, -1.0f), // top
+      glm::vec3(-1.0f, -1.0f,  1.0f), // bottom
+      glm::vec3(-1.0f,  1.0f, -1.0f), // left
+      glm::vec3( 1.0f,  1.0f,  1.0f), // right
   };
   // right-direction vector
   glm::vec3 u[6] = {
-      glm::vec3( 1.0f,  0.0f,  0.0f), // front
-      glm::vec3(-1.0f,  0.0f,  0.0f), // back
-      glm::vec3( 1.0f,  0.0f,  0.0f), // top
-      glm::vec3( 1.0f,  0.0f,  0.0f), // bottom
-      glm::vec3( 0.0f,  0.0f,  1.0f), // left
-      glm::vec3( 0.0f,  0.0f, -1.0f), // right
+      glm::vec3( 2.0f,  0.0f,  0.0f), // front
+      glm::vec3(-2.0f,  0.0f,  0.0f), // back
+      glm::vec3( 2.0f,  0.0f,  0.0f), // top
+      glm::vec3( 2.0f,  0.0f,  0.0f), // bottom
+      glm::vec3( 0.0f,  0.0f,  2.0f), // left
+      glm::vec3( 0.0f,  0.0f, -2.0f), // right
   };
   // bottom-direction vector
   glm::vec3 v[6] = {
-      glm::vec3( 0.0f, -1.0f,  0.0f), // front
-      glm::vec3( 0.0f, -1.0f,  0.0f), // back
-      glm::vec3( 0.0f,  0.0f,  1.0f), // top
-      glm::vec3( 0.0f,  0.0f, -1.0f), // bottom
-      glm::vec3( 0.0f, -1.0f,  0.0f), // left
-      glm::vec3( 0.0f, -1.0f,  0.0f), // right
+      glm::vec3( 0.0f, -2.0f,  0.0f), // front
+      glm::vec3( 0.0f, -2.0f,  0.0f), // back
+      glm::vec3( 0.0f,  0.0f,  2.0f), // top
+      glm::vec3( 0.0f,  0.0f, -2.0f), // bottom
+      glm::vec3( 0.0f, -2.0f,  0.0f), // left
+      glm::vec3( 0.0f, -2.0f,  0.0f), // right
   };
 } g_cube_prototype;
 
@@ -62,8 +62,7 @@ MeshUtil MeshUtil::Cube(bool uv) {
                 g_cube_prototype.p[face].x + g_cube_prototype.v[face].x,
                 g_cube_prototype.p[face].y + g_cube_prototype.v[face].y,
                 g_cube_prototype.p[face].z + g_cube_prototype.v[face].z)
-        .Quad16(face * 6,
-                static_cast<uint16>(face * 4),
+        .Quad16(static_cast<uint16>(face * 4),
                 static_cast<uint16>(face * 4 + 1),
                 static_cast<uint16>(face * 4 + 2),
                 static_cast<uint16>(face * 4 + 3));
@@ -80,18 +79,47 @@ MeshUtil MeshUtil::Cube(bool uv) {
 }
 
 MeshUtil MeshUtil::Sphere(size_t divisions, bool uv) {
+  const size_t count = divisions + 1;
+  const float32 step = 1.0f / static_cast<float32>(divisions);
   MeshUtil mesh;
   mesh.config_.layout.AddElement(VertexElementSemantic::kPosition, VertexElementFormat::kFloat3);
   if (uv) {
     mesh.config_.layout.AddElement(VertexElementSemantic::kTexcoord0, VertexElementFormat::kFloat2);
   }
-  mesh.config_.vertex_count = 4;
+  mesh.config_.vertex_count = 6 * count * count;
   mesh.config_.vertex_usage = BufferUsage::kImmutable;
-  mesh.config_.index_count = 6;
+  mesh.config_.index_count = 6 * 6 * divisions * divisions;
   mesh.config_.index_type = IndexFormat::kUint16;
   mesh.config_.index_usage = BufferUsage::kImmutable;
   mesh.BeginVertex();
   mesh.BeginIndex();
+  for (size_t face = 0; face < 6; ++face) {
+    for (size_t v = 0; v < count; ++v) {
+      for (size_t u = 0; u < count; ++u) {
+        glm::vec3 point(g_cube_prototype.p[face].x + (g_cube_prototype.u[face].x * u + g_cube_prototype.v[face].x * v) * step,
+                        g_cube_prototype.p[face].y + (g_cube_prototype.u[face].y * u + g_cube_prototype.v[face].y * v) * step,
+                        g_cube_prototype.p[face].z + (g_cube_prototype.u[face].z * u + g_cube_prototype.v[face].z * v) * step);
+        auto point_square = point * point;
+        glm::vec3 sphere_point(
+            point.x * sqrtf(1.0f - (point_square.y + point_square.z) / 2.0f + point_square.y * point_square.z / 3.0f),
+            point.y * sqrtf(1.0f - (point_square.x + point_square.z) / 2.0f + point_square.x * point_square.z / 3.0f),
+            point.z * sqrtf(1.0f - (point_square.x + point_square.y) / 2.0f + point_square.x * point_square.y / 3.0f));
+        mesh.Vertex(VertexElementSemantic::kPosition, (face * count + v) * count + u, sphere_point.x, sphere_point.y, sphere_point.z);
+        if (uv) {
+          auto normalized = glm::normalize(sphere_point);
+          mesh.Vertex(VertexElementSemantic::kTexcoord0, (face * count + v) * count + u,
+                      0.5f + atan2f(normalized.x ,normalized.z) / (2.0f * glm::pi<float32>()),
+                      0.5f - asinf(normalized.y) / glm::pi<float32>());
+        }
+        if (u < divisions && v < divisions) {
+          mesh.Quad16(static_cast<uint16>((face * count + v) * count + u),
+                      static_cast<uint16>((face * count + v) * count + u + 1),
+                      static_cast<uint16>((face * count + v + 1) * count + u + 1),
+                      static_cast<uint16>((face * count + v + 1) * count + u));
+        }
+      }
+    }
+  }
   mesh.EndVertex();
   mesh.EndIndex();
   return mesh;
@@ -127,7 +155,7 @@ MeshUtil MeshUtil::Plane(bool uv) {
       .Vertex(VertexElementSemantic::kTexcoord0, 3, 0.0f, 1.0f)
       .EndVertex()
       .BeginIndex()
-      .Quad16(0, 0, 1, 2, 3)
+      .Quad16(0, 1, 2, 3)
       .EndIndex();
   return mesh;
 }
@@ -282,68 +310,75 @@ MeshUtil &MeshUtil::EndVertex() {
 MeshUtil &MeshUtil::BeginIndex() {
   x_assert(index_data_ == nullptr && config_.index_count > 0 && config_.index_type != IndexFormat::kNone);
   index_data_ = Data::Create(config_.index_count * SizeOfIndexFormat(config_.index_type));
+  index_index_ = 0;
   return *this;
 }
 
-MeshUtil &MeshUtil::Index16(size_t index, uint16 value) {
+MeshUtil &MeshUtil::Index16(uint16 value) {
   x_assert(index_data_ != nullptr);
   x_assert(config_.index_type == IndexFormat::kUint16);
-  x_assert(index < config_.index_count);
-  static_cast<uint16 *>(index_data_->buffer())[index] = value;
+  x_assert(index_index_ < config_.index_count);
+  static_cast<uint16 *>(index_data_->buffer())[index_index_] = value;
+  ++index_index_;
   return *this;
 }
 
-MeshUtil &MeshUtil::Index32(size_t index, uint32 value) {
+MeshUtil &MeshUtil::Index32(uint32 value) {
   x_assert(index_data_ != nullptr);
   x_assert(config_.index_type == IndexFormat::kUint32);
-  x_assert(index < config_.index_count);
-  static_cast<uint32 *>(index_data_->buffer())[index] = value;
+  x_assert(index_index_ < config_.index_count);
+  static_cast<uint32 *>(index_data_->buffer())[index_index_] = value;
+  ++index_index_;
   return *this;
 }
 
-MeshUtil &MeshUtil::Triangle16(size_t index, uint16 a, uint16 b, uint16 c) {
+MeshUtil &MeshUtil::Triangle16(uint16 a, uint16 b, uint16 c) {
   x_assert(index_data_ != nullptr);
   x_assert(config_.index_type == IndexFormat::kUint16);
-  x_assert(index + 3 <= config_.index_count);
-  static_cast<uint16 *>(index_data_->buffer())[index] = a;
-  static_cast<uint16 *>(index_data_->buffer())[index + 1] = b;
-  static_cast<uint16 *>(index_data_->buffer())[index + 2] = c;
+  x_assert(index_index_ + 3 <= config_.index_count);
+  static_cast<uint16 *>(index_data_->buffer())[index_index_] = a;
+  static_cast<uint16 *>(index_data_->buffer())[index_index_ + 1] = b;
+  static_cast<uint16 *>(index_data_->buffer())[index_index_ + 2] = c;
+  index_index_ += 3;
   return *this;
 }
 
-MeshUtil &MeshUtil::Triangle32(size_t index, uint32 a, uint32 b, uint32 c) {
+MeshUtil &MeshUtil::Triangle32(uint32 a, uint32 b, uint32 c) {
   x_assert(index_data_ != nullptr);
   x_assert(config_.index_type == IndexFormat::kUint32);
-  x_assert(index + 3 <= config_.index_count);
-  static_cast<uint32 *>(index_data_->buffer())[index] = a;
-  static_cast<uint32 *>(index_data_->buffer())[index + 1] = b;
-  static_cast<uint32 *>(index_data_->buffer())[index + 2] = c;
+  x_assert(index_index_ + 3 <= config_.index_count);
+  static_cast<uint32 *>(index_data_->buffer())[index_index_] = a;
+  static_cast<uint32 *>(index_data_->buffer())[index_index_ + 1] = b;
+  static_cast<uint32 *>(index_data_->buffer())[index_index_ + 2] = c;
+  index_index_ += 3;
   return *this;
 }
 
-MeshUtil &MeshUtil::Quad16(size_t index, uint16 a, uint16 b, uint16 c, uint16 d) {
+MeshUtil &MeshUtil::Quad16(uint16 a, uint16 b, uint16 c, uint16 d) {
   x_assert(index_data_ != nullptr);
   x_assert(config_.index_type == IndexFormat::kUint16);
-  x_assert(index + 6 <= config_.index_count);
-  static_cast<uint16 *>(index_data_->buffer())[index] = a;
-  static_cast<uint16 *>(index_data_->buffer())[index + 1] = b;
-  static_cast<uint16 *>(index_data_->buffer())[index + 2] = c;
-  static_cast<uint16 *>(index_data_->buffer())[index + 3] = a;
-  static_cast<uint16 *>(index_data_->buffer())[index + 4] = c;
-  static_cast<uint16 *>(index_data_->buffer())[index + 5] = d;
+  x_assert(index_index_ + 6 <= config_.index_count);
+  static_cast<uint16 *>(index_data_->buffer())[index_index_] = a;
+  static_cast<uint16 *>(index_data_->buffer())[index_index_ + 1] = b;
+  static_cast<uint16 *>(index_data_->buffer())[index_index_ + 2] = c;
+  static_cast<uint16 *>(index_data_->buffer())[index_index_ + 3] = a;
+  static_cast<uint16 *>(index_data_->buffer())[index_index_ + 4] = c;
+  static_cast<uint16 *>(index_data_->buffer())[index_index_ + 5] = d;
+  index_index_ += 6;
   return *this;
 }
 
-MeshUtil &MeshUtil::Quad32(size_t index, uint32 a, uint32 b, uint32 c, uint32 d) {
+MeshUtil &MeshUtil::Quad32(uint32 a, uint32 b, uint32 c, uint32 d) {
   x_assert(index_data_ != nullptr);
   x_assert(config_.index_type == IndexFormat::kUint32);
-  x_assert(index + 6 <= config_.index_count);
-  static_cast<uint32 *>(index_data_->buffer())[index] = a;
-  static_cast<uint32 *>(index_data_->buffer())[index + 1] = b;
-  static_cast<uint32 *>(index_data_->buffer())[index + 2] = c;
-  static_cast<uint32 *>(index_data_->buffer())[index + 3] = a;
-  static_cast<uint32 *>(index_data_->buffer())[index + 4] = c;
-  static_cast<uint32 *>(index_data_->buffer())[index + 5] = d;
+  x_assert(index_index_ + 6 <= config_.index_count);
+  static_cast<uint32 *>(index_data_->buffer())[index_index_] = a;
+  static_cast<uint32 *>(index_data_->buffer())[index_index_ + 1] = b;
+  static_cast<uint32 *>(index_data_->buffer())[index_index_ + 2] = c;
+  static_cast<uint32 *>(index_data_->buffer())[index_index_ + 3] = a;
+  static_cast<uint32 *>(index_data_->buffer())[index_index_ + 4] = c;
+  static_cast<uint32 *>(index_data_->buffer())[index_index_ + 5] = d;
+  index_index_ += 6;
   return *this;
 }
 
@@ -351,6 +386,7 @@ MeshUtil &MeshUtil::EndIndex() {
   x_assert(index_data_ != nullptr);
   config_.index_data = index_data_;
   index_data_.reset();
+  index_index_ = 0;
   return *this;
 }
 
