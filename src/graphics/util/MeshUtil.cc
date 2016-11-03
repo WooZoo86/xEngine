@@ -1,3 +1,4 @@
+#include <graphics/config/MeshConfig.h>
 #include "MeshUtil.h"
 
 namespace xEngine {
@@ -32,12 +33,10 @@ static struct {
   };
 } g_cube_prototype;
 
-MeshUtil MeshUtil::Cube(bool uv) {
+MeshUtil MeshUtil::Cube() {
   MeshUtil mesh;
   mesh.config_.layout.AddElement(VertexElementSemantic::kPosition, VertexElementFormat::kFloat3);
-  if (uv) {
-    mesh.config_.layout.AddElement(VertexElementSemantic::kTexcoord0, VertexElementFormat::kFloat2);
-  }
+  mesh.config_.layout.AddElement(VertexElementSemantic::kTexcoord0, VertexElementFormat::kFloat2);
   mesh.config_.vertex_count = 24;
   mesh.config_.vertex_usage = BufferUsage::kImmutable;
   mesh.config_.index_count = 36;
@@ -65,27 +64,24 @@ MeshUtil MeshUtil::Cube(bool uv) {
         .Quad16(static_cast<uint16>(face * 4),
                 static_cast<uint16>(face * 4 + 1),
                 static_cast<uint16>(face * 4 + 2),
-                static_cast<uint16>(face * 4 + 3));
-    if (uv) {
-      mesh.Vertex(VertexElementSemantic::kTexcoord0, face * 4, 0.0f, 0.0f)
-          .Vertex(VertexElementSemantic::kTexcoord0, face * 4 + 1, 1.0f, 0.0f)
-          .Vertex(VertexElementSemantic::kTexcoord0, face * 4 + 2, 1.0f, 1.0f)
-          .Vertex(VertexElementSemantic::kTexcoord0, face * 4 + 3, 0.0f, 1.0f);
-    }
+                static_cast<uint16>(face * 4 + 3))
+        .Vertex(VertexElementSemantic::kTexcoord0, face * 4, 0.0f, 0.0f)
+        .Vertex(VertexElementSemantic::kTexcoord0, face * 4 + 1, 1.0f, 0.0f)
+        .Vertex(VertexElementSemantic::kTexcoord0, face * 4 + 2, 1.0f, 1.0f)
+        .Vertex(VertexElementSemantic::kTexcoord0, face * 4 + 3, 0.0f, 1.0f);
   }
   mesh.EndVertex();
   mesh.EndIndex();
   return mesh;
 }
 
-MeshUtil MeshUtil::Sphere(size_t divisions, bool uv) {
-  const size_t count = divisions + 1;
-  const float32 step = 1.0f / static_cast<float32>(divisions);
+MeshUtil MeshUtil::Sphere(size_t divisions) {
+  x_assert(divisions > 0);
+  const auto count = divisions + 1;
+  const auto step = 1.0f / static_cast<float32>(divisions);
   MeshUtil mesh;
   mesh.config_.layout.AddElement(VertexElementSemantic::kPosition, VertexElementFormat::kFloat3);
-  if (uv) {
-    mesh.config_.layout.AddElement(VertexElementSemantic::kTexcoord0, VertexElementFormat::kFloat2);
-  }
+  mesh.config_.layout.AddElement(VertexElementSemantic::kTexcoord0, VertexElementFormat::kFloat2);
   mesh.config_.vertex_count = 6 * count * count;
   mesh.config_.vertex_usage = BufferUsage::kImmutable;
   mesh.config_.index_count = 6 * 6 * divisions * divisions;
@@ -105,12 +101,10 @@ MeshUtil MeshUtil::Sphere(size_t divisions, bool uv) {
             point.y * sqrtf(1.0f - (point_square.x + point_square.z) / 2.0f + point_square.x * point_square.z / 3.0f),
             point.z * sqrtf(1.0f - (point_square.x + point_square.y) / 2.0f + point_square.x * point_square.y / 3.0f));
         mesh.Vertex(VertexElementSemantic::kPosition, (face * count + v) * count + u, sphere_point.x, sphere_point.y, sphere_point.z);
-        if (uv) {
-          auto normalized = glm::normalize(sphere_point);
-          mesh.Vertex(VertexElementSemantic::kTexcoord0, (face * count + v) * count + u,
-                      0.5f + atan2f(normalized.x ,normalized.z) / (2.0f * glm::pi<float32>()),
-                      0.5f - asinf(normalized.y) / glm::pi<float32>());
-        }
+        auto normalized = glm::normalize(sphere_point);
+        mesh.Vertex(VertexElementSemantic::kTexcoord0, (face * count + v) * count + u,
+                    0.5f + atan2f(normalized.x, normalized.z) / (2.0f * glm::pi<float32>()),
+                    0.5f - asinf(normalized.y) / glm::pi<float32>());
         if (u < divisions && v < divisions) {
           mesh.Quad16(static_cast<uint16>((face * count + v) * count + u),
                       static_cast<uint16>((face * count + v) * count + u + 1),
@@ -125,20 +119,69 @@ MeshUtil MeshUtil::Sphere(size_t divisions, bool uv) {
   return mesh;
 }
 
-MeshUtil MeshUtil::Capsule() {
+MeshUtil MeshUtil::Capsule(size_t divisions) {
   return MeshUtil();
 }
 
-MeshUtil MeshUtil::Cylinder() {
-  return MeshUtil();
-}
-
-MeshUtil MeshUtil::Plane(bool uv) {
+MeshUtil MeshUtil::Cylinder(size_t divisions) {
+  x_assert(divisions > 2);
+  static const auto square_root_of_two = sqrtf(2.0f);
+  const auto count = divisions + 1;
+  const auto step = 2.0f * glm::pi<float32>() / static_cast<float32>(divisions);
+  const auto top_center_index = 0;
+  const auto bottom_center_index = count + 1;
+  const auto begin_top_index = top_center_index + 1;
+  const auto begin_bottom_index = bottom_center_index + 1;
+  const auto begin_beside_index = 2 * (count + 1);
   MeshUtil mesh;
   mesh.config_.layout.AddElement(VertexElementSemantic::kPosition, VertexElementFormat::kFloat3);
-  if (uv) {
-    mesh.config_.layout.AddElement(VertexElementSemantic::kTexcoord0, VertexElementFormat::kFloat2);
+  mesh.config_.layout.AddElement(VertexElementSemantic::kTexcoord0, VertexElementFormat::kFloat2);
+  mesh.config_.vertex_count = 4 * divisions + 8;
+  mesh.config_.vertex_usage = BufferUsage::kImmutable;
+  mesh.config_.index_count = 12 * count;
+  mesh.config_.index_type = IndexFormat::kUint16;
+  mesh.config_.index_usage = BufferUsage::kImmutable;
+  mesh.BeginVertex();
+  mesh.BeginIndex();
+  mesh.Vertex(VertexElementSemantic::kPosition, top_center_index, 0.0f, 1.0f, 0.0f)
+      .Vertex(VertexElementSemantic::kTexcoord0, top_center_index, 0.5f, 0.5f)
+      .Vertex(VertexElementSemantic::kPosition, bottom_center_index, 0.0f, -1.0f, 0.0f)
+      .Vertex(VertexElementSemantic::kTexcoord0, bottom_center_index, 0.5f, 0.5f);
+  for (size_t i = 0; i < count; ++i) {
+    auto x = cosf(step * i);
+    auto z = sinf(step * i);
+    auto square_x = x * x;
+    auto square_z = z * z;
+    auto u = 0.5f * (1.0f + (sqrtf(2 + 2 * square_root_of_two * x + square_x - square_z) - sqrtf(2 - 2 * square_root_of_two * x + square_x - square_z)) * 0.5f);
+    auto v = 0.5f * (1.0f + (sqrtf(2 + 2 * square_root_of_two * z - square_x + square_z) - sqrtf(2 - 2 * square_root_of_two * z - square_x + square_z)) * 0.5f);
+    mesh.Vertex(VertexElementSemantic::kPosition, begin_top_index + i, x, 1.0f, z)
+        .Vertex(VertexElementSemantic::kTexcoord0, begin_top_index + i, u, v)
+        .Triangle16(static_cast<uint16>(begin_top_index + i),
+                    static_cast<uint16>(begin_top_index + i + 1),
+                    static_cast<uint16>(top_center_index))
+        .Vertex(VertexElementSemantic::kPosition, begin_bottom_index + i, x, -1.0f, z)
+        .Vertex(VertexElementSemantic::kTexcoord0, begin_bottom_index + i, u, v)
+        .Triangle16(static_cast<uint16>(begin_bottom_index + i + 1),
+                    static_cast<uint16>(begin_bottom_index + i),
+                    static_cast<uint16>(bottom_center_index))
+        .Vertex(VertexElementSemantic::kPosition, begin_beside_index + i * 2, x, 1.0f, z)
+        .Vertex(VertexElementSemantic::kPosition, begin_beside_index + i * 2 + 1, x, -1.0f, z)
+        .Vertex(VertexElementSemantic::kTexcoord0, begin_beside_index + i * 2, static_cast<float32>(i) / static_cast<float32>(divisions), 0.0f)
+        .Vertex(VertexElementSemantic::kTexcoord0, begin_beside_index + i * 2 + 1, static_cast<float32>(i) / static_cast<float32>(divisions), 1.0f)
+        .Quad16(static_cast<uint16>(begin_beside_index + (i + 1) * 2),
+                static_cast<uint16>(begin_beside_index + i * 2),
+                static_cast<uint16>(begin_beside_index + i * 2 + 1),
+                static_cast<uint16>(begin_beside_index + (i + 1) * 2 + 1));
   }
+  mesh.EndVertex();
+  mesh.EndIndex();
+  return mesh;
+}
+
+MeshUtil MeshUtil::Plane() {
+  MeshUtil mesh;
+  mesh.config_.layout.AddElement(VertexElementSemantic::kPosition, VertexElementFormat::kFloat3);
+  mesh.config_.layout.AddElement(VertexElementSemantic::kTexcoord0, VertexElementFormat::kFloat2);
   mesh.config_.vertex_count = 4;
   mesh.config_.vertex_usage = BufferUsage::kImmutable;
   mesh.config_.index_count = 6;
@@ -146,12 +189,12 @@ MeshUtil MeshUtil::Plane(bool uv) {
   mesh.config_.index_usage = BufferUsage::kImmutable;
   mesh.BeginVertex()
       .Vertex(VertexElementSemantic::kPosition, 0, -0.5f, 0.0f, -0.5f)
-      .Vertex(VertexElementSemantic::kTexcoord0, 0, 0.0f, 0.0f)
       .Vertex(VertexElementSemantic::kPosition, 1, 0.5f, 0.0f, -0.5f)
-      .Vertex(VertexElementSemantic::kTexcoord0, 1, 1.0f, 0.0f)
       .Vertex(VertexElementSemantic::kPosition, 2, 0.5f, 0.0f, 0.5f)
-      .Vertex(VertexElementSemantic::kTexcoord0, 2, 1.0f, 1.0f)
       .Vertex(VertexElementSemantic::kPosition, 3, -0.5f, 0.0f, 0.5f)
+      .Vertex(VertexElementSemantic::kTexcoord0, 0, 0.0f, 0.0f)
+      .Vertex(VertexElementSemantic::kTexcoord0, 1, 1.0f, 0.0f)
+      .Vertex(VertexElementSemantic::kTexcoord0, 2, 1.0f, 1.0f)
       .Vertex(VertexElementSemantic::kTexcoord0, 3, 0.0f, 1.0f)
       .EndVertex()
       .BeginIndex()

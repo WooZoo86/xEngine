@@ -9,15 +9,15 @@ namespace xEngine {
 
 class MeshUtil {
  public:
-  static MeshUtil Cube(bool uv);
+  static MeshUtil Cube();
 
-  static MeshUtil Sphere(size_t divisions, bool uv);
+  static MeshUtil Sphere(size_t divisions);
 
-  static MeshUtil Capsule();
+  static MeshUtil Capsule(size_t divisions);
 
-  static MeshUtil Cylinder();
+  static MeshUtil Cylinder(size_t divisions);
 
-  static MeshUtil Plane(bool uv);
+  static MeshUtil Plane();
 
  public:
   MeshUtil &BeginVertex();

@@ -171,13 +171,15 @@ class DepthStencilSample : public Application {
   }
 
   void load_mesh() {
-    auto cube_mesh_config = MeshUtil::Cube(true).config();
-    cube_mesh_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(cube_mesh_config);
+    VertexLayout layout;
+    layout.AddElement(VertexElementSemantic::kPosition, VertexElementFormat::kFloat3)
+          .AddElement(VertexElementSemantic::kTexcoord0, VertexElementFormat::kFloat2);
 
-    auto plane_mesh_config = MeshUtil::Plane(true).config();
-    plane_mesh_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(plane_mesh_config);
+    cube_mesh_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(MeshUtil::Cube().config());
 
-    auto pipeline_config = PipelineConfig::ShaderWithLayout(shader_, cube_mesh_config.layout);
+    plane_mesh_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(MeshUtil::Plane().config());
+
+    auto pipeline_config = PipelineConfig::ShaderWithLayout(shader_, layout);
     pipeline_config.depth_stencil_state.depth_enable = true;
     pipeline_config.depth_stencil_state.depth_write_enable = true;
     cube_pipeline_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(pipeline_config);
