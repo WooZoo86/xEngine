@@ -178,7 +178,7 @@ void OpenGLRenderer::UpdateShaderUniformData(ResourceID shader_id, const eastl::
     auto pair = shader.uniform_info.find(name);
     if (pair != shader.uniform_info.end()) {
       auto &info = pair->second;
-      if (data->size() >= info.size * SizeOfOpenGLType(info.type)) {
+      if (data != nullptr && data->size() >= info.size * SizeOfOpenGLType(info.type)) {
         switch (info.type) {
           case GL_FLOAT: {
             glUniform1fv(info.location, info.size, reinterpret_cast<const GLfloat *>(data->buffer()));
@@ -383,10 +383,10 @@ void OpenGLRenderer::ResetShader() {
   glUseProgram(0);
 }
 
-void OpenGLRenderer::UpdateUniformBufferData(ResourceID id, size_t offset, DataPtr data) {
+void OpenGLRenderer::UpdateUniformBufferData(ResourceID id, DataPtr data) {
   auto &uniform_buffer = resource_manager()->uniform_buffer_pool_.Find(id);
   if (uniform_buffer.status() == ResourceStatus::kCompleted) {
-    if (uniform_buffer.config().size < offset + data->size()) {
+    if (data == nullptr || uniform_buffer.config().size < data->size()) {
       Log::GetInstance().Error("uniform buffer size is smaller then offset + length\n");
     } else {
       GLint current_uniform_buffer;
@@ -394,7 +394,7 @@ void OpenGLRenderer::UpdateUniformBufferData(ResourceID id, size_t offset, DataP
 
       glBindBuffer(GL_UNIFORM_BUFFER, uniform_buffer.uniform_buffer_id);
 
-      auto source = glMapBufferRange(GL_UNIFORM_BUFFER, offset, data->size(), GL_MAP_WRITE_BIT);
+      auto source = glMapBuffer(GL_UNIFORM_BUFFER, GL_MAP_WRITE_BIT);
       memcpy(source, data->buffer(), data->size());
       glUnmapBuffer(GL_UNIFORM_BUFFER);
 
@@ -460,7 +460,7 @@ void OpenGLRenderer::ApplyMesh(ResourceID id) {
   }
 }
 
-void OpenGLRenderer::UpdateMesh(ResourceID id, DataPtr vertex_data, size_t vertex_offset, DataPtr index_data, size_t index_offset) {
+void OpenGLRenderer::UpdateMesh(ResourceID id, DataPtr vertex_data, DataPtr index_data) {
   auto &mesh = resource_manager()->mesh_pool_.Find(id);
   if (mesh.status() == ResourceStatus::kCompleted) {
     if (mesh.vertex_buffer_id != cache_.vertex_buffer) {
@@ -468,11 +468,11 @@ void OpenGLRenderer::UpdateMesh(ResourceID id, DataPtr vertex_data, size_t verte
       cache_.vertex_buffer = mesh.vertex_buffer_id;
     }
     if (vertex_data != nullptr && vertex_data->size() != 0) {
-      if (mesh.config().vertex_count * mesh.config().layout.size < vertex_offset + vertex_data->size()) {
-        Log::GetInstance().Error("UpdateMesh failed, vertex size: %d, but want offset: %d, length: %d\n",
-                                 mesh.config().vertex_count * mesh.config().layout.size, vertex_offset, vertex_data->buffer());
+      if (mesh.config().vertex_count * mesh.config().layout.size < vertex_data->size()) {
+        Log::GetInstance().Error("UpdateMesh failed, vertex size: %d, but length: %d\n",
+                                 mesh.config().vertex_count * mesh.config().layout.size, vertex_data->buffer());
       } else {
-        auto vertex_source = glMapBufferRange(GL_ARRAY_BUFFER, vertex_offset, vertex_data->size(), GL_MAP_WRITE_BIT);
+        auto vertex_source = glMapBuffer(GL_ARRAY_BUFFER, GL_MAP_WRITE_BIT);
         memcpy(vertex_source, vertex_data->buffer(), vertex_data->size());
         glUnmapBuffer(GL_ARRAY_BUFFER);
       }
@@ -485,11 +485,11 @@ void OpenGLRenderer::UpdateMesh(ResourceID id, DataPtr vertex_data, size_t verte
       cache_.index_type = mesh.config().index_type;
     }
     if (index_data != nullptr && index_data->size() != 0) {
-      if (mesh.config().index_count * SizeOfIndexFormat(mesh.config().index_type) < index_offset + index_data->size()) {
-        Log::GetInstance().Error("UpdateMesh failed, index size: %d, but want offset: %d, length: %d\n",
-                                 mesh.config().index_count * SizeOfIndexFormat(mesh.config().index_type), index_offset, index_data->buffer());
+      if (mesh.config().index_count * SizeOfIndexFormat(mesh.config().index_type) < index_data->size()) {
+        Log::GetInstance().Error("UpdateMesh failed, index size: %d, but want length: %d\n",
+                                 mesh.config().index_count * SizeOfIndexFormat(mesh.config().index_type), index_data->buffer());
       } else {
-        auto index_source = glMapBufferRange(GL_ELEMENT_ARRAY_BUFFER, index_offset, index_data->size(), GL_MAP_WRITE_BIT);
+        auto index_source = glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_MAP_WRITE_BIT);
         memcpy(index_source, index_data->buffer(), index_data->size());
         glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
       }

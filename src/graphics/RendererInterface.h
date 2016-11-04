@@ -46,7 +46,7 @@ class RendererInterface {
 
   virtual void ResetShader() = 0;
 
-  virtual void UpdateUniformBufferData(ResourceID id, size_t offset, DataPtr data) = 0;
+  virtual void UpdateUniformBufferData(ResourceID id, DataPtr data) = 0;
 
   virtual void ApplySampler(ResourceID shader_id, const eastl::string &name, ResourceID sampler_id) = 0;
 
@@ -54,7 +54,7 @@ class RendererInterface {
 
   virtual void ApplyMesh(ResourceID id) = 0;
 
-  virtual void UpdateMesh(ResourceID id, DataPtr vertex_data, size_t vertex_offset, DataPtr index_data, size_t index_offset) = 0;
+  virtual void UpdateMesh(ResourceID id, DataPtr vertex_data, DataPtr index_data) = 0;
 
   virtual void ResetMesh() = 0;
 

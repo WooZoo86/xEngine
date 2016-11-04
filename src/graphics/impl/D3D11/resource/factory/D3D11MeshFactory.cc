@@ -31,7 +31,7 @@ void D3D11MeshFactory::Create(D3D11Mesh &resource) {
 		index_desc.StructureByteStride = 0;
 
 		D3D11_SUBRESOURCE_DATA index_data;
-		index_data.pSysMem = resource.config().index_data;
+		index_data.pSysMem = resource.config().index_data == nullptr ? nullptr : resource.config().index_data->buffer();
 		index_data.SysMemPitch = 0;
 		index_data.SysMemSlicePitch = 0;
 
@@ -56,7 +56,7 @@ void D3D11MeshFactory::Create(D3D11Mesh &resource) {
   vertex_desc.StructureByteStride = 0;
 
   D3D11_SUBRESOURCE_DATA vertex_data;
-  vertex_data.pSysMem = resource.config().vertex_data;
+  vertex_data.pSysMem = resource.config().vertex_data == nullptr ? nullptr : resource.config().vertex_data->buffer();
   vertex_data.SysMemPitch = 0;
   vertex_data.SysMemSlicePitch = 0;
 

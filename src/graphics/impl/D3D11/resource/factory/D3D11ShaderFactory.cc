@@ -6,6 +6,8 @@
 
 #include "core/Log.h"
 
+#include <EASTL/allocator.h>
+
 namespace xEngine {
 
 static ID3D10Blob *CompileShader(const char *type, const char *source) {
@@ -47,7 +49,7 @@ static ID3D10Blob *CompileShader(const char *type, const char *source) {
   return shader;
 }
 
-static void ReflectShader(ID3D11Device *device, ID3D10Blob *blob, ID3D11Buffer **buffer,
+static void ReflectShader(ID3D11Device *device, ID3D10Blob *blob, void **data, ID3D11Buffer **buffer,
 													D3D11Shader::UniformBlockInfo &global_info,
                           eastl::hash_map<eastl::string, D3D11Shader::UniformBlockInfo> &block_map,
                           eastl::hash_map<eastl::string, uint32> &texture_map,
@@ -114,6 +116,7 @@ static void ReflectShader(ID3D11Device *device, ID3D10Blob *blob, ID3D11Buffer *
 
         x_d3d11_assert_msg(device->CreateBuffer(&uniform_buffer_desc, nullptr, &uniform_buffer), "create global uniform buffer failed\n");
 
+				*data = eastl::GetDefaultAllocator()->allocate(info.size);
         *buffer = uniform_buffer;
 				global_info = info;
       } else {
@@ -143,8 +146,8 @@ void D3D11ShaderFactory::Create(D3D11Shader &resource) {
     return;
   }
 
-  auto vertex_blob = CompileShader("vs_5_0", resource.config().vertex);
-  auto fragment_blob = CompileShader("ps_5_0", resource.config().fragment);
+  auto vertex_blob = CompileShader("vs_5_0", static_cast<const char *>(resource.config().vertex->buffer()));
+  auto fragment_blob = CompileShader("ps_5_0", static_cast<const char *>(resource.config().fragment->buffer()));
 
   ID3D11VertexShader *vertex_shader = nullptr;
   ID3D11PixelShader *fragment_shader = nullptr;
@@ -157,7 +160,9 @@ void D3D11ShaderFactory::Create(D3D11Shader &resource) {
       &vertex_shader
     ), "create vertex shader failed\n");
 
-    ReflectShader(device_, vertex_blob, &resource.vertex_global_uniform_block,
+    ReflectShader(device_, vertex_blob,
+    	&resource.vertex_global_uniform_buffer,
+    	&resource.vertex_global_uniform_block,
 			resource.vertex_global_uniform_block_info,
       resource.vertex_uniform_block_info,
       resource.vertex_texture_index,
@@ -172,7 +177,9 @@ void D3D11ShaderFactory::Create(D3D11Shader &resource) {
       &fragment_shader
     ), "create fragment shader failed\n");
 
-    ReflectShader(device_, fragment_blob, &resource.fragment_global_uniform_block,
+    ReflectShader(device_, fragment_blob,
+			&resource.fragment_global_uniform_buffer,
+    	&resource.fragment_global_uniform_block,
 			resource.fragment_global_uniform_block_info,
       resource.fragment_uniform_block_info,
       resource.fragment_texture_index,
@@ -201,9 +208,15 @@ void D3D11ShaderFactory::Destroy(D3D11Shader &resource) {
   if (resource.fragment_shader != nullptr) {
     resource.fragment_shader->Release();
   }
+	if (resource.vertex_global_uniform_buffer != nullptr) {
+		eastl::GetDefaultAllocator()->deallocate(resource.vertex_global_uniform_buffer, resource.vertex_global_uniform_block_info.size);
+	}
   if (resource.vertex_global_uniform_block != nullptr) {
     resource.vertex_global_uniform_block->Release();
   }
+	if (resource.fragment_global_uniform_buffer != nullptr) {
+		eastl::GetDefaultAllocator()->deallocate(resource.fragment_global_uniform_buffer, resource.fragment_global_uniform_block_info.size);
+	}
   if (resource.fragment_global_uniform_block != nullptr) {
     resource.fragment_global_uniform_block->Release();
   }

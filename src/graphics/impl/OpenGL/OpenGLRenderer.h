@@ -48,7 +48,7 @@ class OpenGLRenderer: public RendererInterface {
 
   virtual void ResetShader() override;
 
-  virtual void UpdateUniformBufferData(ResourceID id, size_t offset, DataPtr data) override;
+  virtual void UpdateUniformBufferData(ResourceID id, DataPtr data) override;
 
   virtual void ApplySampler(ResourceID shader_id, const eastl::string &name, ResourceID sampler_id) override;
 
@@ -56,7 +56,7 @@ class OpenGLRenderer: public RendererInterface {
 
   virtual void ApplyMesh(ResourceID id) override;
 
-  virtual void UpdateMesh(ResourceID id, DataPtr vertex_data, size_t vertex_offset, DataPtr index_data, size_t index_offset) override;
+  virtual void UpdateMesh(ResourceID id, DataPtr vertex_data, DataPtr index_data) override;
 
   virtual void ResetMesh() override;
 
