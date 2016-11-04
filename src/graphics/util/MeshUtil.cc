@@ -6,30 +6,30 @@ namespace xEngine {
 static struct {
   // left-top point of face
   glm::vec3 p[6] = {
-      glm::vec3(-1.0f,  1.0f,  1.0f), // front
-      glm::vec3( 1.0f,  1.0f, -1.0f), // back
       glm::vec3(-1.0f,  1.0f, -1.0f), // top
       glm::vec3(-1.0f, -1.0f,  1.0f), // bottom
-      glm::vec3(-1.0f,  1.0f, -1.0f), // left
+      glm::vec3(-1.0f,  1.0f,  1.0f), // front
       glm::vec3( 1.0f,  1.0f,  1.0f), // right
+      glm::vec3( 1.0f,  1.0f, -1.0f), // back
+      glm::vec3(-1.0f,  1.0f, -1.0f), // left
   };
   // right-direction vector
   glm::vec3 u[6] = {
-      glm::vec3( 2.0f,  0.0f,  0.0f), // front
-      glm::vec3(-2.0f,  0.0f,  0.0f), // back
       glm::vec3( 2.0f,  0.0f,  0.0f), // top
       glm::vec3( 2.0f,  0.0f,  0.0f), // bottom
-      glm::vec3( 0.0f,  0.0f,  2.0f), // left
+      glm::vec3( 2.0f,  0.0f,  0.0f), // front
       glm::vec3( 0.0f,  0.0f, -2.0f), // right
+      glm::vec3(-2.0f,  0.0f,  0.0f), // back
+      glm::vec3( 0.0f,  0.0f,  2.0f), // left
   };
   // bottom-direction vector
   glm::vec3 v[6] = {
-      glm::vec3( 0.0f, -2.0f,  0.0f), // front
-      glm::vec3( 0.0f, -2.0f,  0.0f), // back
       glm::vec3( 0.0f,  0.0f,  2.0f), // top
       glm::vec3( 0.0f,  0.0f, -2.0f), // bottom
-      glm::vec3( 0.0f, -2.0f,  0.0f), // left
+      glm::vec3( 0.0f, -2.0f,  0.0f), // front
       glm::vec3( 0.0f, -2.0f,  0.0f), // right
+      glm::vec3( 0.0f, -2.0f,  0.0f), // back
+      glm::vec3( 0.0f, -2.0f,  0.0f), // left
   };
 } g_cube_prototype;
 
@@ -120,7 +120,136 @@ MeshUtil MeshUtil::Sphere(size_t divisions) {
 }
 
 MeshUtil MeshUtil::Capsule(size_t divisions) {
-  return MeshUtil();
+  x_assert(divisions > 0);
+  x_assert(divisions % 2 == 0);
+  const auto count = divisions + 1;
+  const auto middle = divisions / 2;
+  const auto begin_beside_index = 2 * count * count;
+  const auto begin_beside_quad_index = begin_beside_index + 4 * count * (count + 1);
+  const auto step = 1.0f / static_cast<float32>(divisions);
+  MeshUtil mesh;
+  mesh.config_.layout.AddElement(VertexElementSemantic::kPosition, VertexElementFormat::kFloat3);
+  mesh.config_.layout.AddElement(VertexElementSemantic::kTexcoord0, VertexElementFormat::kFloat2);
+  mesh.config_.vertex_count = 2 * count * count + 4 * count * (count + 1) + 2 * 4 * count;
+  mesh.config_.vertex_usage = BufferUsage::kImmutable;
+  mesh.config_.index_count = 6 * 6 * divisions * divisions + 4 * 6 * divisions;
+  mesh.config_.index_type = IndexFormat::kUint16;
+  mesh.config_.index_usage = BufferUsage::kImmutable;
+  mesh.BeginVertex();
+  mesh.BeginIndex();
+  // top and bottom
+  for (size_t face = 0; face < 2; ++face) {
+    for (size_t v = 0; v < count; ++v) {
+      for (size_t u = 0; u < count; ++u) {
+        glm::vec3 point(g_cube_prototype.p[face].x + (g_cube_prototype.u[face].x * u + g_cube_prototype.v[face].x * v) * step,
+                        g_cube_prototype.p[face].y + (g_cube_prototype.u[face].y * u + g_cube_prototype.v[face].y * v) * step,
+                        g_cube_prototype.p[face].z + (g_cube_prototype.u[face].z * u + g_cube_prototype.v[face].z * v) * step);
+        auto point_square = point * point;
+        glm::vec3 sphere_point(
+            point.x * sqrtf(1.0f - (point_square.y + point_square.z) / 2.0f + point_square.y * point_square.z / 3.0f),
+            point.y * sqrtf(1.0f - (point_square.x + point_square.z) / 2.0f + point_square.x * point_square.z / 3.0f),
+            point.z * sqrtf(1.0f - (point_square.x + point_square.y) / 2.0f + point_square.x * point_square.y / 3.0f));
+        if (face == 0) {
+          mesh.Vertex(VertexElementSemantic::kPosition, (face * count + v) * count + u, sphere_point.x, sphere_point.y + 1.0f, sphere_point.z);
+        } else {
+          mesh.Vertex(VertexElementSemantic::kPosition, (face * count + v) * count + u, sphere_point.x, sphere_point.y - 1.0f, sphere_point.z);
+        }
+        auto normalized = glm::normalize(sphere_point);
+        mesh.Vertex(VertexElementSemantic::kTexcoord0, (face * count + v) * count + u,
+                    0.5f + atan2f(normalized.x, normalized.z) / (2.0f * glm::pi<float32>()),
+                    0.5f - asinf(normalized.y) / glm::pi<float32>());
+        if (u < divisions && v < divisions) {
+          mesh.Quad16(static_cast<uint16>((face * count + v) * count + u),
+                      static_cast<uint16>((face * count + v) * count + u + 1),
+                      static_cast<uint16>((face * count + v + 1) * count + u + 1),
+                      static_cast<uint16>((face * count + v + 1) * count + u));
+        }
+      }
+    }
+  }
+  // front bottom left right
+  for (size_t face = 0; face < 4; ++face) {
+    for (size_t v = 0; v < count; ++v) {
+      for (size_t u = 0; u < count; ++u) {
+        glm::vec3 point(g_cube_prototype.p[face + 2].x + (g_cube_prototype.u[face + 2].x * u + g_cube_prototype.v[face + 2].x * v) * step,
+                        g_cube_prototype.p[face + 2].y + (g_cube_prototype.u[face + 2].y * u + g_cube_prototype.v[face + 2].y * v) * step,
+                        g_cube_prototype.p[face + 2].z + (g_cube_prototype.u[face + 2].z * u + g_cube_prototype.v[face + 2].z * v) * step);
+        auto point_square = point * point;
+        glm::vec3 sphere_point(
+            point.x * sqrtf(1.0f - (point_square.y + point_square.z) / 2.0f + point_square.y * point_square.z / 3.0f),
+            point.y * sqrtf(1.0f - (point_square.x + point_square.z) / 2.0f + point_square.x * point_square.z / 3.0f),
+            point.z * sqrtf(1.0f - (point_square.x + point_square.y) / 2.0f + point_square.x * point_square.y / 3.0f));
+        auto normalized = glm::normalize(sphere_point);
+        auto uv = glm::vec2(0.5f + atan2f(normalized.x, normalized.z) / (2.0f * glm::pi<float32>()),
+                            0.5f - asinf(normalized.y) / glm::pi<float32>());
+        if (v < middle) {
+          mesh.Vertex(VertexElementSemantic::kPosition,
+                      begin_beside_index + face * count * (count + 1) + v * count + u,
+                      sphere_point.x, sphere_point.y + 1.0f, sphere_point.z)
+              .Vertex(VertexElementSemantic::kTexcoord0,
+                      begin_beside_index + face * count * (count + 1) + v * count + u,
+                      uv.x, uv.y);
+          if (u < divisions && v < divisions) {
+            mesh.Quad16(static_cast<uint16>(begin_beside_index + face * count * (count + 1) + v * count + u),
+                        static_cast<uint16>(begin_beside_index + face * count * (count + 1) + v * count + u + 1),
+                        static_cast<uint16>(begin_beside_index + face * count * (count + 1) + (v + 1) * count + u + 1),
+                        static_cast<uint16>(begin_beside_index + face * count * (count + 1) + (v + 1) * count + u));
+          }
+        } else if (v > middle) {
+          mesh.Vertex(VertexElementSemantic::kPosition,
+                      begin_beside_index + face * count * (count + 1) + (v + 1) * count + u,
+                      sphere_point.x, sphere_point.y - 1.0f, sphere_point.z)
+              .Vertex(VertexElementSemantic::kTexcoord0,
+                      begin_beside_index + face * count * (count + 1) + (v + 1) * count + u,
+                      uv.x, uv.y);
+          if (u < divisions && v < divisions) {
+            mesh.Quad16(static_cast<uint16>(begin_beside_index + face * count * (count + 1) + (v + 1) * count + u),
+                        static_cast<uint16>(begin_beside_index + face * count * (count + 1) + (v + 1) * count + u + 1),
+                        static_cast<uint16>(begin_beside_index + face * count * (count + 1) + (v + 2) * count + u + 1),
+                        static_cast<uint16>(begin_beside_index + face * count * (count + 1) + (v + 2) * count + u));
+          }
+        } else {
+          mesh.Vertex(VertexElementSemantic::kPosition,
+                      begin_beside_index + face * count * (count + 1) + v * count + u,
+                      sphere_point.x, sphere_point.y + 1.0f, sphere_point.z)
+              .Vertex(VertexElementSemantic::kTexcoord0,
+                      begin_beside_index + face * count * (count + 1) + v * count + u,
+                      uv.x, uv.y)
+              .Vertex(VertexElementSemantic::kPosition,
+                      begin_beside_index + face * count * (count + 1) + (v + 1) * count + u,
+                      sphere_point.x, sphere_point.y - 1.0f, sphere_point.z)
+              .Vertex(VertexElementSemantic::kTexcoord0,
+                      begin_beside_index + face * count * (count + 1) + (v + 1) * count + u,
+                      uv.x, uv.y)
+              .Vertex(VertexElementSemantic::kPosition,
+                      begin_beside_quad_index + face * count * 2 + u,
+                      sphere_point.x, sphere_point.y + 1.0f, sphere_point.z)
+              .Vertex(VertexElementSemantic::kTexcoord0,
+                      begin_beside_quad_index + face * count * 2 + u,
+                      static_cast<float32>(face * divisions + u) / static_cast<float32>(4 * divisions), 0.0f)
+              .Vertex(VertexElementSemantic::kPosition,
+                      begin_beside_quad_index + face * count * 2 + u + count,
+                      sphere_point.x, sphere_point.y - 1.0f, sphere_point.z)
+              .Vertex(VertexElementSemantic::kTexcoord0,
+                      begin_beside_quad_index + face * count * 2 + u + count,
+                      static_cast<float32>(face * divisions + u) / static_cast<float32>(4 * divisions), 1.0f);
+          if (u < divisions && v < divisions) {
+            mesh.Quad16(static_cast<uint16>(begin_beside_quad_index + face * count * 2 + u),
+                        static_cast<uint16>(begin_beside_quad_index + face * count * 2 + u + 1),
+                        static_cast<uint16>(begin_beside_quad_index + face * count * 2 + u + count + 1),
+                        static_cast<uint16>(begin_beside_quad_index + face * count * 2 + u + count))
+                .Quad16(static_cast<uint16>(begin_beside_index + face * count * (count + 1) + (v + 1) * count + u),
+                        static_cast<uint16>(begin_beside_index + face * count * (count + 1) + (v + 1) * count + u + 1),
+                        static_cast<uint16>(begin_beside_index + face * count * (count + 1) + (v + 2) * count + u + 1),
+                        static_cast<uint16>(begin_beside_index + face * count * (count + 1) + (v + 2) * count + u));
+          }
+        }
+      }
+    }
+  }
+  mesh.EndVertex();
+  mesh.EndIndex();
+  return mesh;
 }
 
 MeshUtil MeshUtil::Cylinder(size_t divisions) {
