@@ -17,7 +17,7 @@ if(X_ENGINE_OPTION_GLAD_DEBUG)
 endif()
 
 include_directories(
-    ${PROJECT_SOURCE_DIR}/src
+    ${PROJECT_SOURCE_DIR}/runtime
     ${PROJECT_SOURCE_DIR}/third_party/EASTL/include
     ${PROJECT_SOURCE_DIR}/third_party/EASTL/test/packages/EABase/include/Common
     ${PROJECT_SOURCE_DIR}/third_party/mongoose

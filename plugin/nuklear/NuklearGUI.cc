@@ -83,7 +83,7 @@ struct vertex_struct {
   nk_byte color[4];
 };
 
-void NuklearGUI::Initialize(NuklearConfig config) {
+void NuklearGUI::Initialize(NuklearGUIConfig config) {
   x_assert(!Available());
 
   gui_config_ = config;

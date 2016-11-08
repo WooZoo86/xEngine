@@ -1,4 +1,4 @@
-#include "application/Application.h"
+#include "application/ApplicationDelegate.h"
 #include "core/Log.h"
 #include "graphics/Graphics.h"
 #include "window/Window.h"
@@ -75,12 +75,11 @@ static const char *fragment_shader =
 
 using namespace xEngine;
 
-class GraphicsSample : public Application {
+class GraphicsSample : public ApplicationDelegate, WindowDelegate {
  public:
-  virtual ApplicationStatus Initialize() override {
-    Log::GetInstance().Info("Initialize\n");
+  virtual void Initialize() override {
     Window::GetInstance().Initialize();
-    window_id_ = Window::GetInstance().Create(WindowConfig::ForWindow(1024, 768, "GraphicsSample"));
+    window_id_ = Window::GetInstance().Create(WindowConfig::ForWindow(this, 1024, 768, "GraphicsSample"));
     Window::GetInstance().GetGraphics(window_id_)->Initialize(GraphicsConfig::ForWindow(window_id_));
     Window::GetInstance().GetGraphics(window_id_)->renderer()->MakeCurrent();
 
@@ -88,26 +87,20 @@ class GraphicsSample : public Application {
     load_texture();
     load_mesh();
     state_ = ClearState::ClearColor();
-
-    return Application::Initialize();
   }
-  virtual ApplicationStatus Finalize() override {
-    Log::GetInstance().Info("Finalize\n");
+
+  virtual void Finalize() override {
     Window::GetInstance().Finalize();
-    return Application::Finalize();
   }
-  virtual ApplicationStatus Loop() override {
+
+  virtual void OnWindowClose() override {
+    Window::GetInstance().GetGraphics(window_id_)->Finalize();
+    Window::GetInstance().Destroy(window_id_);
+    window_id_ = kInvalidResourceID;
+  }
+
+  virtual void OnWindowUpdate() override {
     draw();
-
-    Window::GetInstance().Tick();
-
-    if (Window::GetInstance().ShouldClose(window_id_)) {
-      Window::GetInstance().GetGraphics(window_id_)->Finalize();
-      Window::GetInstance().Destroy(window_id_);
-      window_id_ = kInvalidResourceID;
-    }
-
-    return Window::GetInstance().IsAllClosed() ? ApplicationStatus::kFinalize : ApplicationStatus::kLoop;
   }
 
  private:

@@ -1,29 +1,23 @@
-#include "application/Application.h"
+#include "application/ApplicationDelegate.h"
 #include "core/Log.h"
 #include "window/Window.h"
 
 using namespace xEngine;
 
-class WindowSample : public Application {
+class WindowSample : public ApplicationDelegate, WindowDelegate {
  public:
-  virtual ApplicationStatus Initialize() override {
-    Log::GetInstance().Info("Initialize\n");
+  virtual void Initialize() override {
     Window::GetInstance().Initialize();
-    window_id_ = Window::GetInstance().Create(WindowConfig::ForWindow(1024, 768, "WindowSample"));
-    return Application::Initialize();
+    window_id_ = Window::GetInstance().Create(WindowConfig::ForWindow(this, 1024, 768, "WindowSample"));
   }
-  virtual ApplicationStatus Finalize() override {
-    Log::GetInstance().Info("Finalize\n");
+
+  virtual void Finalize() override {
     Window::GetInstance().Finalize();
-    return Application::Finalize();
   }
-  virtual ApplicationStatus Loop() override {
-    Window::GetInstance().Tick();
-    if (Window::GetInstance().ShouldClose(window_id_)) {
-      Window::GetInstance().Destroy(window_id_);
-      window_id_ = kInvalidResourceID;
-    }
-    return Window::GetInstance().IsAllClosed() ? ApplicationStatus::kFinalize : ApplicationStatus::kLoop;
+
+  virtual void OnWindowClose() override {
+    Window::GetInstance().Destroy(window_id_);
+    window_id_ = kInvalidResourceID;
   }
 
  private:

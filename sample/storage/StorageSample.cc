@@ -1,14 +1,13 @@
-#include "application/Application.h"
+#include "application/ApplicationDelegate.h"
 #include "core/Log.h"
 #include "io/IO.h"
 #include "storage/StorageFilesystem.h"
 
 using namespace xEngine;
 
-class StorageSample : public Application {
+class StorageSample : public ApplicationDelegate {
  public:
-  virtual ApplicationStatus Initialize() override {
-    Log::GetInstance().Info("Initialize\n");
+  virtual void Initialize() override {
     IO::GetInstance().Initialize();
 #if X_MACOS
     IO::GetInstance().AddPlaceholder("local", "storage:///Users/leafnsand/Desktop/");
@@ -25,25 +24,15 @@ class StorageSample : public Application {
         IO::GetInstance().Read("local:test.txt", [&](Location location2, IOStatus status2, DataPtr data2) {
           if (status2 == IOStatus::kSuccess) {
             Log::GetInstance().Debug("read complete: %s\n", data2->buffer());
-            complete_ = true;
           }
         });
       }
     });
-    return Application::Initialize();
-  }
-  virtual ApplicationStatus Finalize() override {
-    Log::GetInstance().Info("Finalize\n");
-    IO::GetInstance().Finalize();
-    return Application::Finalize();
-  }
-  virtual ApplicationStatus Loop() override {
-    IO::GetInstance().Tick();
-    return complete_ ? ApplicationStatus::kFinalize : ApplicationStatus::kLoop;
   }
 
- private:
-  bool complete_{false};
+  virtual void Finalize() override {
+    IO::GetInstance().Finalize();
+  }
 };
 
 XENGINE_APPLICATION(StorageSample)

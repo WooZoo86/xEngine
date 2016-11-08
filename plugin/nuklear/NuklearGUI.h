@@ -1,7 +1,7 @@
 #ifndef XENGINE_PLUGIN_NUKLEAR_NUKLEARGUI_H
 #define XENGINE_PLUGIN_NUKLEAR_NUKLEARGUI_H
 
-#include "NuklearConfig.h"
+#include "NuklearGUIConfig.h"
 
 #include <graphics/Graphics.h>
 
@@ -15,6 +15,7 @@
 #include <nuklear.h>
 
 #include <EASTL/vector.h>
+#include <EASTL/shared_ptr.h>
 
 namespace xEngine {
 
@@ -24,13 +25,9 @@ class WindowInterface;
 
 class NuklearGUI {
  public:
-  static NuklearGUI &GetInstance() {
-    static NuklearGUI instance;
-    return instance;
-  }
+  CREATE_FUNC_DECLARE(NuklearGUI)
 
- public:
-  void Initialize(NuklearConfig config = NuklearConfig());
+  void Initialize(NuklearGUIConfig config = NuklearGUIConfig());
 
   void Finalize();
 
@@ -43,7 +40,7 @@ class NuklearGUI {
   nk_context *context() { return &context_; }
 
  private:
-  NuklearConfig gui_config_;
+  NuklearGUIConfig gui_config_;
   WindowInterface *window_{nullptr};
   Graphics *graphics_{nullptr};
   nk_convert_config config_;
@@ -60,6 +57,8 @@ class NuklearGUI {
   ResourceID pipeline_{kInvalidResourceID};
   ResourceID sampler_{kInvalidResourceID};
 };
+
+PTR_DECLARE(NuklearGUI)
 
 } // namespace xEngine
 

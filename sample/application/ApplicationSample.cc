@@ -1,21 +1,16 @@
-#include "application/Application.h"
+#include "application/ApplicationDelegate.h"
 #include "core/Log.h"
 
 using namespace xEngine;
 
-class ApplicationSample : public Application {
+class ApplicationSample : public ApplicationDelegate {
  public:
-  virtual ApplicationStatus Initialize() override {
+  virtual void Initialize() override {
     Log::GetInstance().Info("Initialize\n");
-    return Application::Initialize();
   }
-  virtual ApplicationStatus Finalize() override {
+
+  virtual void Finalize() override {
     Log::GetInstance().Info("Finalize\n");
-    return Application::Finalize();
-  }
-  virtual ApplicationStatus Loop() override {
-    Log::GetInstance().Info("Loop\n");
-    return Application::Loop();
   }
 };
 

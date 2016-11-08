@@ -1,13 +1,13 @@
-#include "application/Application.h"
+#include "application/ApplicationDelegate.h"
 #include "core/Log.h"
 #include "io/IO.h"
 #include "http/HTTPFilesystem.h"
 
 using namespace xEngine;
 
-class HTTPSample : public Application {
+class HTTPSample : public ApplicationDelegate {
  public:
-  virtual ApplicationStatus Initialize() override {
+  virtual void Initialize() override {
     Log::GetInstance().Info("Initialize\n");
     IO::GetInstance().Initialize();
     IO::GetInstance().AddPlaceholder("web", "http://leafnsand.com/");
@@ -19,16 +19,10 @@ class HTTPSample : public Application {
         complete_ = true;
       }
     });
-    return Application::Initialize();
   }
-  virtual ApplicationStatus Finalize() override {
-    Log::GetInstance().Info("Finalize\n");
+
+  virtual void Finalize() override {
     IO::GetInstance().Finalize();
-    return Application::Finalize();
-  }
-  virtual ApplicationStatus Loop() override {
-    IO::GetInstance().Tick();
-    return complete_ ? ApplicationStatus::kFinalize : ApplicationStatus::kLoop;
   }
 
  private:

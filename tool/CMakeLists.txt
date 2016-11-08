@@ -28,11 +28,4 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/plugin
 )
 
-add_subdirectory(application)
-add_subdirectory(depth_stencil)
-add_subdirectory(graphics)
-add_subdirectory(http)
-add_subdirectory(nuklear)
-add_subdirectory(shape)
-add_subdirectory(storage)
-add_subdirectory(window)
+add_subdirectory(mesh_convert_tool)
