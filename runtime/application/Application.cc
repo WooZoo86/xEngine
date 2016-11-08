@@ -6,23 +6,23 @@ namespace xEngine {
 
 extern void NativeApplicationInitialize(ApplicationDelegate *delegate);
 
-extern void NativeApplicationFinalize();
+extern void NativeApplicationFinalize(ApplicationDelegate *delegate);
 
-extern void PollNativeApplicationEvent();
+extern bool PollNativeApplicationEvent();
 
 void Application::Run(ApplicationDelegate *delegate) {
   x_assert(delegate_ == nullptr);
   delegate_ = delegate;
-  NativeApplicationInitialize(delegate);
+  NativeApplicationInitialize(delegate_);
   while (true) {
-    PollNativeApplicationEvent();
+		if (PollNativeApplicationEvent()) break;
     InvokeLoop();
     DoRemoveLoop();
   }
 }
 
 void Application::Quit() {
-  NativeApplicationFinalize();
+  NativeApplicationFinalize(delegate_);
 }
 
 LoopID Application::AddLoop(Loop loop) {

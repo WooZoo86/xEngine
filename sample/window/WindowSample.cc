@@ -18,6 +18,9 @@ class WindowSample : public ApplicationDelegate, WindowDelegate {
   virtual void OnWindowClose() override {
     Window::GetInstance().Destroy(window_id_);
     window_id_ = kInvalidResourceID;
+#if X_WINDOWS
+		Application::GetInstance().Quit();
+#endif
   }
 
  private:

@@ -1,5 +1,6 @@
 #include "MeshConvertToolWindow.h"
 
+#include <application/Application.h>
 #include <window/Window.h>
 
 namespace xEngine {
@@ -29,6 +30,9 @@ void MeshConvertToolWindow::OnWindowClose() {
   Window::GetInstance().GetGraphics(window_id_)->Finalize();
   Window::GetInstance().Destroy(window_id_);
   window_id_ = kInvalidResourceID;
+#if X_WINDOWS
+	Application::GetInstance().Quit();
+#endif
 }
 
 void MeshConvertToolWindow::Draw() {

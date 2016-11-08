@@ -128,6 +128,7 @@ namespace xEngine {
 
 void MacOSWindow::Create(const WindowConfig &config) {
   @autoreleasepool {
+	x_assert(config.delegate != nullptr);
     config_ = config;
     NSWindow *window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, config.width, config.height)
                                          styleMask:(NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable)
@@ -148,8 +149,8 @@ void MacOSWindow::Create(const WindowConfig &config) {
     window_ = window;
     loop_id_ = Application::GetInstance().AddLoop([this](){
       if (this->config_.delegate != nullptr) {
-        this->Reset();
-        this->config_.delegate->OnWindowUpdate();
+        Reset();
+        config_.delegate->OnWindowUpdate();
       }
     });
   }

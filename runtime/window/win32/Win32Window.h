@@ -5,18 +5,13 @@
 
 #include "window/WindowInterface.h"
 
+#include "application/Application.h"
+
 #include <Windows.h>
 
 namespace xEngine {
 
 class Win32Window : public WindowInterface {
- public:
-  static void Initialize();
-
-  static void Finalize();
-
-  static void Tick();
-
  public:
   virtual void Create(const WindowConfig &config) override;
 
@@ -27,6 +22,7 @@ class Win32Window : public WindowInterface {
   virtual void *GetNativeHandle() override { return window_; }
 
  private:
+	LoopID loop_id_{kInvalidLoopID};
   HWND window_{nullptr};
 
   friend LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);

@@ -93,8 +93,6 @@ static void ReflectShader(ID3D11Device *device, ID3D10Blob *blob, void **data, I
         x_d3d11_assert_msg(variable_type_reflection->GetDesc(&variable_type_desc), "get variable type description failed\n");
 
         D3D11Shader::UniformElementInfo element_info;
-        element_info.clazz = variable_type_desc.Class;
-        element_info.type = variable_type_desc.Type;
         element_info.offset = variable_desc.StartOffset;
         element_info.size = variable_desc.Size;
 

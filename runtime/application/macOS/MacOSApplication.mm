@@ -63,7 +63,7 @@ void NativeApplicationFinalize() {
   [[NSApplication sharedApplication] terminate:nil];
 }
 
-void PollNativeApplicationEvent() {
+bool PollNativeApplicationEvent() {
   @autoreleasepool {
     NSEvent *event;
     do {
@@ -73,6 +73,7 @@ void PollNativeApplicationEvent() {
                                                  dequeue:YES];
       [[NSApplication sharedApplication] sendEvent: event];
     } while(event != nil);
+	return true;
   }
 }
 

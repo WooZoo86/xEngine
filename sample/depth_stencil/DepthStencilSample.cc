@@ -106,6 +106,9 @@ class DepthStencilSample : public ApplicationDelegate, WindowDelegate {
     Window::GetInstance().GetGraphics(window_id_)->Finalize();
     Window::GetInstance().Destroy(window_id_);
     window_id_ = kInvalidResourceID;
+#if X_WINDOWS
+		Application::GetInstance().Quit();
+#endif
   }
 
   virtual void OnWindowUpdate() override {
