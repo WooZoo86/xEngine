@@ -31,6 +31,8 @@ struct WindowConfig {
 
   bool is_full_screen{false};
 
+	bool is_dropfile_accepted{true};
+
   eastl::string title{"xEngine"};
 
 };

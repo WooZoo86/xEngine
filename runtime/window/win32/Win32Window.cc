@@ -2,6 +2,10 @@
 
 #include "Win32Window.h"
 
+#include <EASTL/allocator.h>
+#include <EASTL/string.h>
+#include <EASTL/vector.h>
+
 #include <windowsx.h>
 
 namespace xEngine {
@@ -71,6 +75,22 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 			self->config_.delegate->OnWindowMouseButtonUp(MouseButtonType::kMiddle);
       break;
     }
+		case WM_DROPFILES:
+		{
+			eastl::vector<eastl::string> files;
+			auto drop = reinterpret_cast<HDROP>(wParam);
+			auto count = DragQueryFile(drop, 0xFFFFFFFF, nullptr, 0);
+			for (auto i = 0; i < count; ++i) {
+				auto length = DragQueryFile(drop, i, nullptr, 0) + 1;
+				auto buffer = static_cast<char *>(eastl::GetDefaultAllocator()->allocate(length));
+				DragQueryFile(drop, i, buffer, length);
+				files.push_back(eastl::string(buffer, length));
+				eastl::GetDefaultAllocator()->deallocate(buffer, length);
+			}
+			DragFinish(drop);
+			self->config_.delegate->OnWindowDropFile(files);
+			break;
+		}
     default:
       return DefWindowProc(hwnd, message, wParam, lParam);
   }
@@ -98,6 +118,7 @@ void Win32Window::Create(const WindowConfig &config) {
   SetProp(window_, "xEngine", this);
   ShowWindow(window_, SW_SHOWNORMAL);
   SetCursor(LoadCursorW(nullptr, reinterpret_cast<LPCWSTR>(IDC_ARROW)));
+	DragAcceptFiles(window_, config_.is_dropfile_accepted);
 	loop_id_ = Application::GetInstance().AddLoop([this]()
 	{
 		Reset();

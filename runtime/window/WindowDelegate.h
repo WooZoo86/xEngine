@@ -3,6 +3,9 @@
 
 #include <glm.hpp>
 
+#include <EASTL/string.h>
+#include <EASTL/vector.h>
+
 namespace xEngine {
 
 class WindowDelegate {
@@ -26,6 +29,8 @@ class WindowDelegate {
   virtual void OnWindowKeyboardButtonDown(KeyboardButtonType type) {}
 
   virtual void OnWindowKeyboardButtonUp(KeyboardButtonType type) {}
+
+	virtual void OnWindowDropFile(eastl::vector<eastl::string> files) {}
 };
 
 }

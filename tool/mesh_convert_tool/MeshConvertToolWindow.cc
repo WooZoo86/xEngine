@@ -35,6 +35,10 @@ void MeshConvertToolWindow::OnWindowClose() {
 #endif
 }
 
+void MeshConvertToolWindow::OnWindowDropFile(eastl::vector<eastl::string> files) {
+	
+}
+
 void MeshConvertToolWindow::Draw() {
   auto &renderer = Window::GetInstance().GetGraphics(window_id_)->renderer();
   renderer->MakeCurrent();
@@ -48,8 +52,8 @@ void MeshConvertToolWindow::DrawGUI() {
   nuklear_->BeginFrame();
   auto ctx = nuklear_->context();
   nk_begin(ctx, "", nk_rect(0, 0, window_config.width, window_config.height), NK_WINDOW_NO_SCROLLBAR);
-  nk_layout_row_static(ctx, 200, 50, 1);
-  nk_button_label(ctx, "click");
+  nk_layout_row_static(ctx, 100, 400, 1);
+	nk_label(ctx, "Drop Model File Here!", NK_TEXT_ALIGN_CENTERED);
   nk_end(ctx);
   nuklear_->EndFrame();
 }
