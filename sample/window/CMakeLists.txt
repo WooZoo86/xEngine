@@ -1,7 +1,7 @@
 if(X_WINDOWS)
-	add_executable(WindowSample WIN32 WindowSample.cc)
+  add_executable(WindowSample WIN32 WindowSample.cc)
 else()
-	add_executable(WindowSample WindowSample.cc)
+  add_executable(WindowSample WindowSample.cc)
 endif()
 
 target_link_libraries(WindowSample xEngine EASTL)

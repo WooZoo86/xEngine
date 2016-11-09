@@ -48,7 +48,7 @@ static ID3D10Blob *CompileShader(const char *type, const char *source) {
 }
 
 static void ReflectShader(ID3D11Device *device, ID3D10Blob *blob, void **data, ID3D11Buffer **buffer,
-													D3D11Shader::UniformBlockInfo &global_info,
+                          D3D11Shader::UniformBlockInfo &global_info,
                           eastl::hash_map<eastl::string, D3D11Shader::UniformBlockInfo> &block_map,
                           eastl::hash_map<eastl::string, uint32> &texture_map,
                           eastl::hash_map<eastl::string, uint32> &sampler_map) {
@@ -112,11 +112,11 @@ static void ReflectShader(ID3D11Device *device, ID3D10Blob *blob, void **data, I
 
         x_d3d11_assert_msg(device->CreateBuffer(&uniform_buffer_desc, nullptr, &uniform_buffer), "create global uniform buffer failed\n");
 
-				*data = eastl::GetDefaultAllocator()->allocate(info.size);
+        *data = eastl::GetDefaultAllocator()->allocate(info.size);
         *buffer = uniform_buffer;
-				global_info = info;
+        global_info = info;
       } else {
-				block_map.insert({ uniform_block_desc.Name, info });
+        block_map.insert({ uniform_block_desc.Name, info });
       }
     }
     else if (resource_desc.Type == D3D_SIT_TEXTURE) {
@@ -157,9 +157,9 @@ void D3D11ShaderFactory::Create(D3D11Shader &resource) {
     ), "create vertex shader failed\n");
 
     ReflectShader(device_, vertex_blob,
-    	&resource.vertex_global_uniform_buffer,
-    	&resource.vertex_global_uniform_block,
-			resource.vertex_global_uniform_block_info,
+      &resource.vertex_global_uniform_buffer,
+      &resource.vertex_global_uniform_block,
+      resource.vertex_global_uniform_block_info,
       resource.vertex_uniform_block_info,
       resource.vertex_texture_index,
       resource.vertex_sampler_index);
@@ -174,9 +174,9 @@ void D3D11ShaderFactory::Create(D3D11Shader &resource) {
     ), "create fragment shader failed\n");
 
     ReflectShader(device_, fragment_blob,
-			&resource.fragment_global_uniform_buffer,
-    	&resource.fragment_global_uniform_block,
-			resource.fragment_global_uniform_block_info,
+      &resource.fragment_global_uniform_buffer,
+      &resource.fragment_global_uniform_block,
+      resource.fragment_global_uniform_block_info,
       resource.fragment_uniform_block_info,
       resource.fragment_texture_index,
       resource.fragment_sampler_index);
@@ -204,15 +204,15 @@ void D3D11ShaderFactory::Destroy(D3D11Shader &resource) {
   if (resource.fragment_shader != nullptr) {
     resource.fragment_shader->Release();
   }
-	if (resource.vertex_global_uniform_buffer != nullptr) {
-		eastl::GetDefaultAllocator()->deallocate(resource.vertex_global_uniform_buffer, resource.vertex_global_uniform_block_info.size);
-	}
+  if (resource.vertex_global_uniform_buffer != nullptr) {
+    eastl::GetDefaultAllocator()->deallocate(resource.vertex_global_uniform_buffer, resource.vertex_global_uniform_block_info.size);
+  }
   if (resource.vertex_global_uniform_block != nullptr) {
     resource.vertex_global_uniform_block->Release();
   }
-	if (resource.fragment_global_uniform_buffer != nullptr) {
-		eastl::GetDefaultAllocator()->deallocate(resource.fragment_global_uniform_buffer, resource.fragment_global_uniform_block_info.size);
-	}
+  if (resource.fragment_global_uniform_buffer != nullptr) {
+    eastl::GetDefaultAllocator()->deallocate(resource.fragment_global_uniform_buffer, resource.fragment_global_uniform_block_info.size);
+  }
   if (resource.fragment_global_uniform_block != nullptr) {
     resource.fragment_global_uniform_block->Release();
   }

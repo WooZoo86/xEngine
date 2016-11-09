@@ -73,7 +73,7 @@ bool PollNativeApplicationEvent() {
                                                  dequeue:YES];
       [[NSApplication sharedApplication] sendEvent: event];
     } while(event != nil);
-	return true;
+  return true;
   }
 }
 

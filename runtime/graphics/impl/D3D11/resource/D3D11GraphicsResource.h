@@ -42,14 +42,14 @@ struct D3D11Shader : public Resource<ShaderConfig> {
 
   ID3D11PixelShader *fragment_shader{nullptr};
 
-	UniformBlockInfo vertex_global_uniform_block_info;
+  UniformBlockInfo vertex_global_uniform_block_info;
 
-	void *vertex_global_uniform_buffer{nullptr};
+  void *vertex_global_uniform_buffer{nullptr};
 
   ID3D11Buffer *vertex_global_uniform_block{nullptr};
 
-	UniformBlockInfo fragment_global_uniform_block_info;
-	void *fragment_global_uniform_buffer{nullptr};
+  UniformBlockInfo fragment_global_uniform_block_info;
+  void *fragment_global_uniform_buffer{nullptr};
 
   ID3D11Buffer *fragment_global_uniform_block{nullptr};
 
@@ -70,11 +70,11 @@ struct D3D11Shader : public Resource<ShaderConfig> {
     fragment_blob = nullptr;
     vertex_shader = nullptr;
     fragment_shader = nullptr;
-		vertex_global_uniform_block_info = UniformBlockInfo();
-		vertex_global_uniform_buffer = nullptr;
+    vertex_global_uniform_block_info = UniformBlockInfo();
+    vertex_global_uniform_buffer = nullptr;
     vertex_global_uniform_block = nullptr;
-		fragment_global_uniform_block_info = UniformBlockInfo();
-		fragment_global_uniform_buffer = nullptr;
+    fragment_global_uniform_block_info = UniformBlockInfo();
+    fragment_global_uniform_buffer = nullptr;
     fragment_global_uniform_block = nullptr;
     vertex_uniform_block_info.clear();
     fragment_uniform_block_info.clear();

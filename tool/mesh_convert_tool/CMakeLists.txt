@@ -6,7 +6,7 @@ else()
     add_executable(MeshConvertTool ${mesh_convert_tool_source})
 endif()
 
-target_link_libraries(MeshConvertTool xEngine EASTL xEngineNuklear)
+target_link_libraries(MeshConvertTool xEngine EASTL xEngineNuklear assimp)
 
 if(X_ENGINE_OPTION_OPENGL)
     target_link_libraries(MeshConvertTool glad)

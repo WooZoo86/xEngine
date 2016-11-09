@@ -17,7 +17,7 @@ class MeshConvertToolWindow : public WindowDelegate {
 
   virtual void OnWindowClose() override;
 
-	virtual void OnWindowDropFile(eastl::vector<eastl::string> files) override;
+  virtual void OnWindowDropFile(eastl::vector<eastl::string> files) override;
 
  private:
   void Draw();

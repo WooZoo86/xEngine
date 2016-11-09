@@ -15,7 +15,7 @@ void Application::Run(ApplicationDelegate *delegate) {
   delegate_ = delegate;
   NativeApplicationInitialize(delegate_);
   while (true) {
-		if (PollNativeApplicationEvent()) break;
+    if (PollNativeApplicationEvent()) break;
     InvokeLoop();
     DoRemoveLoop();
   }

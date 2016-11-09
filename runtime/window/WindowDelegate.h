@@ -30,7 +30,7 @@ class WindowDelegate {
 
   virtual void OnWindowKeyboardButtonUp(KeyboardButtonType type) {}
 
-	virtual void OnWindowDropFile(eastl::vector<eastl::string> files) {}
+  virtual void OnWindowDropFile(eastl::vector<eastl::string> files) {}
 };
 
 }

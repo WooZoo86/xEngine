@@ -22,7 +22,7 @@ class Win32Window : public WindowInterface {
   virtual void *GetNativeHandle() override { return window_; }
 
  private:
-	LoopID loop_id_{kInvalidLoopID};
+  LoopID loop_id_{kInvalidLoopID};
   HWND window_{nullptr};
 
   friend LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);

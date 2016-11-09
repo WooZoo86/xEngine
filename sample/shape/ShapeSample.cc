@@ -43,8 +43,8 @@ static const char *fragment_shader =
 
 static const char *vertex_shader =
   "float4x4 uModel;\n"
-	"float4x4 uView;\n"
-	"float4x4 uProjection;\n"
+  "float4x4 uView;\n"
+  "float4x4 uProjection;\n"
   "struct VS_INPUT\n"
   "{\n"
   "    float3 aPosition: POSITION;\n"
@@ -59,7 +59,7 @@ static const char *vertex_shader =
   "{\n"
   "    VS_OUTPUT output;\n"
   "    output.Texcoord = input.aTexcoord0;\n"
-	"    output.Position = mul(uProjection, mul(uView, mul(uModel, float4(input.aPosition, 1.0))));\n"
+  "    output.Position = mul(uProjection, mul(uView, mul(uModel, float4(input.aPosition, 1.0))));\n"
   "    return output;\n"
   "}\n";
 
@@ -105,7 +105,7 @@ class ShapeSample : public ApplicationDelegate, WindowDelegate {
     Window::GetInstance().Destroy(window_id_);
     window_id_ = kInvalidResourceID;
 #if X_WINDOWS
-		Application::GetInstance().Quit();
+    Application::GetInstance().Quit();
 #endif
   }
 

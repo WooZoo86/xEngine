@@ -18,31 +18,31 @@ void D3D11MeshFactory::Create(D3D11Mesh &resource) {
     return;
   }
 
-	if (resource.config().index_type != IndexFormat::kNone && resource.config().index_count > 0) {
-		ID3D11Buffer *index_buffer = nullptr;
+  if (resource.config().index_type != IndexFormat::kNone && resource.config().index_count > 0) {
+    ID3D11Buffer *index_buffer = nullptr;
 
-		D3D11_BUFFER_DESC index_desc;
-		ZeroMemory(&index_desc, sizeof(index_desc));
-		index_desc.ByteWidth = SizeOfIndexFormat(resource.config().index_type) * resource.config().index_count;
-		index_desc.Usage = D3D11UsageForBufferUsage(resource.config().index_usage);
-		index_desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-		index_desc.CPUAccessFlags = D3D11CPUAccessFlagForBufferUsage(resource.config().index_usage);
-		index_desc.MiscFlags = 0;
-		index_desc.StructureByteStride = 0;
+    D3D11_BUFFER_DESC index_desc;
+    ZeroMemory(&index_desc, sizeof(index_desc));
+    index_desc.ByteWidth = SizeOfIndexFormat(resource.config().index_type) * resource.config().index_count;
+    index_desc.Usage = D3D11UsageForBufferUsage(resource.config().index_usage);
+    index_desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    index_desc.CPUAccessFlags = D3D11CPUAccessFlagForBufferUsage(resource.config().index_usage);
+    index_desc.MiscFlags = 0;
+    index_desc.StructureByteStride = 0;
 
-		D3D11_SUBRESOURCE_DATA index_data;
-		index_data.pSysMem = resource.config().index_data == nullptr ? nullptr : resource.config().index_data->buffer();
-		index_data.SysMemPitch = 0;
-		index_data.SysMemSlicePitch = 0;
+    D3D11_SUBRESOURCE_DATA index_data;
+    index_data.pSysMem = resource.config().index_data == nullptr ? nullptr : resource.config().index_data->buffer();
+    index_data.SysMemPitch = 0;
+    index_data.SysMemSlicePitch = 0;
 
-		x_d3d11_assert_msg(device_->CreateBuffer(
-			&index_desc,
-			index_data.pSysMem == nullptr ? nullptr : &index_data,
-			&index_buffer
-		), "create index buffer failed\n");
+    x_d3d11_assert_msg(device_->CreateBuffer(
+      &index_desc,
+      index_data.pSysMem == nullptr ? nullptr : &index_data,
+      &index_buffer
+    ), "create index buffer failed\n");
 
-		resource.index_buffer = index_buffer;
-	}
+    resource.index_buffer = index_buffer;
+  }
 
   ID3D11Buffer *vertex_buffer = nullptr;
 

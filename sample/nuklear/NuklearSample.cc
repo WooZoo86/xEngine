@@ -34,7 +34,7 @@ class NuklearSample: public ApplicationDelegate, WindowDelegate {
     Window::GetInstance().Destroy(window_id_);
     window_id_ = kInvalidResourceID;
 #if X_WINDOWS
-		Application::GetInstance().Quit();
+    Application::GetInstance().Quit();
 #endif
   }
 
