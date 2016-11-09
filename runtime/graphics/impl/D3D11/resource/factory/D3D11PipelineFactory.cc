@@ -95,7 +95,7 @@ void D3D11PipelineFactory::Create(D3D11Pipeline &resource) {
 
   D3D11_RASTERIZER_DESC rasterizer_desc;
   ZeroMemory(&rasterizer_desc, sizeof(rasterizer_desc));
-  rasterizer_desc.FillMode = rasterizer_state.fill_mode == FillMode::kWireframe ? D3D11_FILL_WIREFRAME : D3D11_FILL_SOLID;
+  rasterizer_desc.FillMode = rasterizer_config.fill_mode == FillMode::kWireframe ? D3D11_FILL_WIREFRAME : D3D11_FILL_SOLID;
   rasterizer_desc.CullMode = rasterizer_config.cull_face_enable ? (rasterizer_config.cull_face == FaceSide::kFront ? D3D11_CULL_FRONT : D3D11_CULL_BACK) : D3D11_CULL_NONE;
   rasterizer_desc.FrontCounterClockwise = rasterizer_config.front_face == FrontFaceType::kCounterClockWise;
   rasterizer_desc.DepthBias = 0;
