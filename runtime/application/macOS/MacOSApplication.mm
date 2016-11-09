@@ -59,7 +59,7 @@ void NativeApplicationInitialize(ApplicationDelegate *delegate) {
   }
 }
 
-void NativeApplicationFinalize() {
+void NativeApplicationFinalize(ApplicationDelegate *delegate) {
   [[NSApplication sharedApplication] terminate:nil];
 }
 
