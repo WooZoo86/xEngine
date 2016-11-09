@@ -61,7 +61,7 @@ void MeshConvertToolWindow::DrawGUI() {
   auto &window_config = Window::GetInstance().Get(window_id_)->config();
   nuklear_->BeginFrame();
   auto ctx = nuklear_->context();
-  nk_begin(ctx, "", nk_rect(0, 0, window_config.width, window_config.height), NK_WINDOW_BACKGROUND);
+  nk_begin(ctx, "", nk_rect(-1, -1, window_config.width + 2, window_config.height + 2), NK_WINDOW_BACKGROUND);
 
   if (nk_tree_push(ctx, NK_TREE_NODE, "PostProcessFlag", NK_MAXIMIZED)) {
     nk_layout_row_dynamic(ctx, 30, 3);

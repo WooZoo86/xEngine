@@ -132,6 +132,14 @@ void Win32Window::SetTitle(const eastl::string &name) {
   SetWindowText(window_, name.c_str());
 }
 
+void Win32Window::OnBeforeEventLoop() {
+  Reset();
+}
+
+void Win32Window::OnAfterEventLoop() {
+  config_.delegate->OnWindowUpdate();
+}
+
 } // namespace xEngine
 
 #endif // X_WINDOWS

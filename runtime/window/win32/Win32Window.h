@@ -21,6 +21,10 @@ class Win32Window : public WindowInterface, ApplicationLoopDelegate {
 
   virtual void *GetNativeHandle() override { return window_; }
 
+  virtual void OnBeforeEventLoop() override;
+
+  virtual void OnAfterEventLoop() override;
+
  private:
   HWND window_{nullptr};
 
