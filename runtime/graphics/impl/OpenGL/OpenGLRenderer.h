@@ -60,7 +60,7 @@ class OpenGLRenderer: public RendererInterface {
 
   virtual void ResetMesh() override;
 
-  virtual void DrawTopology(VertexTopology topology, int32 first, int32 count) override;
+  virtual void Draw(const DrawState &state) override;
 
   virtual void Reset() override;
 

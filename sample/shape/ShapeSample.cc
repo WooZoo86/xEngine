@@ -1,7 +1,7 @@
 #include "application/ApplicationDelegate.h"
 #include "core/Log.h"
 #include "graphics/Graphics.h"
-#include "graphics/util/MeshUtil.h"
+#include "asset/graphics/util/MeshUtil.h"
 #include "window/Window.h"
 
 #include "../graphics/GraphicsSample.h"
@@ -205,31 +205,31 @@ class ShapeSample : public ApplicationDelegate, WindowDelegate {
     const auto cube_translate = glm::translate(glm::mat4(), glm::vec3(-3.5f, 1.5f, 0.0f));
     auto cube_model = cube_translate * rotation;
     renderer->UpdateShaderUniformData(shader_, "uModel", Data::Create(glm::value_ptr(cube_model), sizeof(cube_model)));
-    renderer->DrawTopology(VertexTopology::kTriangles, 0, 36);
+    renderer->Draw(DrawState::Triangles(36));
 
     renderer->ApplyMesh(sphere_mesh_);
     const auto sphere_translate = glm::translate(glm::mat4(), glm::vec3(0.0f, 1.5f, 0.0f));
     auto sphere_model = sphere_translate * rotation;
     renderer->UpdateShaderUniformData(shader_, "uModel", Data::Create(glm::value_ptr(sphere_model), sizeof(sphere_model)));
-    renderer->DrawTopology(VertexTopology::kTriangles, 0, 6 * 6 * sphere_division_ * sphere_division_);
+    renderer->Draw(DrawState::Triangles(6 * 6 * sphere_division_ * sphere_division_));
 
     renderer->ApplyMesh(capsule_mesh_);
     const auto capsule_translate = glm::translate(glm::mat4(), glm::vec3(3.5f, 1.5f, 0.0f));
     auto capsule_model = capsule_translate * rotation;
     renderer->UpdateShaderUniformData(shader_, "uModel", Data::Create(glm::value_ptr(capsule_model), sizeof(capsule_model)));
-    renderer->DrawTopology(VertexTopology::kTriangles, 0, 6 * 6 * capsule_division_ * capsule_division_ + 4 * 6 * capsule_division_);
+    renderer->Draw(DrawState::Triangles(6 * 6 * capsule_division_ * capsule_division_ + 4 * 6 * capsule_division_));
 
     renderer->ApplyMesh(cylinder_mesh_);
     const auto cylinder_translate = glm::translate(glm::mat4(), glm::vec3(-2.0f, -1.5f, 0.0f));
     auto cylinder_model = cylinder_translate * rotation;
     renderer->UpdateShaderUniformData(shader_, "uModel", Data::Create(glm::value_ptr(cylinder_model), sizeof(cylinder_model)));
-    renderer->DrawTopology(VertexTopology::kTriangles, 0, 12 * cylinder_division_);
+    renderer->Draw(DrawState::Triangles(12 * cylinder_division_));
 
     renderer->ApplyMesh(plane_mesh_);
     const auto plane_translate = glm::translate(glm::mat4(), glm::vec3(2.0f, -1.5f, 0.0f));
     auto plane_model = plane_translate * rotation;
     renderer->UpdateShaderUniformData(shader_, "uModel", Data::Create(glm::value_ptr(plane_model), sizeof(plane_model)));
-    renderer->DrawTopology(VertexTopology::kTriangles, 0, 6);
+    renderer->Draw(DrawState::Triangles(6));
 
     renderer->Render();
   }

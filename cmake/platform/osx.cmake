@@ -42,3 +42,5 @@ if (NOT CMAKE_BUILD_TYPE)
 endif()
 
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS Debug Release)
+
+include_directories(/usr/local/include)

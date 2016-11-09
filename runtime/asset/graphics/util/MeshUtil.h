@@ -1,5 +1,5 @@
-#ifndef XENGINE_GRAPHICS_UTIL_MESHUTIL_H
-#define XENGINE_GRAPHICS_UTIL_MESHUTIL_H
+#ifndef XENGINE_ASSET_GRAPHICS_UTIL_MESHUTIL_H
+#define XENGINE_ASSET_GRAPHICS_UTIL_MESHUTIL_H
 
 #include "graphics/config/MeshConfig.h"
 
@@ -76,4 +76,4 @@ T MeshUtil::ConvertNormalized(float32 value) {
 
 } // namespace xEngine
 
-#endif // XENGINE_GRAPHICS_UTIL_MESHUTIL_H
+#endif // XENGINE_ASSET_GRAPHICS_UTIL_MESHUTIL_H

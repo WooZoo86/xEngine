@@ -56,6 +56,7 @@ class NuklearGUI {
   ResourceID mesh_{kInvalidResourceID};
   ResourceID pipeline_{kInvalidResourceID};
   ResourceID sampler_{kInvalidResourceID};
+  DrawState draw_state_;
 };
 
 PTR_DECLARE(NuklearGUI)

@@ -7,7 +7,7 @@
 
 namespace xEngine {
 
-class MeshConvertor {
+class MeshConverter {
  public:
   static void Convert(const eastl::string &in, const eastl::string &out);
 

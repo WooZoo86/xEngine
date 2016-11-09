@@ -4,6 +4,10 @@
 
 #include "application/Application.h"
 
+#include <EASTL/allocator.h>
+#include <EASTL/string.h>
+#include <EASTL/vector.h>
+
 #import <Cocoa/Cocoa.h>
 
 using namespace xEngine;
@@ -25,7 +29,7 @@ using namespace xEngine;
 }
 
 - (BOOL) windowShouldClose: (id) sender {
-  InvokeWindowClose(window);
+  GetConfig(window).delegate->OnWindowClose();
   return NO;
 }
 
@@ -42,9 +46,14 @@ using namespace xEngine;
 @implementation MacOSWindowView
 
 - (id) initWithMacOSWindow: (MacOSWindow *) initWindow {
-  self = [super init];
-  if (self != nil) window = initWindow;
-  return self;
+  @autoreleasepool {
+    self = [super init];
+    if (self != nil) {
+      window = initWindow;
+      [self registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, nil]];
+    }
+    return self;
+  }
 }
 
 - (BOOL) isOpaque {
@@ -68,7 +77,7 @@ using namespace xEngine;
     config.frame_buffer_width = frame_buffer_rect.size.width;
     config.frame_buffer_height = frame_buffer_rect.size.height;
 
-    InvokeWindowResize(window);
+    GetConfig(window).delegate->OnWindowResize();
   }
 }
 
@@ -122,13 +131,38 @@ using namespace xEngine;
   }
 }
 
+- (NSDragOperation) draggingEntered: (id <NSDraggingInfo>) sender {
+  if ((NSDragOperationGeneric & [sender draggingSourceOperationMask]) == NSDragOperationGeneric) {
+    [self setNeedsDisplay:YES];
+    return NSDragOperationGeneric;
+  }
+  return NSDragOperationNone;
+}
+
+- (BOOL) performDragOperation: (id <NSDraggingInfo>) sender {
+  @autoreleasepool {
+    eastl::vector<eastl::string> vector;
+    NSPasteboard *pasteboard = [sender draggingPasteboard];
+    NSArray *files = [pasteboard propertyListForType:NSFilenamesPboardType];
+    auto count = [files count];
+    if (count > 0) {
+      auto enumerator = [files objectEnumerator];
+      for (auto i = 0; i < count; ++i) {
+        vector.push_back(eastl::string([[enumerator nextObject] UTF8String]));
+      }
+    }
+    GetConfig(window).delegate->OnWindowDropFile(vector);
+    return YES;
+  }
+}
+
 @end
 
 namespace xEngine {
 
 void MacOSWindow::Create(const WindowConfig &config) {
   @autoreleasepool {
-  x_assert(config.delegate != nullptr);
+    x_assert(config.delegate != nullptr);
     config_ = config;
     NSWindow *window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, config.width, config.height)
                                          styleMask:(NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable)

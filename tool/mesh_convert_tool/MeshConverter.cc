@@ -1,6 +1,6 @@
-#include "MeshConvertor.h"
+#include "MeshConverter.h"
 
-#include <graphics/util/MeshUtil.h>
+#include <core/Log.h>
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
@@ -8,34 +8,45 @@
 
 namespace xEngine {
 
-void MeshConvertor::Convert(const eastl::string &in, const eastl::string &out) {
-  auto file = fopen(out.c_str(), "wb");
+static const auto g_magic = 'XMSH';
 
+static void write_int32(FILE *file, int32 value) {
+  fwrite(&value, 1, sizeof(int32), file);
+}
+
+static void write_float32(FILE *file, float32 value) {
+  fwrite(&value, 1, sizeof(float32), file);
+}
+
+void MeshConverter::Convert(const eastl::string &in, const eastl::string &out) {
   Assimp::Importer importer;
   importer.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS, GetRemoveComponentFlag());
   importer.SetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE, GetRemoveTopologyFlag());
 
   auto scene = importer.ReadFile(in.c_str(), GetPostProcessFlag());
-  
+  if (scene == nullptr) {
+    Log::GetInstance().Warning("cannot load mesh model from %s\n", in.c_str());
+    return;
+  }
+
+  auto file = fopen(out.c_str(), "wb");
+  write_int32(file, g_magic);
+  write_int32(file, scene->mNumMeshes);
+
   for (auto mesh_index = 0; mesh_index < scene->mNumMeshes; ++mesh_index) {
-    MeshUtil util;
-    util.config().layout.AddElement(VertexElementSemantic::kPosition, VertexElementFormat::kFloat3);
-
     auto mesh = scene->mMeshes[mesh_index];
-
+    write_int32(file, mesh->mNumVertices);
     for (auto vertex_index = 0; vertex_index < mesh->mNumVertices; ++vertex_index) {
       auto vertex = mesh->mVertices[vertex_index];
-      
+      write_float32(file, vertex.x);
+      write_float32(file, vertex.y);
+      write_float32(file, vertex.z);
     }
-
+    write_int32(file, mesh->mNumFaces * 3);
     for (auto face_index = 0; face_index < mesh->mNumFaces; ++face_index) {
       auto &face = mesh->mFaces[face_index];
-      if (face.mNumIndices == 1) {
-        
-      } else if (face.mNumIndices == 2) {
-        
-      } else if (face.mNumIndices == 3) {
-        
+      for (auto index = 0; index < face.mNumIndices; ++index) {
+        write_int32(file, face.mIndices[index]);
       }
     }
   }
@@ -45,7 +56,7 @@ void MeshConvertor::Convert(const eastl::string &in, const eastl::string &out) {
   fclose(file);
 }
 
-uint32 MeshConvertor::GetPostProcessFlag() {
+uint32 MeshConverter::GetPostProcessFlag() {
   uint32 flag = 0;
   if (PostProcessFlag::calc_tangent_space) flag |= aiProcess_CalcTangentSpace;
   if (PostProcessFlag::join_identical_vertices) flag |= aiProcess_JoinIdenticalVertices;
@@ -76,7 +87,7 @@ uint32 MeshConvertor::GetPostProcessFlag() {
   return flag;
 }
 
-uint32 MeshConvertor::GetRemoveComponentFlag() {
+uint32 MeshConverter::GetRemoveComponentFlag() {
   uint32 flag = 0;
   if (RemoveComponentFlag::normals) flag |= aiComponent_NORMALS;
   if (RemoveComponentFlag::tangents_and_bitangents) flag |= aiComponent_TANGENTS_AND_BITANGENTS;
@@ -100,7 +111,7 @@ uint32 MeshConvertor::GetRemoveComponentFlag() {
   return flag;
 }
 
-uint32 MeshConvertor::GetRemoveTopologyFlag() {
+uint32 MeshConverter::GetRemoveTopologyFlag() {
   uint32 flag = 0;
   if (RemoveTopologyFlag::point) flag |= aiPrimitiveType_POINT;
   if (RemoveTopologyFlag::line) flag |= aiPrimitiveType_LINE;
@@ -109,56 +120,56 @@ uint32 MeshConvertor::GetRemoveTopologyFlag() {
   return flag;
 }
 
-int32 MeshConvertor::PostProcessFlag::calc_tangent_space = 0;
-int32 MeshConvertor::PostProcessFlag::join_identical_vertices = 0;
-int32 MeshConvertor::PostProcessFlag::make_left_handed = 0;
-int32 MeshConvertor::PostProcessFlag::triangulate = 1;
-int32 MeshConvertor::PostProcessFlag::remove_component = 0;
-int32 MeshConvertor::PostProcessFlag::gen_normals = 0;
-int32 MeshConvertor::PostProcessFlag::gen_smooth_normals = 0;
-int32 MeshConvertor::PostProcessFlag::split_large_meshes = 0;
-int32 MeshConvertor::PostProcessFlag::pre_transform_vertices = 0;
-int32 MeshConvertor::PostProcessFlag::limit_bone_weights = 0;
-int32 MeshConvertor::PostProcessFlag::validate_data_structure = 0;
-int32 MeshConvertor::PostProcessFlag::improve_cache_locality = 0;
-int32 MeshConvertor::PostProcessFlag::remove_redundant_materials = 0;
-int32 MeshConvertor::PostProcessFlag::fix_infacing_normals = 0;
-int32 MeshConvertor::PostProcessFlag::sort_by_ptype = 0;
-int32 MeshConvertor::PostProcessFlag::find_degenerates = 0;
-int32 MeshConvertor::PostProcessFlag::find_invalid_data = 0;
-int32 MeshConvertor::PostProcessFlag::gen_uv_coords = 0;
-int32 MeshConvertor::PostProcessFlag::transform_uv_coords = 0;
-int32 MeshConvertor::PostProcessFlag::find_instances = 0;
-int32 MeshConvertor::PostProcessFlag::optimize_meshes = 0;
-int32 MeshConvertor::PostProcessFlag::optimize_graph = 0;
-int32 MeshConvertor::PostProcessFlag::flip_uvs = 0;
-int32 MeshConvertor::PostProcessFlag::flip_winding_order = 0;
-int32 MeshConvertor::PostProcessFlag::split_by_bone_count = 0;
-int32 MeshConvertor::PostProcessFlag::debone = 0;
+int32 MeshConverter::PostProcessFlag::calc_tangent_space = 0;
+int32 MeshConverter::PostProcessFlag::join_identical_vertices = 0;
+int32 MeshConverter::PostProcessFlag::make_left_handed = 0;
+int32 MeshConverter::PostProcessFlag::triangulate = 1;
+int32 MeshConverter::PostProcessFlag::remove_component = 0;
+int32 MeshConverter::PostProcessFlag::gen_normals = 0;
+int32 MeshConverter::PostProcessFlag::gen_smooth_normals = 0;
+int32 MeshConverter::PostProcessFlag::split_large_meshes = 0;
+int32 MeshConverter::PostProcessFlag::pre_transform_vertices = 0;
+int32 MeshConverter::PostProcessFlag::limit_bone_weights = 0;
+int32 MeshConverter::PostProcessFlag::validate_data_structure = 0;
+int32 MeshConverter::PostProcessFlag::improve_cache_locality = 0;
+int32 MeshConverter::PostProcessFlag::remove_redundant_materials = 0;
+int32 MeshConverter::PostProcessFlag::fix_infacing_normals = 0;
+int32 MeshConverter::PostProcessFlag::sort_by_ptype = 0;
+int32 MeshConverter::PostProcessFlag::find_degenerates = 0;
+int32 MeshConverter::PostProcessFlag::find_invalid_data = 0;
+int32 MeshConverter::PostProcessFlag::gen_uv_coords = 0;
+int32 MeshConverter::PostProcessFlag::transform_uv_coords = 0;
+int32 MeshConverter::PostProcessFlag::find_instances = 0;
+int32 MeshConverter::PostProcessFlag::optimize_meshes = 0;
+int32 MeshConverter::PostProcessFlag::optimize_graph = 0;
+int32 MeshConverter::PostProcessFlag::flip_uvs = 0;
+int32 MeshConverter::PostProcessFlag::flip_winding_order = 0;
+int32 MeshConverter::PostProcessFlag::split_by_bone_count = 0;
+int32 MeshConverter::PostProcessFlag::debone = 0;
 
-int32 MeshConvertor::RemoveComponentFlag::normals = 0;
-int32 MeshConvertor::RemoveComponentFlag::tangents_and_bitangents = 0;
-int32 MeshConvertor::RemoveComponentFlag::colors = 0;
-int32 MeshConvertor::RemoveComponentFlag::colors0 = 0;
-int32 MeshConvertor::RemoveComponentFlag::colors1 = 0;
-int32 MeshConvertor::RemoveComponentFlag::colors2 = 0;
-int32 MeshConvertor::RemoveComponentFlag::colors3 = 0;
-int32 MeshConvertor::RemoveComponentFlag::texcoords = 0;
-int32 MeshConvertor::RemoveComponentFlag::texcoords0 = 0;
-int32 MeshConvertor::RemoveComponentFlag::texcoords1 = 0;
-int32 MeshConvertor::RemoveComponentFlag::texcoords2 = 0;
-int32 MeshConvertor::RemoveComponentFlag::texcoords3 = 0;
-int32 MeshConvertor::RemoveComponentFlag::boneweights = 0;
-int32 MeshConvertor::RemoveComponentFlag::animations = 0;
-int32 MeshConvertor::RemoveComponentFlag::textures = 0;
-int32 MeshConvertor::RemoveComponentFlag::lights = 0;
-int32 MeshConvertor::RemoveComponentFlag::cameras = 0;
-int32 MeshConvertor::RemoveComponentFlag::meshes = 0;
-int32 MeshConvertor::RemoveComponentFlag::materials = 0;
+int32 MeshConverter::RemoveComponentFlag::normals = 0;
+int32 MeshConverter::RemoveComponentFlag::tangents_and_bitangents = 0;
+int32 MeshConverter::RemoveComponentFlag::colors = 0;
+int32 MeshConverter::RemoveComponentFlag::colors0 = 0;
+int32 MeshConverter::RemoveComponentFlag::colors1 = 0;
+int32 MeshConverter::RemoveComponentFlag::colors2 = 0;
+int32 MeshConverter::RemoveComponentFlag::colors3 = 0;
+int32 MeshConverter::RemoveComponentFlag::texcoords = 0;
+int32 MeshConverter::RemoveComponentFlag::texcoords0 = 0;
+int32 MeshConverter::RemoveComponentFlag::texcoords1 = 0;
+int32 MeshConverter::RemoveComponentFlag::texcoords2 = 0;
+int32 MeshConverter::RemoveComponentFlag::texcoords3 = 0;
+int32 MeshConverter::RemoveComponentFlag::boneweights = 0;
+int32 MeshConverter::RemoveComponentFlag::animations = 0;
+int32 MeshConverter::RemoveComponentFlag::textures = 0;
+int32 MeshConverter::RemoveComponentFlag::lights = 0;
+int32 MeshConverter::RemoveComponentFlag::cameras = 0;
+int32 MeshConverter::RemoveComponentFlag::meshes = 0;
+int32 MeshConverter::RemoveComponentFlag::materials = 0;
 
-int32 MeshConvertor::RemoveTopologyFlag::point = 0;
-int32 MeshConvertor::RemoveTopologyFlag::line = 0;
-int32 MeshConvertor::RemoveTopologyFlag::triangle = 0;
-int32 MeshConvertor::RemoveTopologyFlag::polygon = 0;
+int32 MeshConverter::RemoveTopologyFlag::point = 1;
+int32 MeshConverter::RemoveTopologyFlag::line = 1;
+int32 MeshConverter::RemoveTopologyFlag::triangle = 0;
+int32 MeshConverter::RemoveTopologyFlag::polygon = 0;
 
 } // namespace xEngine

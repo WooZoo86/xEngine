@@ -1,7 +1,7 @@
 #include "application/ApplicationDelegate.h"
 #include "core/Log.h"
 #include "graphics/Graphics.h"
-#include "graphics/util/MeshUtil.h"
+#include "asset/graphics/util/MeshUtil.h"
 #include "window/Window.h"
 
 #include "../graphics/GraphicsSample.h"
@@ -224,7 +224,7 @@ class DepthStencilSample : public ApplicationDelegate, WindowDelegate {
     );
     renderer->UpdateShaderUniformData(shader_, "uModel", Data::Create(glm::value_ptr(cube_model), sizeof(cube_model)));
     renderer->UpdateShaderUniformData(shader_, "uColor", Data::Create(glm::value_ptr(Color(1.0, 1.0, 1.0, 1.0)), sizeof(Color)));
-    renderer->DrawTopology(VertexTopology::kTriangles, 0, 36);
+    renderer->Draw(DrawState::Triangles(36));
 
     renderer->ApplyMesh(plane_mesh_);
     renderer->ApplyPipeline(floor_pipeline_);
@@ -234,7 +234,7 @@ class DepthStencilSample : public ApplicationDelegate, WindowDelegate {
     );
     renderer->UpdateShaderUniformData(shader_, "uModel", Data::Create(glm::value_ptr(plane_model), sizeof(plane_model)));
     renderer->UpdateShaderUniformData(shader_, "uColor", Data::Create(glm::value_ptr(Color(0.0, 0.0, 0.0, 1.0)), sizeof(Color)));
-    renderer->DrawTopology(VertexTopology::kTriangles, 0, 6);
+    renderer->Draw(DrawState::Triangles(6));
 
     renderer->ApplyMesh(cube_mesh_);
     renderer->ApplyPipeline(reflection_pipeline_);
@@ -248,7 +248,7 @@ class DepthStencilSample : public ApplicationDelegate, WindowDelegate {
     );
     renderer->UpdateShaderUniformData(shader_, "uModel", Data::Create(glm::value_ptr(reflection_model), sizeof(reflection_model)));
     renderer->UpdateShaderUniformData(shader_, "uColor", Data::Create(glm::value_ptr(Color(0.3, 0.3, 0.3, 1.0)), sizeof(Color)));
-    renderer->DrawTopology(VertexTopology::kTriangles, 0, 36);
+    renderer->Draw(DrawState::Triangles(36));
 
     renderer->Render();
   }

@@ -217,7 +217,7 @@ void NuklearGUI::EndFrame() {
   graphics_->renderer()->ApplyPipeline(pipeline_);
   const struct nk_draw_command *cmd = nullptr;
   ResourceID current_texture = kInvalidResourceID;
-  auto element_offset = 0;
+  size_t element_offset = 0;
   nk_draw_foreach(cmd, &context_, &command) {
     auto texture = image_[cmd->texture.id];
     if (current_texture != texture) {
@@ -229,7 +229,9 @@ void NuklearGUI::EndFrame() {
                                         static_cast<int32>((window_->config().height - (cmd->clip_rect.y + cmd->clip_rect.h)) * scale_y),
                                         static_cast<int32>(cmd->clip_rect.w * scale_x),
                                         static_cast<int32>(cmd->clip_rect.h * scale_y));
-    graphics_->renderer()->DrawTopology(VertexTopology::kTriangles, element_offset, cmd->elem_count);
+    draw_state_.first = element_offset;
+    draw_state_.count = cmd->elem_count;
+    graphics_->renderer()->Draw(draw_state_);
     element_offset += cmd->elem_count;
   }
   nk_clear(&context_);

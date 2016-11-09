@@ -514,12 +514,12 @@ void D3D11Renderer::ResetMesh() {
   context_->IASetIndexBuffer(nullptr, DXGI_FORMAT_UNKNOWN, 0);
 }
 
-void D3D11Renderer::DrawTopology(VertexTopology topology, int32 first, int32 count) {
-  context_->IASetPrimitiveTopology(EnumForVertexTopology(topology));
+void D3D11Renderer::Draw(const DrawState &state) {
+  context_->IASetPrimitiveTopology(EnumForVertexTopology(state.topology));
   if (cache_.index_format == IndexFormat::kNone) {
-    context_->Draw(count, first);
+    context_->Draw(state.count, state.first);
   } else {
-    context_->DrawIndexed(count, first, 0);
+    context_->DrawIndexed(state.count, state.first, 0);
   }
 }
 

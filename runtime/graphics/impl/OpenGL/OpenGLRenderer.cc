@@ -503,14 +503,16 @@ void OpenGLRenderer::ResetMesh() {
   cache_.index_type = IndexFormat::kNone;
 }
 
-void OpenGLRenderer::DrawTopology(VertexTopology topology, int32 first, int32 count) {
+void OpenGLRenderer::Draw(const DrawState &state) {
   if (cache_.index_type == IndexFormat::kNone) {
-    glDrawArrays(GLEnumForVertexTopology(topology), first, count);
+    glDrawArrays(GLEnumForVertexTopology(state.topology),
+                 static_cast<GLint>(state.first),
+                 static_cast<GLint>(state.count));
   } else {
-    glDrawElements(GLEnumForVertexTopology(topology),
-                   count,
+    glDrawElements(GLEnumForVertexTopology(state.topology),
+                   static_cast<GLint>(state.count),
                    GLEnumForIndexFormat(cache_.index_type),
-                   reinterpret_cast<GLvoid *>(first * SizeOfIndexFormat(cache_.index_type)));
+                   reinterpret_cast<GLvoid *>(state.first * SizeOfIndexFormat(cache_.index_type)));
   }
 }
 
