@@ -14,8 +14,9 @@ struct RasterizerState {
       bool scissor_test_enable : 1;
       bool dither_enable : 1;
       bool alpha_to_coverage_enable : 1;
-      FrontFaceType front_face : 3;
-      FaceSide cull_face : 4;
+      FillMode fill_mode : 2;
+      FrontFaceType front_face : 2;
+      FaceSide cull_face : 2;
       uint8 sample : 4;
     };
 #pragma pack(pop)
@@ -37,6 +38,7 @@ inline RasterizerState::RasterizerState() {
   scissor_test_enable = false;
   dither_enable = true;
   alpha_to_coverage_enable = false;
+  fill_mode = FillMode::kSolid;
   front_face = FrontFaceType::kClockWise;
   cull_face = FaceSide::kBack;
   sample = 1;

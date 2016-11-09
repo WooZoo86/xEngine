@@ -137,6 +137,7 @@ class MeshSample : public ApplicationDelegate, WindowDelegate {
     auto pipeline_config = PipelineConfig::ShaderWithLayout(shader_, layout);
     pipeline_config.depth_stencil_state.depth_enable = true;
     pipeline_config.depth_stencil_state.depth_write_enable = true;
+    pipeline_config.rasterizer_state.fill_mode = FillMode::kWireframe;
     pipeline_config.rasterizer_state.cull_face_enable = true;
     pipeline_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(pipeline_config);
   }

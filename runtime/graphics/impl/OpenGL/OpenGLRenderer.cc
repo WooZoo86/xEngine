@@ -718,6 +718,10 @@ void OpenGLRenderer::ApplyRasterizerState(const RasterizerState &rasterizer_stat
       glDisable(GL_MULTISAMPLE);
     }
 
+    if (rasterizer_state.fill_mode != cache_.rasterizer_state.fill_mode) {
+      glPolygonMode(GL_FRONT_AND_BACK, rasterizer_state.fill_mode == FillMode::kWireframe ? GL_LINE : GL_FILL);
+    }
+
     if (rasterizer_state.cull_face != cache_.rasterizer_state.cull_face) {
       if (rasterizer_state.cull_face_enable) {
         glCullFace(GLEnumForFaceSide(rasterizer_state.cull_face));

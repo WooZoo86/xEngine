@@ -264,6 +264,11 @@ enum class StencilOperation: uint8 {
   kInvert,
 };
 
+enum class FillMode : uint8 {
+  kWireframe,
+  kSolid,
+};
+
 enum class FrontFaceType: uint8 {
   kClockWise,
   kCounterClockWise,
