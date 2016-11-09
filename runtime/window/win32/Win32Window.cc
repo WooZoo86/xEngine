@@ -119,18 +119,13 @@ void Win32Window::Create(const WindowConfig &config) {
   ShowWindow(window_, SW_SHOWNORMAL);
   SetCursor(LoadCursorW(nullptr, reinterpret_cast<LPCWSTR>(IDC_ARROW)));
   DragAcceptFiles(window_, config_.is_dropfile_accepted);
-  loop_id_ = Application::GetInstance().AddLoop([this]()
-  {
-    Reset();
-    config_.delegate->OnWindowUpdate();
-  });
+  Application::GetInstance().AddLoopDelegate(this);
 }
 
 void Win32Window::Destroy() {
   CloseWindow(window_);
   window_ = nullptr;
-  Application::GetInstance().RemoveLoop(loop_id_);
-  loop_id_ = kInvalidLoopID;
+  Application::GetInstance().RemoveLoopDelegate(this);
 }
 
 void Win32Window::SetTitle(const eastl::string &name) {

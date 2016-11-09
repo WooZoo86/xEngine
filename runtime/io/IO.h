@@ -9,7 +9,7 @@
 
 #include "core/Data.h"
 #include "core/Types.h"
-#include "application/Application.h"
+#include "application/ApplicationDelegate.h"
 
 #include <EASTL/functional.h>
 #include <EASTL/string.h>
@@ -17,7 +17,7 @@
 
 namespace xEngine {
 
-class IO {
+class IO : public ApplicationLoopDelegate {
  public:
   static IO &GetInstance() {
     static IO instance;
@@ -29,7 +29,7 @@ class IO {
 
   void Finalize();
 
-  bool Available() const { return loop_id_ != kInvalidLoopID; }
+  bool Available() const { return available_; }
 
   void Read(const eastl::string &file, IOCallbackFunction callback);
 
@@ -60,8 +60,10 @@ class IO {
     return filesystem_manager_.CreateFilesystem(name);
   }
 
+  virtual void OnAfterEventLoop() override;
+
  private:
-  LoopID loop_id_{kInvalidLoopID};
+  bool available_{false};
   int32 last_worker_{0};
   eastl::vector<IOWorkerPtr> workers_;
   LocationPlaceholderManager location_placeholder_manager_;

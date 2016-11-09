@@ -1,4 +1,5 @@
 #include "application/Application.h"
+#include "application/ApplicationDelegate.h"
 
 #include "core/Core.h"
 
@@ -11,13 +12,13 @@ extern void NativeApplicationFinalize(ApplicationDelegate *delegate);
 extern bool PollNativeApplicationEvent();
 
 void Application::Run(ApplicationDelegate *delegate) {
-  x_assert(delegate_ == nullptr);
+  x_assert(delegate_ == nullptr && delegate != nullptr);
   delegate_ = delegate;
   NativeApplicationInitialize(delegate_);
   while (true) {
+    InvokeBeforeEvent();
     if (PollNativeApplicationEvent()) break;
-    InvokeLoop();
-    DoRemoveLoop();
+    InvokeAfterEvent();
   }
 }
 
@@ -25,36 +26,33 @@ void Application::Quit() {
   NativeApplicationFinalize(delegate_);
 }
 
-LoopID Application::AddLoop(Loop loop) {
-  ++current_id_;
-  loop_list_.push_back(eastl::make_tuple(current_id_, loop));
-  return current_id_;
+void Application::AddLoopDelegate(ApplicationLoopDelegate *delegate) {
+  if (delegate != nullptr) {
+    loop_delegate_list_.push_back(delegate);
+  }
 }
 
-void Application::RemoveLoop(LoopID id) {
-  remove_id_.push_back(id);
-}
-
-void Application::InvokeLoop() {
-  for (auto &pair : loop_list_) {
-    auto &id = eastl::get<0>(pair);
-    if (eastl::find(remove_id_.begin(), remove_id_.end(), id) == remove_id_.end()) {
-      eastl::get<1>(pair)();
+void Application::RemoveLoopDelegate(ApplicationLoopDelegate *delegate) {
+  if (delegate != nullptr) {
+    auto iterator = eastl::find(loop_delegate_list_.begin(), loop_delegate_list_.end(), delegate);
+    if (iterator != loop_delegate_list_.end()) {
+      loop_delegate_list_.erase(iterator);
     }
   }
 }
 
-void Application::DoRemoveLoop() {
-  for (auto &id : remove_id_) {
-    for (auto iterator = loop_list_.begin(); iterator != loop_list_.end();) {
-      if (eastl::get<0>(*iterator) == id) {
-        iterator = loop_list_.erase(iterator);
-      } else {
-        ++iterator;
-      }
-    }
+void Application::InvokeBeforeEvent() {
+  auto list = loop_delegate_list_;
+  for (auto delegate : list) {
+    delegate->OnBeforeEventLoop();
   }
-  remove_id_.clear();
+}
+
+void Application::InvokeAfterEvent() {
+  auto list = loop_delegate_list_;
+  for (auto delegate : list) {
+    delegate->OnAfterEventLoop();
+  }
 }
 
 } // namespace xEngine

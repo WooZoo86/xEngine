@@ -41,21 +41,21 @@ namespace xEngine {
 
 void NativeApplicationInitialize(ApplicationDelegate *delegate) {
   @autoreleasepool {
-      [NSApplication sharedApplication];
-      [[NSApplication sharedApplication] setActivationPolicy:NSApplicationActivationPolicyRegular];
+    [NSApplication sharedApplication];
+    [[NSApplication sharedApplication] setActivationPolicy:NSApplicationActivationPolicyRegular];
 
-      NSMenu *main_menu = [[NSMenu alloc] init];
-      NSMenu *menu = [[NSMenu alloc] init];
+    NSMenu *main_menu = [[NSMenu alloc] init];
+    NSMenu *menu = [[NSMenu alloc] init];
 
-      NSMenuItem *main_menu_item = [main_menu addItemWithTitle:@"" action:nil keyEquivalent:@""];
-      [main_menu_item setSubmenu:menu];
-      [[NSApplication sharedApplication] setMainMenu:main_menu];
+    NSMenuItem *main_menu_item = [main_menu addItemWithTitle:@"" action:nil keyEquivalent:@""];
+    [main_menu_item setSubmenu:menu];
+    [[NSApplication sharedApplication] setMainMenu:main_menu];
 
-      [menu addItemWithTitle:@"Quit" action:@selector(terminate:) keyEquivalent:@"q"];
+    [menu addItemWithTitle:@"Quit" action:@selector(terminate:) keyEquivalent:@"q"];
 
-      [[NSApplication sharedApplication] performSelector:NSSelectorFromString(@"setAppleMenu:") withObject:menu];
-      [[NSApplication sharedApplication] setDelegate:[[MacOSAppDelegate alloc] initWithApplicationDelegate:delegate]];
-      [[NSApplication sharedApplication] run];
+    [[NSApplication sharedApplication] performSelector:NSSelectorFromString(@"setAppleMenu:") withObject:menu];
+    [[NSApplication sharedApplication] setDelegate:[[MacOSAppDelegate alloc] initWithApplicationDelegate:delegate]];
+    [[NSApplication sharedApplication] run];
   }
 }
 
@@ -73,7 +73,7 @@ bool PollNativeApplicationEvent() {
                                                  dequeue:YES];
       [[NSApplication sharedApplication] sendEvent: event];
     } while(event != nil);
-  return true;
+    return false;
   }
 }
 

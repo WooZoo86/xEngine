@@ -4,6 +4,6 @@ else()
   add_executable(WindowSample WindowSample.cc)
 endif()
 
-target_link_libraries(WindowSample xEngine EASTL)
+target_link_libraries(WindowSample xEngine)
 
 set_target_properties(WindowSample PROPERTIES FOLDER "sample")

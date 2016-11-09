@@ -4,11 +4,11 @@
 #if X_MACOS
 
 #include "window/WindowInterface.h"
-#include "application/Application.h"
+#include "application/ApplicationDelegate.h"
 
 namespace xEngine {
 
-class MacOSWindow: public WindowInterface {
+class MacOSWindow: public WindowInterface, ApplicationLoopDelegate {
  public:
   virtual void Create(const WindowConfig &config) override;
 
@@ -18,8 +18,11 @@ class MacOSWindow: public WindowInterface {
 
   virtual void *GetNativeHandle() override { return window_; }
 
+  virtual void OnBeforeEventLoop() override;
+
+  virtual void OnAfterEventLoop() override;
+
  private:
-  LoopID loop_id_{kInvalidLoopID};
   void *window_{nullptr};
 
   friend WindowConfig &GetConfig(MacOSWindow *window) {

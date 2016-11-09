@@ -29,6 +29,12 @@ file(GLOB_RECURSE runtime_source *.h *.cc *.mm)
 
 add_library(xEngine ${runtime_source})
 
+target_link_libraries(xEngine EASTL mongoose)
+
+if(X_ENGINE_OPTION_OPENGL)
+    target_link_libraries(xEngine glad)
+endif()
+
 if(X_MACOS)
     find_library(COCOA_FRAMEWORK Cocoa)
     target_link_libraries(xEngine ${COCOA_FRAMEWORK})

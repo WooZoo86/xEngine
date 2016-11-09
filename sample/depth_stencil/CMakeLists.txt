@@ -4,10 +4,6 @@ else()
   add_executable(DepthStencilSample DepthStencilSample.cc)
 endif()
 
-target_link_libraries(DepthStencilSample xEngine EASTL)
-
-if(X_ENGINE_OPTION_OPENGL)
-    target_link_libraries(DepthStencilSample glad)
-endif()
+target_link_libraries(DepthStencilSample xEngine)
 
 set_target_properties(DepthStencilSample PROPERTIES FOLDER "sample")

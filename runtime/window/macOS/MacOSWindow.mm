@@ -147,12 +147,7 @@ void MacOSWindow::Create(const WindowConfig &config) {
     [window makeKeyAndOrderFront:nil];
     [window center];
     window_ = window;
-    loop_id_ = Application::GetInstance().AddLoop([this](){
-      if (this->config_.delegate != nullptr) {
-        Reset();
-        config_.delegate->OnWindowUpdate();
-      }
-    });
+    Application::GetInstance().AddLoopDelegate(this);
   }
 }
 
@@ -163,8 +158,7 @@ void MacOSWindow::Destroy() {
     [[window delegate] release];
     [window release];
     window_ = nullptr;
-    Application::GetInstance().RemoveLoop(loop_id_);
-    loop_id_ = kInvalidLoopID;
+    Application::GetInstance().RemoveLoopDelegate(this);
   }
 }
 
@@ -173,6 +167,14 @@ void MacOSWindow::SetTitle(const eastl::string &name) {
     NSWindow *window = static_cast<NSWindow *>(window_);
     [window setTitle:[NSString stringWithCString:name.c_str() encoding:[NSString defaultCStringEncoding]]];
   }
+}
+
+void MacOSWindow::OnBeforeEventLoop() {
+  Reset();
+}
+
+void MacOSWindow::OnAfterEventLoop() {
+  config_.delegate->OnWindowUpdate();
 }
 
 } // namespace xEngine

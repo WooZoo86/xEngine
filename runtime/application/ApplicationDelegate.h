@@ -42,6 +42,15 @@ class ApplicationDelegate {
   virtual void Finalize() {}
 };
 
+class ApplicationLoopDelegate {
+ public:
+  virtual ~ApplicationLoopDelegate() {}
+
+  virtual void OnBeforeEventLoop() {}
+
+  virtual void OnAfterEventLoop() {}
+};
+
 } // namespace xEngine
 
 #endif // XENGINE_APPLICATION_APPLICATIONDELEGATE_H

@@ -3,22 +3,13 @@
 
 #include "core/Types.h"
 
-#include <EASTL/functional.h>
 #include <EASTL/list.h>
-#include <EASTL/tuple.h>
-#include <EASTL/vector.h>
 
 namespace xEngine {
 
-typedef uint32 LoopID;
-
-enum: LoopID {
-  kInvalidLoopID = 0,
-};
-
-typedef eastl::function<void()> Loop;
-
 class ApplicationDelegate;
+
+class ApplicationLoopDelegate;
 
 class Application {
  public:
@@ -31,20 +22,18 @@ class Application {
 
   void Quit();
 
-  LoopID AddLoop(Loop loop);
+  void AddLoopDelegate(ApplicationLoopDelegate *delegate);
 
-  void RemoveLoop(LoopID id);
+  void RemoveLoopDelegate(ApplicationLoopDelegate *delegate);
 
  private:
-  void InvokeLoop();
+  void InvokeBeforeEvent();
 
-  void DoRemoveLoop();
+  void InvokeAfterEvent();
 
  private:
   ApplicationDelegate *delegate_{nullptr};
-  LoopID current_id_{kInvalidLoopID};
-  eastl::list<eastl::tuple<LoopID, Loop>> loop_list_;
-  eastl::vector<LoopID> remove_id_;
+  eastl::list<ApplicationLoopDelegate *> loop_delegate_list_;
 };
 
 } // namespace xEngine
