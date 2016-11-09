@@ -55,7 +55,7 @@ class D3D11Renderer: public RendererInterface {
 
   virtual void ResetMesh() override;
 
-  virtual void Draw(const DrawState &state) override;
+  virtual void Draw(const DrawCallState &state) override;
 
   virtual void Reset() override;
 

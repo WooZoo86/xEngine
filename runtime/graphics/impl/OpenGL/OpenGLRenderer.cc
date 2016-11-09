@@ -503,7 +503,7 @@ void OpenGLRenderer::ResetMesh() {
   cache_.index_type = IndexFormat::kNone;
 }
 
-void OpenGLRenderer::Draw(const DrawState &state) {
+void OpenGLRenderer::Draw(const DrawCallState &state) {
   if (cache_.index_type == IndexFormat::kNone) {
     glDrawArrays(GLEnumForVertexTopology(state.topology),
                  static_cast<GLint>(state.first),

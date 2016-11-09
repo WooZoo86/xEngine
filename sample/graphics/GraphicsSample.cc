@@ -175,7 +175,7 @@ class GraphicsSample : public ApplicationDelegate, WindowDelegate {
       renderer->ApplyPipeline(pipeline_);
       renderer->UpdateShaderUniformTexture(shader_, "uTexture", texture_);
       renderer->ApplySampler(shader_, "uTexture", sampler_);
-      renderer->Draw(DrawState::Triangles(6));
+      renderer->Draw(DrawCallState::Triangles(6));
       renderer->Render();
     }
   }

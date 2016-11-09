@@ -8,6 +8,7 @@
 
 #include <gtc/matrix_transform.hpp>
 
+#include <EASTL/chrono.h>
 #include <EASTL/tuple.h>
 
 #if X_OPENGL
@@ -28,7 +29,7 @@ static const char *fragment_shader =
     "out vec4 outColor;\n"
     "void main()\n"
     "{\n"
-    "    outColor = vec4(1.0, 1.0, 1.0, 1.0);\n"
+    "    outColor = vec4(1.0, 0.0, 0.0, 1.0);\n"
     "}\n";
 
 #elif X_D3D11
@@ -40,32 +41,26 @@ static const char *vertex_shader =
   "struct VS_INPUT\n"
   "{\n"
   "    float3 aPosition: POSITION;\n"
-  "    float2 aTexcoord0: TEXCOORD;\n"
   "};\n"
   "struct VS_OUTPUT\n"
   "{\n"
   "    float4 Position: SV_POSITION;\n"
-  "    float2 Texcoord: TEXCOORD;\n"
   "};\n"
   "VS_OUTPUT main(const VS_INPUT input)\n"
   "{\n"
   "    VS_OUTPUT output;\n"
-  "    output.Texcoord = input.aTexcoord0;\n"
   "    output.Position = mul(uProjection, mul(uView, mul(uModel, float4(input.aPosition, 1.0))));\n"
   "    return output;\n"
   "}\n";
 
 static const char *fragment_shader =
-  "Texture2D uTexture;\n"
-  "SamplerState uTexture_sampler;\n"
   "struct PS_INPUT\n"
   "{\n"
   "    float4 Position: SV_POSITION;\n"
-  "    float2 Texcoord: TEXCOORD;\n"
   "};\n"
   "float4 main(const PS_INPUT input): SV_TARGET\n"
   "{\n"
-  "    return uTexture.Sample(uTexture_sampler, input.Texcoord);\n"
+  "    return float4(1.0, 0.0, 0.0, 1.0);\n"
   "}\n";
 
 #endif
@@ -115,12 +110,12 @@ class MeshSample : public ApplicationDelegate, WindowDelegate {
     shader_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(shader_config);
     Window::GetInstance().GetGraphics(window_id_)->renderer()->ApplyShader(shader_);
     auto view = glm::lookAt(
-        glm::vec3(0.0f, 0.0f, 10.0f),
+        glm::vec3(0.0f, 0.0f, 2.5f),
         glm::vec3(0.0f, 0.0f, 0.0f),
         glm::vec3(0.0f, 1.0f, 0.0f)
     );
     Window::GetInstance().GetGraphics(window_id_)->renderer()->UpdateShaderUniformData(shader_, "uView", Data::Create(glm::value_ptr(view), sizeof(view)));
-    auto projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 1.0f, 100.0f);
+    auto projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 1.0f, 10.0f);
     Window::GetInstance().GetGraphics(window_id_)->renderer()->UpdateShaderUniformData(shader_, "uProjection", Data::Create(glm::value_ptr(projection), sizeof(projection)));
   }
 
@@ -130,7 +125,7 @@ class MeshSample : public ApplicationDelegate, WindowDelegate {
         auto mesh_vector = MeshLoader::Load(data);
         for (auto mesh : mesh_vector) {
           auto id = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(mesh.config());
-          auto state = DrawState::Triangles(mesh.config().index_count);
+          auto state = DrawCallState::Triangles(mesh.config().index_count);
           mesh_.push_back(eastl::make_tuple(id, state));
         }
       }
@@ -147,6 +142,9 @@ class MeshSample : public ApplicationDelegate, WindowDelegate {
   }
 
   void draw() {
+    auto now = eastl::chrono::high_resolution_clock::now();
+    auto time = eastl::chrono::duration_cast<eastl::chrono::duration<float>>(now - start_time_).count();
+
     auto &renderer = Window::GetInstance().GetGraphics(window_id_)->renderer();
 
     renderer->ApplyTarget(kInvalidResourceID, ClearState::ClearAll());
@@ -154,6 +152,7 @@ class MeshSample : public ApplicationDelegate, WindowDelegate {
     renderer->ApplyPipeline(pipeline_);
 
     auto model = glm::mat4();
+    model = glm::rotate(model, 0.5f * time * glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     renderer->UpdateShaderUniformData(shader_, "uModel", Data::Create(glm::value_ptr(model), sizeof(model)));
 
     for (auto tuple : mesh_) {
@@ -167,10 +166,11 @@ class MeshSample : public ApplicationDelegate, WindowDelegate {
   }
 
  private:
+  eastl::chrono::time_point<eastl::chrono::high_resolution_clock> start_time_;
   ResourceID shader_{kInvalidResourceID};
   ResourceID pipeline_{kInvalidResourceID};
   ResourceID window_id_{kInvalidResourceID};
-  eastl::vector<eastl::tuple<ResourceID, DrawState>> mesh_;
+  eastl::vector<eastl::tuple<ResourceID, DrawCallState>> mesh_;
 };
 
 XENGINE_WINDOW_APPLICATION(MeshSample)

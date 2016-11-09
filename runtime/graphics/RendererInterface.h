@@ -5,7 +5,7 @@
 #include "graphics/state/BlendState.h"
 #include "graphics/state/ClearState.h"
 #include "graphics/state/DepthStencilState.h"
-#include "graphics/state/DrawState.h"
+#include "graphics/state/DrawCallState.h"
 #include "graphics/state/RasterizerState.h"
 
 #include "core/Data.h"
@@ -59,7 +59,7 @@ class RendererInterface {
 
   virtual void ResetMesh() = 0;
 
-  virtual void Draw(const DrawState &state) = 0;
+  virtual void Draw(const DrawCallState &state) = 0;
 
   virtual void Reset() = 0;
 };
