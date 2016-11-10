@@ -61,7 +61,7 @@ class D3D11Renderer: public RendererInterface {
 
   void ApplyD3D11Shader(D3D11Shader &shader);
 
-  void ApplySampler(Resource id, int32 index, GraphicsPipelineStage stage);
+  void ApplySampler(ResourceID id, int32 index, GraphicsPipelineStage stage);
 
   void ResetSampler();
 

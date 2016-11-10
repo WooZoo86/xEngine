@@ -21,9 +21,9 @@ class Win32Window : public WindowInterface, ApplicationTickDelegate {
 
   virtual void *GetNativeHandle() override { return window_; }
 
-  virtual void OnBeforeEventLoop() override;
+  virtual void OnBeforeEventTick() override;
 
-  virtual void OnAfterEventLoop() override;
+  virtual void OnAfterEventTick() override;
 
  private:
   HWND window_{nullptr};

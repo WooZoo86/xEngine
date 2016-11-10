@@ -132,11 +132,11 @@ void Win32Window::SetTitle(const eastl::string &name) {
   SetWindowText(window_, name.c_str());
 }
 
-void Win32Window::OnBeforeEventLoop() {
+void Win32Window::OnBeforeEventTick() {
   Reset();
 }
 
-void Win32Window::OnAfterEventLoop() {
+void Win32Window::OnAfterEventTick() {
   config_.delegate->OnWindowUpdate();
 }
 
