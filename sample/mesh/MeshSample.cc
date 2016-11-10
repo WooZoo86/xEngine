@@ -5,6 +5,7 @@
 #include "io/IO.h"
 #include "storage/StorageFilesystem.h"
 #include "asset/graphics/MeshLoader.h"
+#include "asset/graphics/Camera.h"
 
 #include <gtc/matrix_transform.hpp>
 
@@ -83,6 +84,7 @@ class MeshSample : public ApplicationDelegate, WindowDelegate {
     IO::GetInstance().RegisterFilesystem("storage", StorageFilesystem::Creator);
 
     load_shader();
+    load_camera();
     load_mesh();
   }
 
@@ -104,26 +106,43 @@ class MeshSample : public ApplicationDelegate, WindowDelegate {
     draw();
   }
 
+  virtual void OnWindowMousePosition(const glm::vec2 &position) override {
+    static glm::vec2 last_position;
+
+    auto delta = position - last_position;
+    last_position = position;
+
+    if (Window::GetInstance().Get(window_id_)->IsMouseButtonPressed(MouseButtonType::kRight)) {
+      delta /= 10.0f;
+      camera_->Rotate(delta.x, delta.y);
+    }
+
+    if (Window::GetInstance().Get(window_id_)->IsMouseButtonPressed(MouseButtonType::kMiddle)) {
+      delta /= 50.0f;
+      camera_->Move(delta.x, delta.y);
+    }
+  }
+
+  virtual void OnWindowMouseScroll(const glm::vec2 &offset) override {
+    camera_->Zoom(offset.y / 50.0f);
+  }
+
  private:
   void load_shader() {
     auto shader_config = ShaderConfig::FromData(Data::Create(vertex_shader, strlen(vertex_shader) + 1), Data::Create(fragment_shader, strlen(fragment_shader) + 1));
     shader_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(shader_config);
-    Window::GetInstance().GetGraphics(window_id_)->renderer()->ApplyShader(shader_);
-    auto view = glm::lookAt(
-        glm::vec3(0.0f, 0.0f, 2.5f),
-        glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, 1.0f, 0.0f)
-    );
-    Window::GetInstance().GetGraphics(window_id_)->renderer()->UpdateShaderResourceData(shader_,
-                                                                                        "uView",
-                                                                                        Data::Create(glm::value_ptr(view),
-                                                                                                     sizeof(view)));
-    auto projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 1.0f, 10.0f);
-    Window::GetInstance().GetGraphics(window_id_)->renderer()->UpdateShaderResourceData(shader_,
-                                                                                        "uProjection",
-                                                                                        Data::Create(glm::value_ptr(
-                                                                                            projection),
-                                                                                                     sizeof(projection)));
+  }
+
+  void load_camera() {
+    camera_ = Camera::CreateUnique();
+    camera_->set_position(glm::vec3(0.0f, 0.0f, 3.0f));
+    camera_->set_target(glm::vec3(0.0f, 0.0f, 0.0f));
+    camera_->set_up_direction(glm::vec3(0.0f, 1.0f, 0.0f));
+
+    auto &renderer = Window::GetInstance().GetGraphics(window_id_)->renderer();
+    auto projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 1.0f, 1000.0f);
+    renderer->UpdateShaderResourceData(shader_, "uProjection", Data::Create(glm::value_ptr(projection), sizeof(projection)));
+    renderer->UpdateShaderResourceData(shader_, "uModel", Data::Create(glm::value_ptr(glm::mat4()), sizeof(glm::mat4)));
   }
 
   void load_mesh() {
@@ -150,18 +169,13 @@ class MeshSample : public ApplicationDelegate, WindowDelegate {
   }
 
   void draw() {
-    auto now = eastl::chrono::high_resolution_clock::now();
-    auto time = eastl::chrono::duration_cast<eastl::chrono::duration<float>>(now - start_time_).count();
-
     auto &renderer = Window::GetInstance().GetGraphics(window_id_)->renderer();
 
     renderer->ApplyTarget(kInvalidResourceID, ClearState::ClearAll());
     renderer->ApplyShader(shader_);
     renderer->ApplyPipeline(pipeline_);
 
-    auto model = glm::mat4();
-    model = glm::rotate(model, 0.5f * time * glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    renderer->UpdateShaderResourceData(shader_, "uModel", Data::Create(glm::value_ptr(model), sizeof(model)));
+    renderer->UpdateShaderResourceData(shader_, "uView", Data::Create(glm::value_ptr(camera_->matrix()), sizeof(glm::mat4)));
 
     for (auto tuple : mesh_) {
       auto id = eastl::get<0>(tuple);
@@ -174,6 +188,7 @@ class MeshSample : public ApplicationDelegate, WindowDelegate {
   }
 
  private:
+  CameraUniquePtr camera_;
   eastl::chrono::time_point<eastl::chrono::high_resolution_clock> start_time_;
   ResourceID shader_{kInvalidResourceID};
   ResourceID pipeline_{kInvalidResourceID};

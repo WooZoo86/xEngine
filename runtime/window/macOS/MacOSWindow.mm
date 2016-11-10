@@ -93,6 +93,14 @@ using namespace xEngine;
   [self mouseMoved:event];
 }
 
+- (void) rightMouseDragged: (NSEvent *) event {
+  [self mouseMoved:event];
+}
+
+- (void) otherMouseDragged: (NSEvent *) event {
+  [self mouseMoved:event];
+}
+
 - (void) mouseDown: (NSEvent *) event {
   SetMouseButtonDown(window, MouseButtonType::kLeft);
 }
@@ -141,6 +149,10 @@ using namespace xEngine;
 
 - (BOOL) performDragOperation: (id <NSDraggingInfo>) sender {
   @autoreleasepool {
+    const NSRect content_rect = [self frame];
+    const NSPoint position = [sender draggingLocation];
+    SetMousePosition(window, position.x, content_rect.size.height - position.y);
+
     eastl::vector<eastl::string> vector;
     NSPasteboard *pasteboard = [sender draggingPasteboard];
     NSArray *files = [pasteboard propertyListForType:NSFilenamesPboardType];
