@@ -170,11 +170,10 @@ class GraphicsSample : public ApplicationDelegate, WindowDelegate {
       auto &renderer = Window::GetInstance().GetGraphics(window_id_)->renderer();
       renderer->Reset();
       renderer->ApplyTarget(kInvalidResourceID, state_);
-      renderer->ApplyShader(shader_);
       renderer->ApplyMesh(mesh_);
       renderer->ApplyPipeline(pipeline_);
-      renderer->UpdateShaderUniformTexture(shader_, "uTexture", texture_);
-      renderer->ApplySampler(shader_, "uTexture", sampler_);
+      renderer->UpdateShaderResourceTexture(shader_, "uTexture", texture_);
+      renderer->UpdateShaderResourceSampler(shader_, "uTexture", sampler_);
       renderer->Draw(DrawCallState::Triangles(6));
       renderer->Render();
     }

@@ -39,19 +39,17 @@ class RendererInterface {
 
   virtual void ApplyShader(ResourceID id) = 0;
 
-  virtual void UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, DataPtr data) = 0;
+  virtual void UpdateShaderResourceData(ResourceID shader_id, const eastl::string &name, DataPtr data) = 0;
 
-  virtual void UpdateShaderUniformTexture(ResourceID shader_id, const eastl::string &name, ResourceID texture_id) = 0;
+  virtual void UpdateShaderResourceTexture(ResourceID shader_id, const eastl::string &name, ResourceID texture_id) = 0;
 
-  virtual void UpdateShaderUniformBlock(ResourceID shader_id, const eastl::string &name, ResourceID uniform_buffer_id) = 0;
+  virtual void UpdateShaderResourceSampler(ResourceID shader_id, const eastl::string &name, ResourceID sampler_id) = 0;
+
+  virtual void UpdateShaderResourceBlock(ResourceID shader_id, const eastl::string &name, ResourceID uniform_buffer_id) = 0;
 
   virtual void ResetShader() = 0;
 
   virtual void UpdateUniformBufferData(ResourceID id, DataPtr data) = 0;
-
-  virtual void ApplySampler(ResourceID shader_id, const eastl::string &name, ResourceID sampler_id) = 0;
-
-  virtual void ResetSampler() = 0;
 
   virtual void ApplyMesh(ResourceID id) = 0;
 

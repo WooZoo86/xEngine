@@ -40,19 +40,17 @@ class OpenGLRenderer: public RendererInterface {
 
   virtual void ApplyShader(ResourceID id) override;
 
-  virtual void UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, DataPtr data) override;
+  virtual void UpdateShaderResourceData(ResourceID shader_id, const eastl::string &name, DataPtr data) override;
 
-  virtual void UpdateShaderUniformTexture(ResourceID shader_id, const eastl::string &name, ResourceID texture_id) override;
+  virtual void UpdateShaderResourceTexture(ResourceID shader_id, const eastl::string &name, ResourceID texture_id) override;
 
-  virtual void UpdateShaderUniformBlock(ResourceID shader_id, const eastl::string &name, ResourceID uniform_buffer_id) override;
+  virtual void UpdateShaderResourceSampler(ResourceID shader_id, const eastl::string &name, ResourceID sampler_id) override;
+
+  virtual void UpdateShaderResourceBlock(ResourceID shader_id, const eastl::string &name, ResourceID uniform_buffer_id) override;
 
   virtual void ResetShader() override;
 
   virtual void UpdateUniformBufferData(ResourceID id, DataPtr data) override;
-
-  virtual void ApplySampler(ResourceID shader_id, const eastl::string &name, ResourceID sampler_id) override;
-
-  virtual void ResetSampler() override;
 
   virtual void ApplyMesh(ResourceID id) override;
 
@@ -65,6 +63,10 @@ class OpenGLRenderer: public RendererInterface {
   virtual void Reset() override;
 
  private:
+  void ApplySampler(ResourceID id, int32 index);
+
+  void ResetSampler();
+
   void ApplyTexture(ResourceID id, int32 index);
 
   void ResetTexture();

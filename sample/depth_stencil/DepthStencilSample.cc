@@ -125,9 +125,9 @@ class DepthStencilSample : public ApplicationDelegate, WindowDelegate {
         glm::vec3(0.0f, 0.0f, 0.0f),
         glm::vec3(0.0f, 1.0f, 0.0f)
     );
-    Window::GetInstance().GetGraphics(window_id_)->renderer()->UpdateShaderUniformData(shader_, "uView", Data::Create(glm::value_ptr(view), sizeof(view)));
+    Window::GetInstance().GetGraphics(window_id_)->renderer()->UpdateShaderResourceData(shader_, "uView", Data::Create(glm::value_ptr(view), sizeof(view)));
     auto projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 1.0f, 10.0f);
-    Window::GetInstance().GetGraphics(window_id_)->renderer()->UpdateShaderUniformData(shader_, "uProjection", Data::Create(glm::value_ptr(projection), sizeof(projection)));
+    Window::GetInstance().GetGraphics(window_id_)->renderer()->UpdateShaderResourceData(shader_, "uProjection", Data::Create(glm::value_ptr(projection), sizeof(projection)));
   }
 
   void load_sampler() {
@@ -211,10 +211,16 @@ class DepthStencilSample : public ApplicationDelegate, WindowDelegate {
 
     auto &renderer = Window::GetInstance().GetGraphics(window_id_)->renderer();
     renderer->ApplyTarget(kInvalidResourceID, ClearState::ClearAll());
-    renderer->ApplyShader(shader_);
-    renderer->UpdateShaderUniformTexture(shader_, "uTexture", texture_);
-    renderer->ApplySampler(shader_, "uTexture", sampler_);
 
+    draw_cube(time);
+    draw_plane(time);
+    draw_reflection(time);
+
+    renderer->Render();
+  }
+
+  void draw_cube(float32 time) {
+    auto &renderer = Window::GetInstance().GetGraphics(window_id_)->renderer();
     renderer->ApplyMesh(cube_mesh_);
     renderer->ApplyPipeline(cube_pipeline_);
     auto cube_model = glm::rotate(
@@ -222,20 +228,30 @@ class DepthStencilSample : public ApplicationDelegate, WindowDelegate {
         time * glm::radians(180.0f),
         glm::vec3(0.0f, 1.0f, 0.0f)
     );
-    renderer->UpdateShaderUniformData(shader_, "uModel", Data::Create(glm::value_ptr(cube_model), sizeof(cube_model)));
-    renderer->UpdateShaderUniformData(shader_, "uColor", Data::Create(glm::value_ptr(Color(1.0, 1.0, 1.0, 1.0)), sizeof(Color)));
+    renderer->UpdateShaderResourceData(shader_, "uModel", Data::Create(glm::value_ptr(cube_model), sizeof(cube_model)));
+    renderer->UpdateShaderResourceData(shader_, "uColor", Data::Create(glm::value_ptr(Color(1.0, 1.0, 1.0, 1.0)), sizeof(Color)));
+    renderer->UpdateShaderResourceTexture(shader_, "uTexture", texture_);
+    renderer->UpdateShaderResourceSampler(shader_, "uTexture", sampler_);
     renderer->Draw(DrawCallState::Triangles(36));
+  }
 
+  void draw_plane(float32 time) {
+    auto &renderer = Window::GetInstance().GetGraphics(window_id_)->renderer();
     renderer->ApplyMesh(plane_mesh_);
     renderer->ApplyPipeline(floor_pipeline_);
     auto plane_model = glm::scale(
         glm::mat4(),
         glm::vec3(4.0f, 4.0f, 4.0f)
     );
-    renderer->UpdateShaderUniformData(shader_, "uModel", Data::Create(glm::value_ptr(plane_model), sizeof(plane_model)));
-    renderer->UpdateShaderUniformData(shader_, "uColor", Data::Create(glm::value_ptr(Color(0.0, 0.0, 0.0, 1.0)), sizeof(Color)));
+    renderer->UpdateShaderResourceData(shader_, "uModel", Data::Create(glm::value_ptr(plane_model), sizeof(plane_model)));
+    renderer->UpdateShaderResourceData(shader_, "uColor", Data::Create(glm::value_ptr(Color(0.0, 0.0, 0.0, 1.0)), sizeof(Color)));
+    renderer->UpdateShaderResourceTexture(shader_, "uTexture", texture_);
+    renderer->UpdateShaderResourceSampler(shader_, "uTexture", sampler_);
     renderer->Draw(DrawCallState::Triangles(6));
+  }
 
+  void draw_reflection(float32 time) {
+    auto &renderer = Window::GetInstance().GetGraphics(window_id_)->renderer();
     renderer->ApplyMesh(cube_mesh_);
     renderer->ApplyPipeline(reflection_pipeline_);
     auto reflection_model = glm::scale(
@@ -246,11 +262,12 @@ class DepthStencilSample : public ApplicationDelegate, WindowDelegate {
         ),
         glm::vec3(1, -1, 1)
     );
-    renderer->UpdateShaderUniformData(shader_, "uModel", Data::Create(glm::value_ptr(reflection_model), sizeof(reflection_model)));
-    renderer->UpdateShaderUniformData(shader_, "uColor", Data::Create(glm::value_ptr(Color(0.3, 0.3, 0.3, 1.0)), sizeof(Color)));
+    renderer->UpdateShaderResourceData(shader_, "uModel",
+                                       Data::Create(glm::value_ptr(reflection_model), sizeof(reflection_model)));
+    renderer->UpdateShaderResourceData(shader_, "uColor", Data::Create(glm::value_ptr(Color(0.3, 0.3, 0.3, 1.0)), sizeof(Color)));
+    renderer->UpdateShaderResourceTexture(shader_, "uTexture", texture_);
+    renderer->UpdateShaderResourceSampler(shader_, "uTexture", sampler_);
     renderer->Draw(DrawCallState::Triangles(36));
-
-    renderer->Render();
   }
 
  private:

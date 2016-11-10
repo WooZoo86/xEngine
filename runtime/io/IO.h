@@ -17,7 +17,7 @@
 
 namespace xEngine {
 
-class IO : public ApplicationLoopDelegate {
+class IO : public ApplicationTickDelegate {
  public:
   static IO &GetInstance() {
     static IO instance;
@@ -60,7 +60,7 @@ class IO : public ApplicationLoopDelegate {
     return filesystem_manager_.CreateFilesystem(name);
   }
 
-  virtual void OnAfterEventLoop() override;
+  virtual void OnAfterEventTick() override;
 
  private:
   bool available_{false};

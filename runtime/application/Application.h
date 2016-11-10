@@ -9,7 +9,7 @@ namespace xEngine {
 
 class ApplicationDelegate;
 
-class ApplicationLoopDelegate;
+class ApplicationTickDelegate;
 
 class Application {
  public:
@@ -22,9 +22,9 @@ class Application {
 
   void Quit();
 
-  void AddLoopDelegate(ApplicationLoopDelegate *delegate);
+  void AddLoopDelegate(ApplicationTickDelegate *delegate);
 
-  void RemoveLoopDelegate(ApplicationLoopDelegate *delegate);
+  void RemoveLoopDelegate(ApplicationTickDelegate *delegate);
 
  private:
   void InvokeBeforeEvent();
@@ -33,7 +33,7 @@ class Application {
 
  private:
   ApplicationDelegate *delegate_{nullptr};
-  eastl::list<ApplicationLoopDelegate *> loop_delegate_list_;
+  eastl::list<ApplicationTickDelegate *> loop_delegate_list_;
 };
 
 } // namespace xEngine

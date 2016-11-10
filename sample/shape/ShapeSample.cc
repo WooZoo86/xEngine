@@ -123,9 +123,16 @@ class ShapeSample : public ApplicationDelegate, WindowDelegate {
         glm::vec3(0.0f, 0.0f, 0.0f),
         glm::vec3(0.0f, 1.0f, 0.0f)
     );
-    Window::GetInstance().GetGraphics(window_id_)->renderer()->UpdateShaderUniformData(shader_, "uView", Data::Create(glm::value_ptr(view), sizeof(view)));
+    Window::GetInstance().GetGraphics(window_id_)->renderer()->UpdateShaderResourceData(shader_,
+                                                                                        "uView",
+                                                                                        Data::Create(glm::value_ptr(view),
+                                                                                                     sizeof(view)));
     auto projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 1.0f, 100.0f);
-    Window::GetInstance().GetGraphics(window_id_)->renderer()->UpdateShaderUniformData(shader_, "uProjection", Data::Create(glm::value_ptr(projection), sizeof(projection)));
+    Window::GetInstance().GetGraphics(window_id_)->renderer()->UpdateShaderResourceData(shader_,
+                                                                                        "uProjection",
+                                                                                        Data::Create(glm::value_ptr(
+                                                                                            projection),
+                                                                                                     sizeof(projection)));
   }
 
   void load_sampler() {
@@ -191,10 +198,10 @@ class ShapeSample : public ApplicationDelegate, WindowDelegate {
     auto &renderer = Window::GetInstance().GetGraphics(window_id_)->renderer();
     renderer->ApplyTarget(kInvalidResourceID, ClearState::ClearAll());
     renderer->ApplyShader(shader_);
-    renderer->UpdateShaderUniformTexture(shader_, "uTexture", texture_);
-    renderer->ApplySampler(shader_, "uTexture", sampler_);
 
     renderer->ApplyPipeline(pipeline_);
+    renderer->UpdateShaderResourceTexture(shader_, "uTexture", texture_);
+    renderer->UpdateShaderResourceSampler(shader_, "uTexture", sampler_);
 
     glm::mat4 rotation;
     rotation = glm::rotate(rotation, 0.3f * time * glm::radians(180.0f), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -204,31 +211,31 @@ class ShapeSample : public ApplicationDelegate, WindowDelegate {
     renderer->ApplyMesh(cube_mesh_);
     const auto cube_translate = glm::translate(glm::mat4(), glm::vec3(-3.5f, 1.5f, 0.0f));
     auto cube_model = cube_translate * rotation;
-    renderer->UpdateShaderUniformData(shader_, "uModel", Data::Create(glm::value_ptr(cube_model), sizeof(cube_model)));
+    renderer->UpdateShaderResourceData(shader_, "uModel", Data::Create(glm::value_ptr(cube_model), sizeof(cube_model)));
     renderer->Draw(DrawCallState::Triangles(36));
 
     renderer->ApplyMesh(sphere_mesh_);
     const auto sphere_translate = glm::translate(glm::mat4(), glm::vec3(0.0f, 1.5f, 0.0f));
     auto sphere_model = sphere_translate * rotation;
-    renderer->UpdateShaderUniformData(shader_, "uModel", Data::Create(glm::value_ptr(sphere_model), sizeof(sphere_model)));
+    renderer->UpdateShaderResourceData(shader_, "uModel", Data::Create(glm::value_ptr(sphere_model), sizeof(sphere_model)));
     renderer->Draw(DrawCallState::Triangles(6 * 6 * sphere_division_ * sphere_division_));
 
     renderer->ApplyMesh(capsule_mesh_);
     const auto capsule_translate = glm::translate(glm::mat4(), glm::vec3(3.5f, 1.5f, 0.0f));
     auto capsule_model = capsule_translate * rotation;
-    renderer->UpdateShaderUniformData(shader_, "uModel", Data::Create(glm::value_ptr(capsule_model), sizeof(capsule_model)));
+    renderer->UpdateShaderResourceData(shader_, "uModel", Data::Create(glm::value_ptr(capsule_model), sizeof(capsule_model)));
     renderer->Draw(DrawCallState::Triangles(6 * 6 * capsule_division_ * capsule_division_ + 4 * 6 * capsule_division_));
 
     renderer->ApplyMesh(cylinder_mesh_);
     const auto cylinder_translate = glm::translate(glm::mat4(), glm::vec3(-2.0f, -1.5f, 0.0f));
     auto cylinder_model = cylinder_translate * rotation;
-    renderer->UpdateShaderUniformData(shader_, "uModel", Data::Create(glm::value_ptr(cylinder_model), sizeof(cylinder_model)));
+    renderer->UpdateShaderResourceData(shader_, "uModel", Data::Create(glm::value_ptr(cylinder_model), sizeof(cylinder_model)));
     renderer->Draw(DrawCallState::Triangles(12 * cylinder_division_));
 
     renderer->ApplyMesh(plane_mesh_);
     const auto plane_translate = glm::translate(glm::mat4(), glm::vec3(2.0f, -1.5f, 0.0f));
     auto plane_model = plane_translate * rotation;
-    renderer->UpdateShaderUniformData(shader_, "uModel", Data::Create(glm::value_ptr(plane_model), sizeof(plane_model)));
+    renderer->UpdateShaderResourceData(shader_, "uModel", Data::Create(glm::value_ptr(plane_model), sizeof(plane_model)));
     renderer->Draw(DrawCallState::Triangles(6));
 
     renderer->Render();
@@ -238,7 +245,9 @@ class ShapeSample : public ApplicationDelegate, WindowDelegate {
   size_t sphere_division_{8};
   size_t capsule_division_{8};
   size_t cylinder_division_{20};
+
   eastl::chrono::time_point<eastl::chrono::high_resolution_clock> start_time_;
+
   ResourceID shader_{kInvalidResourceID};
   ResourceID texture_{kInvalidResourceID};
   ResourceID sampler_{kInvalidResourceID};

@@ -42,13 +42,13 @@ class ApplicationDelegate {
   virtual void Finalize() {}
 };
 
-class ApplicationLoopDelegate {
+class ApplicationTickDelegate {
  public:
-  virtual ~ApplicationLoopDelegate() {}
+  virtual ~ApplicationTickDelegate() {}
 
-  virtual void OnBeforeEventLoop() {}
+  virtual void OnBeforeEventTick() {}
 
-  virtual void OnAfterEventLoop() {}
+  virtual void OnAfterEventTick() {}
 };
 
 } // namespace xEngine

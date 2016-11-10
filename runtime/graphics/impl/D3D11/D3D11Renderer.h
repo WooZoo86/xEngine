@@ -35,19 +35,17 @@ class D3D11Renderer: public RendererInterface {
 
   virtual void ApplyShader(ResourceID id) override;
 
-  virtual void UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, DataPtr data) override;
+  virtual void UpdateShaderResourceData(ResourceID shader_id, const eastl::string &name, DataPtr data) override;
 
-  virtual void UpdateShaderUniformTexture(ResourceID shader_id, const eastl::string &name, ResourceID texture_id) override;
+  virtual void UpdateShaderResourceTexture(ResourceID shader_id, const eastl::string &name, ResourceID texture_id) override;
 
-  virtual void UpdateShaderUniformBlock(ResourceID shader_id, const eastl::string &name, ResourceID uniform_buffer_id) override;
+  virtual void UpdateShaderResourceSampler(ResourceID shader_id, const eastl::string &name, ResourceID sampler_id) override;
+
+  virtual void UpdateShaderResourceBlock(ResourceID shader_id, const eastl::string &name, ResourceID uniform_buffer_id) override;
 
   virtual void ResetShader() override;
 
   virtual void UpdateUniformBufferData(ResourceID id, DataPtr data) override;
-
-  virtual void ApplySampler(ResourceID shader_id, const eastl::string &name, ResourceID sampler_id) override;
-
-  virtual void ResetSampler() override;
 
   virtual void ApplyMesh(ResourceID id) override;
 
@@ -60,7 +58,12 @@ class D3D11Renderer: public RendererInterface {
   virtual void Reset() override;
 
  private:
+
   void ApplyD3D11Shader(D3D11Shader &shader);
+
+  void ApplySampler(Resource id, int32 index, GraphicsPipelineStage stage);
+
+  void ResetSampler();
 
   void ApplyTexture(ResourceID id, int32 index, GraphicsPipelineStage stage);
 

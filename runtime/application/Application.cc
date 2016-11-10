@@ -26,13 +26,13 @@ void Application::Quit() {
   NativeApplicationFinalize(delegate_);
 }
 
-void Application::AddLoopDelegate(ApplicationLoopDelegate *delegate) {
+void Application::AddLoopDelegate(ApplicationTickDelegate *delegate) {
   if (delegate != nullptr) {
     loop_delegate_list_.push_back(delegate);
   }
 }
 
-void Application::RemoveLoopDelegate(ApplicationLoopDelegate *delegate) {
+void Application::RemoveLoopDelegate(ApplicationTickDelegate *delegate) {
   if (delegate != nullptr) {
     auto iterator = eastl::find(loop_delegate_list_.begin(), loop_delegate_list_.end(), delegate);
     if (iterator != loop_delegate_list_.end()) {
@@ -44,14 +44,14 @@ void Application::RemoveLoopDelegate(ApplicationLoopDelegate *delegate) {
 void Application::InvokeBeforeEvent() {
   auto list = loop_delegate_list_;
   for (auto delegate : list) {
-    delegate->OnBeforeEventLoop();
+    delegate->OnBeforeEventTick();
   }
 }
 
 void Application::InvokeAfterEvent() {
   auto list = loop_delegate_list_;
   for (auto delegate : list) {
-    delegate->OnAfterEventLoop();
+    delegate->OnAfterEventTick();
   }
 }
 

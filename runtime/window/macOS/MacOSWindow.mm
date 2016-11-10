@@ -203,11 +203,11 @@ void MacOSWindow::SetTitle(const eastl::string &name) {
   }
 }
 
-void MacOSWindow::OnBeforeEventLoop() {
+void MacOSWindow::OnBeforeEventTick() {
   Reset();
 }
 
-void MacOSWindow::OnAfterEventLoop() {
+void MacOSWindow::OnAfterEventTick() {
   config_.delegate->OnWindowUpdate();
 }
 

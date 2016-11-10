@@ -34,7 +34,7 @@ void IO::Write(const eastl::string &file, DataPtr data, IOCallbackFunction callb
   workers_[++last_worker_ % workers_.size()]->Handle(message);
 }
 
-void IO::OnAfterEventLoop() {
+void IO::OnAfterEventTick() {
   for (auto &worker : workers_) {
     worker->Tick();
   }

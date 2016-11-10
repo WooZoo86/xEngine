@@ -114,9 +114,16 @@ class MeshSample : public ApplicationDelegate, WindowDelegate {
         glm::vec3(0.0f, 0.0f, 0.0f),
         glm::vec3(0.0f, 1.0f, 0.0f)
     );
-    Window::GetInstance().GetGraphics(window_id_)->renderer()->UpdateShaderUniformData(shader_, "uView", Data::Create(glm::value_ptr(view), sizeof(view)));
+    Window::GetInstance().GetGraphics(window_id_)->renderer()->UpdateShaderResourceData(shader_,
+                                                                                        "uView",
+                                                                                        Data::Create(glm::value_ptr(view),
+                                                                                                     sizeof(view)));
     auto projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 1.0f, 10.0f);
-    Window::GetInstance().GetGraphics(window_id_)->renderer()->UpdateShaderUniformData(shader_, "uProjection", Data::Create(glm::value_ptr(projection), sizeof(projection)));
+    Window::GetInstance().GetGraphics(window_id_)->renderer()->UpdateShaderResourceData(shader_,
+                                                                                        "uProjection",
+                                                                                        Data::Create(glm::value_ptr(
+                                                                                            projection),
+                                                                                                     sizeof(projection)));
   }
 
   void load_mesh() {
@@ -154,7 +161,7 @@ class MeshSample : public ApplicationDelegate, WindowDelegate {
 
     auto model = glm::mat4();
     model = glm::rotate(model, 0.5f * time * glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    renderer->UpdateShaderUniformData(shader_, "uModel", Data::Create(glm::value_ptr(model), sizeof(model)));
+    renderer->UpdateShaderResourceData(shader_, "uModel", Data::Create(glm::value_ptr(model), sizeof(model)));
 
     for (auto tuple : mesh_) {
       auto id = eastl::get<0>(tuple);

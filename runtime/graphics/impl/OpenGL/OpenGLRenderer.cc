@@ -146,6 +146,7 @@ void OpenGLRenderer::ApplyScissor(int32 x, int32 y, int32 width, int32 height) {
 void OpenGLRenderer::ApplyPipeline(ResourceID id) {
   auto &pipeline = resource_manager()->pipeline_pool_.Find(id);
   if (pipeline.status() == ResourceStatus::kCompleted) {
+    ApplyShader(pipeline.config().shader);
     ApplyBlendState(pipeline.config().blend_state);
     ApplyDepthStencilState(pipeline.config().depth_stencil_state);
     ApplyRasterizerState(pipeline.config().rasterizer_state);
@@ -168,7 +169,7 @@ void OpenGLRenderer::ApplyShader(ResourceID id) {
   }
 }
 
-void OpenGLRenderer::UpdateShaderUniformData(ResourceID shader_id, const eastl::string &name, DataPtr data) {
+void OpenGLRenderer::UpdateShaderResourceData(ResourceID shader_id, const eastl::string &name, DataPtr data) {
   auto &shader = resource_manager()->shader_pool_.Find(shader_id);
   if (shader.status() == ResourceStatus::kCompleted) {
     if (shader.program_id != cache_.program_id) {
@@ -321,7 +322,7 @@ void OpenGLRenderer::UpdateShaderUniformData(ResourceID shader_id, const eastl::
             break;
           }
           default: {
-            Log::GetInstance().Error("type of uniform %s should not be update with UpdateShaderUniformData\n", name.c_str());
+            Log::GetInstance().Error("type of uniform %s should not be update with UpdateShaderResourceData\n", name.c_str());
           }
         }
       } else {
@@ -333,7 +334,7 @@ void OpenGLRenderer::UpdateShaderUniformData(ResourceID shader_id, const eastl::
   }
 }
 
-void OpenGLRenderer::UpdateShaderUniformTexture(ResourceID shader_id, const eastl::string &name, ResourceID texture_id) {
+void OpenGLRenderer::UpdateShaderResourceTexture(ResourceID shader_id, const eastl::string &name, ResourceID texture_id) {
   auto &shader = resource_manager()->shader_pool_.Find(shader_id);
   if (shader.status() == ResourceStatus::kCompleted) {
     if (shader.program_id != cache_.program_id) {
@@ -356,7 +357,34 @@ void OpenGLRenderer::UpdateShaderUniformTexture(ResourceID shader_id, const east
   }
 }
 
-void OpenGLRenderer::UpdateShaderUniformBlock(ResourceID shader_id, const eastl::string &name, ResourceID uniform_buffer_id) {
+void OpenGLRenderer::UpdateShaderResourceSampler(ResourceID shader_id, const eastl::string &name, ResourceID sampler_id) {
+  auto &shader = resource_manager()->shader_pool_.Find(shader_id);
+  if (shader.status() == ResourceStatus::kCompleted) {
+    if (shader.program_id != cache_.program_id) {
+      glUseProgram(shader.program_id);
+      cache_.program_id = shader.program_id;
+    }
+    auto index = -1;
+    auto pair = shader.uniform_info.find(name);
+    if (pair != shader.uniform_info.end()) {
+      auto &info = pair->second;
+      if (info.type == GL_SAMPLER_2D) {
+        index = info.texture_2d_index;
+      } else if (info.type == GL_SAMPLER_CUBE) {
+        index = info.texture_cube_index;
+      } else {
+        Log::GetInstance().Error("uniform %s should not be Texture\n", name.c_str());
+      }
+    } else {
+      Log::GetInstance().Error("cannot find texture: %s\n", name.c_str());
+    }
+    if (index != -1) {
+      ApplySampler(sampler_id, index);
+    }
+  }
+}
+
+void OpenGLRenderer::UpdateShaderResourceBlock(ResourceID shader_id, const eastl::string &name, ResourceID uniform_buffer_id) {
   auto &shader = resource_manager()->shader_pool_.Find(shader_id);
   if (shader.status() == ResourceStatus::kCompleted) {
     if (shader.program_id != cache_.program_id) {
@@ -400,46 +428,6 @@ void OpenGLRenderer::UpdateUniformBufferData(ResourceID id, DataPtr data) {
 
       glBindBuffer(GL_UNIFORM_BUFFER, static_cast<GLuint>(current_uniform_buffer));
     }
-  }
-}
-
-void OpenGLRenderer::ApplySampler(ResourceID shader_id, const eastl::string &name, ResourceID sampler_id) {
-  auto &shader = resource_manager()->shader_pool_.Find(shader_id);
-  if (shader.status() == ResourceStatus::kCompleted) {
-    if (shader.program_id != cache_.program_id) {
-      glUseProgram(shader.program_id);
-      cache_.program_id = shader.program_id;
-    }
-    auto &sampler = resource_manager()->sampler_pool_.Find(sampler_id);
-    if (sampler.status() == ResourceStatus::kCompleted) {
-      auto index = -1;
-      auto pair = shader.uniform_info.find(name);
-      if (pair != shader.uniform_info.end()) {
-        auto &info = pair->second;
-        if (info.type == GL_SAMPLER_2D) {
-          index = info.texture_2d_index;
-        } else if (info.type == GL_SAMPLER_CUBE) {
-          index = info.texture_cube_index;
-        } else {
-          Log::GetInstance().Error("uniform %s should not be Texture\n", name.c_str());
-        }
-      } else {
-        Log::GetInstance().Error("cannot find texture: %s\n", name.c_str());
-      }
-      if (index != -1) {
-        if (cache_.sampler_id[index] != sampler.sampler_id) {
-          glBindSampler(static_cast<GLuint>(index), sampler.sampler_id);
-          cache_.sampler_id[index] = sampler.sampler_id;
-        }
-      }
-    }
-  }
-}
-
-void OpenGLRenderer::ResetSampler() {
-  memset(cache_.sampler_id, 0, sizeof(cache_.sampler_id));
-  for (auto i = 0; i < static_cast<uint16>(GraphicsMaxDefine::kMaxSamplerCount); ++i) {
-    glBindSampler(static_cast<GLuint>(i), 0);
   }
 }
 
@@ -522,6 +510,23 @@ void OpenGLRenderer::Reset() {
   ResetMesh();
   ResetPipeline();
   ResetSampler();
+}
+
+void OpenGLRenderer::ApplySampler(ResourceID id, int32 index) {
+  auto &sampler = resource_manager()->sampler_pool_.Find(id);
+  if (sampler.status() == ResourceStatus::kCompleted) {
+    if (cache_.sampler_id[index] != sampler.sampler_id) {
+      glBindSampler(static_cast<GLuint>(index), sampler.sampler_id);
+      cache_.sampler_id[index] = sampler.sampler_id;
+    }
+  }
+}
+
+void OpenGLRenderer::ResetSampler() {
+  memset(cache_.sampler_id, 0, sizeof(cache_.sampler_id));
+  for (auto i = 0; i < static_cast<uint16>(GraphicsMaxDefine::kMaxSamplerCount); ++i) {
+    glBindSampler(static_cast<GLuint>(i), 0);
+  }
 }
 
 void OpenGLRenderer::ApplyTexture(ResourceID id, int32 index) {

@@ -212,9 +212,9 @@ void NuklearGUI::EndFrame() {
   nk_buffer_clear(&vertex_buffer);
   nk_buffer_clear(&index_buffer);
   nk_convert(&context_, &command, &vertex_buffer, &index_buffer, &config_);
-  graphics_->renderer()->UpdateMesh(mesh_, vertex_data, index_data);
-  graphics_->renderer()->UpdateShaderUniformData(shader_, "uProjectionMatrix", Data::Create(glm::value_ptr(matrix), sizeof(matrix)));
   graphics_->renderer()->ApplyPipeline(pipeline_);
+  graphics_->renderer()->UpdateMesh(mesh_, vertex_data, index_data);
+  graphics_->renderer()->UpdateShaderResourceData(shader_, "uProjectionMatrix", Data::Create(glm::value_ptr(matrix), sizeof(matrix)));
   const struct nk_draw_command *cmd = nullptr;
   ResourceID current_texture = kInvalidResourceID;
   size_t element_offset = 0;
@@ -222,8 +222,8 @@ void NuklearGUI::EndFrame() {
     auto texture = image_[cmd->texture.id];
     if (current_texture != texture) {
       current_texture = texture;
-      graphics_->renderer()->UpdateShaderUniformTexture(shader_, "uTexture", current_texture);
-      graphics_->renderer()->ApplySampler(shader_, "uTexture", sampler_);
+      graphics_->renderer()->UpdateShaderResourceTexture(shader_, "uTexture", current_texture);
+      graphics_->renderer()->UpdateShaderResourceSampler(shader_, "uTexture", sampler_);
     }
     graphics_->renderer()->ApplyScissor(static_cast<int32>(cmd->clip_rect.x * scale_x),
                                         static_cast<int32>((window_->config().height - (cmd->clip_rect.y + cmd->clip_rect.h)) * scale_y),

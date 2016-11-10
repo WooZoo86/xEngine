@@ -8,7 +8,7 @@
 
 namespace xEngine {
 
-class MacOSWindow: public WindowInterface, ApplicationLoopDelegate {
+class MacOSWindow: public WindowInterface, ApplicationTickDelegate {
  public:
   virtual void Create(const WindowConfig &config) override;
 
@@ -18,9 +18,9 @@ class MacOSWindow: public WindowInterface, ApplicationLoopDelegate {
 
   virtual void *GetNativeHandle() override { return window_; }
 
-  virtual void OnBeforeEventLoop() override;
+  virtual void OnBeforeEventTick() override;
 
-  virtual void OnAfterEventLoop() override;
+  virtual void OnAfterEventTick() override;
 
  private:
   void *window_{nullptr};

@@ -11,7 +11,7 @@
 
 namespace xEngine {
 
-class Win32Window : public WindowInterface, ApplicationLoopDelegate {
+class Win32Window : public WindowInterface, ApplicationTickDelegate {
  public:
   virtual void Create(const WindowConfig &config) override;
 
