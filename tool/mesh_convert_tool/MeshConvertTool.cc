@@ -1,23 +1,24 @@
+#include "MeshConvertToolDefine.h"
 #include "MeshConvertToolWindow.h"
+#include "MeshViewerWindow.h"
 
 #include <application/ApplicationDelegate.h>
 #include <window/Window.h>
 
-using namespace xEngine;
+namespace xEngine {
 
-class MeshConvertTool: public ApplicationDelegate {
- public:
-  virtual void Initialize() override {
-    Window::GetInstance().Initialize();
-    window_ = new MeshConvertToolWindow;
-  }
-  virtual void Finalize() override {
-    delete window_;
-    Window::GetInstance().Finalize();
-  }
+void MeshConvertTool::Initialize() {
+  Window::GetInstance().Initialize();
+  window_ = new MeshConvertToolWindow;
+  viewer_ = new MeshViewerWindow;
+}
 
- private:
-  MeshConvertToolWindow *window_{nullptr};
-};
+void MeshConvertTool::Finalize() {
+  delete window_;
+  delete viewer_;
+  Window::GetInstance().Finalize();
+}
 
-XENGINE_WINDOW_APPLICATION(MeshConvertTool)
+} // namespace xEngine
+
+XENGINE_WINDOW_APPLICATION(xEngine::MeshConvertTool)

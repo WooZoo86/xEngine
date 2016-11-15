@@ -547,21 +547,21 @@ void D3D11Renderer::ApplyD3D11Shader(D3D11Shader &shader) {
 }
 
 void D3D11Renderer::ApplySampler(ResourceID id, int32 index, GraphicsPipelineStage stage) {
-	auto &sampler = resource_manager()->sampler_pool_.Find(id);
-	if (sampler.status() == ResourceStatus::kCompleted) {
-		if (stage == GraphicsPipelineStage::kVertexShader) {
-			if (sampler.sampler_state != cache_.vertex_sampler_state[index]) {
-				context_->PSSetSamplers(index, 1, &sampler.sampler_state);
-				cache_.vertex_sampler_state[index] = sampler.sampler_state;
-			}
-		}
-		else if (stage == GraphicsPipelineStage::kFragmentShader) {
-			if (sampler.sampler_state != cache_.fragment_sampler_state[index]) {
-				context_->PSSetSamplers(index, 1, &sampler.sampler_state);
-				cache_.fragment_sampler_state[index] = sampler.sampler_state;
-			}
-		}
-	}
+  auto &sampler = resource_manager()->sampler_pool_.Find(id);
+  if (sampler.status() == ResourceStatus::kCompleted) {
+    if (stage == GraphicsPipelineStage::kVertexShader) {
+      if (sampler.sampler_state != cache_.vertex_sampler_state[index]) {
+        context_->PSSetSamplers(index, 1, &sampler.sampler_state);
+        cache_.vertex_sampler_state[index] = sampler.sampler_state;
+      }
+    }
+    else if (stage == GraphicsPipelineStage::kFragmentShader) {
+      if (sampler.sampler_state != cache_.fragment_sampler_state[index]) {
+        context_->PSSetSamplers(index, 1, &sampler.sampler_state);
+        cache_.fragment_sampler_state[index] = sampler.sampler_state;
+      }
+    }
+  }
 }
 
 void D3D11Renderer::ResetSampler() {

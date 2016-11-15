@@ -84,23 +84,23 @@ class OpenGLRenderer: public RendererInterface {
   void ResetRasterizerState();
 
   WindowInterface *window() {
-    static WindowInterface *pointer = nullptr;
-    if (pointer == nullptr) {
-      pointer = Window::GetInstance().Get(config_.window).get();
+    if (window_ == nullptr) {
+      window_ = Window::GetInstance().Get(config_.window).get();
     }
-    return pointer;
+    return window_;
   }
 
   OpenGLGraphicsResourceManager *resource_manager() {
-    static OpenGLGraphicsResourceManager *pointer = nullptr;
-    if (pointer == nullptr) {
-      pointer = static_cast<OpenGLGraphicsResourceManager *>(window()->graphics()->resource_manager().get());
+    if (resource_manager_ == nullptr) {
+      resource_manager_ = static_cast<OpenGLGraphicsResourceManager *>(window()->graphics()->resource_manager().get());
     }
-    return pointer;
+    return resource_manager_;
   }
 
  private:
   void *context_{nullptr};
+  WindowInterface *window_{nullptr};
+  OpenGLGraphicsResourceManager *resource_manager_{nullptr};
   GraphicsConfig config_;
   OpenGLRendererCache cache_;
 };

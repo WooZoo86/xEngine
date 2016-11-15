@@ -26,6 +26,8 @@ class Application {
 
   void RemoveLoopDelegate(ApplicationTickDelegate *delegate);
 
+  ApplicationDelegate *delegate() const { return delegate_; }
+
  private:
   void InvokeBeforeEvent();
 

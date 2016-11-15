@@ -189,20 +189,20 @@ static D3D11_TEXTURE_ADDRESS_MODE EnumForTextureWrapMode(TextureWrapMode mode) {
   }
 }
 
-static uint32 RowPitchForPixelFormat(PixelFormat format, uint32 width) {
+static uint32 RowPitchForPixelFormat(PixelFormat format, int32 width) {
   switch (format) {
     case PixelFormat::DXT1:
     case PixelFormat::ETC2_RGB8:
     case PixelFormat::ETC2_SRGB8:
-      return max(8, 2 * width + 6);
+      return eastl::max(8, 2 * width + 6);
     case PixelFormat::DXT3:
     case PixelFormat::DXT5:
-      return max(16, 4 * width + 12);
+      return eastl::max(16, 4 * width + 12);
     case PixelFormat::PVRTC4_RGB:
     case PixelFormat::PVRTC4_RGBA:
     case PixelFormat::PVRTC2_RGB:
     case PixelFormat::PVRTC2_RGBA:
-      return max(16, 2 * width);
+      return eastl::max(16, 2 * width);
     default:
       return width * SizeOfPixelFormat(format);
   }

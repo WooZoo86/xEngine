@@ -28,7 +28,7 @@ struct ClearState {
     return state;
   }
 
-  static ClearState ClearAll(Color clear_color = Color(1.0f, 1.0f, 1.0f, 1.0f), float32 depth = 1.0f, uint8 stencil = 0) {
+  static ClearState ClearAll(Color clear_color = Color(0.0f, 0.0f, 0.0f, 1.0f), float32 depth = 1.0f, uint8 stencil = 0) {
     ClearState state;
     state.type = ClearType::kAll;
     state.clear_color = clear_color;
@@ -37,7 +37,7 @@ struct ClearState {
     return state;
   }
 
-  Color clear_color = Color(1.0f, 1.0f, 1.0f, 1.0f);
+  Color clear_color = Color(0.0f, 0.0f, 0.0f, 0.0f);
 
   float32 depth = 1.0f;
 

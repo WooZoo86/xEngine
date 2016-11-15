@@ -1,6 +1,7 @@
 message("Target Platform: MACOS")
 
 set(X_MACOS 1)
+set(X_PLATFORM_NAME "macOS")
 
 set(CMAKE_CONFIGURATION_TYPES Debug Release)
 

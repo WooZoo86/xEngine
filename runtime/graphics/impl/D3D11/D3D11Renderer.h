@@ -70,23 +70,24 @@ class D3D11Renderer: public RendererInterface {
   void ResetTexture();
 
   WindowInterface *window() {
-    static WindowInterface *pointer = nullptr;
-    if (pointer == nullptr) {
-      pointer = Window::GetInstance().Get(config_.window).get();
+    if (window_ == nullptr) {
+      window_ = Window::GetInstance().Get(config_.window).get();
     }
-    return pointer;
+    return window_;
   }
 
   D3D11GraphicsResourceManager *resource_manager() {
-    static D3D11GraphicsResourceManager *pointer = nullptr;
-    if (pointer == nullptr) {
-      pointer = static_cast<D3D11GraphicsResourceManager *>(window()->graphics()->resource_manager().get());
+    if (resource_manager_ == nullptr) {
+      resource_manager_ = static_cast<D3D11GraphicsResourceManager *>(window()->graphics()->resource_manager().get());
     }
-    return pointer;
+    return resource_manager_;
   }
 
 private:
   GraphicsConfig config_;
+
+  WindowInterface *window_{nullptr};
+  D3D11GraphicsResourceManager *resource_manager_{nullptr};
 
   ID3D11Device *device_{nullptr};
   ID3D11DeviceContext *context_{nullptr};

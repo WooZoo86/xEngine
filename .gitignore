@@ -1,1 +1,6 @@
 .idea/
+*.lib
+*.dll
+*.dylib
+*.a
+*.so

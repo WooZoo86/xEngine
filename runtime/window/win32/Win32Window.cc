@@ -113,8 +113,9 @@ void Win32Window::Create(const WindowConfig &config) {
     GetModuleHandle(nullptr),
     nullptr
   );
-  if (window_ == nullptr)
-  x_error("fail to create window, code: %d\n", GetLastError());
+  if (window_ == nullptr) {
+    x_error("fail to create window, code: %d\n", GetLastError());
+  }
   SetProp(window_, "xEngine", this);
   ShowWindow(window_, SW_SHOWNORMAL);
   SetCursor(LoadCursorW(nullptr, reinterpret_cast<LPCWSTR>(IDC_ARROW)));
@@ -123,7 +124,7 @@ void Win32Window::Create(const WindowConfig &config) {
 }
 
 void Win32Window::Destroy() {
-  CloseWindow(window_);
+  DestroyWindow(window_);
   window_ = nullptr;
   Application::GetInstance().RemoveLoopDelegate(this);
 }
