@@ -20,6 +20,8 @@ else()
     include(${PROJECT_SOURCE_DIR}/cmake/platform/linux.cmake)
 endif()
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/build/bin)
+
 add_subdirectory(runtime)
 add_subdirectory(third_party)
 add_subdirectory(plugin)

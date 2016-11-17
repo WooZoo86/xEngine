@@ -3,7 +3,7 @@
 #include "graphics/Graphics.h"
 #include "window/Window.h"
 #include "io/IO.h"
-#include "storage/StorageFilesystem.h"
+#include "storage/Storage.h"
 #include "asset/graphics/MeshLoader.h"
 #include "asset/graphics/Camera.h"
 
@@ -75,12 +75,10 @@ class MeshSample : public ApplicationDelegate, WindowDelegate {
     window_id_ = Window::GetInstance().Create(WindowConfig::ForWindow(this, 1024, 768, "MeshSample"));
     Window::GetInstance().GetGraphics(window_id_)->Initialize(GraphicsConfig::ForWindow(window_id_));
     Window::GetInstance().GetGraphics(window_id_)->renderer()->MakeCurrent();
+
     IO::GetInstance().Initialize();
-#if X_MACOS
-    IO::GetInstance().AddPlaceholder("local", "storage:///Users/leafnsand/Desktop/");
-#elif X_WINDOWS
-    IO::GetInstance().AddPlaceholder("local", "storage://C:\\Users\\leafnsand\\Desktop\\");
-#endif
+    IO::GetInstance().AddPlaceholder("texture", "storage://" +
+        Path::GetCurrentDirectory().ParentDirectory().Append("assets").Append("texture").string() + Path::separator());
     IO::GetInstance().RegisterFilesystem("storage", StorageFilesystem::Creator);
 
     load_shader();
@@ -146,7 +144,7 @@ class MeshSample : public ApplicationDelegate, WindowDelegate {
   }
 
   void load_mesh() {
-    IO::GetInstance().Read("local:teapot.xmesh", [&](Location location, IOStatus status, DataPtr data) {
+    IO::GetInstance().Read("mesh:teapot.xmesh", [&](Location location, IOStatus status, DataPtr data) {
       if (status == IOStatus::kSuccess) {
         auto mesh_vector = MeshLoader::Load(data);
         for (auto mesh : mesh_vector) {
