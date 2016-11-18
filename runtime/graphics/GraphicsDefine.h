@@ -24,9 +24,10 @@ enum class GraphicsMaxDefine: uint16 {
 };
 
 enum class GraphicsType: uint8 {
-  kNone,
   kOpenGL3,
   kD3D11,
+
+  kCount,
 };
 
 enum class PixelChannel: uint8 {

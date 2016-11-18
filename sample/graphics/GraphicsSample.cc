@@ -113,12 +113,12 @@ class GraphicsSample : public ApplicationDelegate, WindowDelegate {
 
  private:
   void load_shader() {
-    auto shader_config = ShaderConfig::FromData(Data::Create(vertex_shader, strlen(vertex_shader) + 1), Data::Create(fragment_shader, strlen(fragment_shader) + 1));
+    auto shader_config = ShaderConfig::FromString(vertex_shader, fragment_shader);
     shader_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(shader_config);
   }
 
   void load_texture() {
-    IO::GetInstance().Read("texture:test.jpg", [&](Location location, IOStatus status, DataPtr data) {
+    IO::GetInstance().Read("texture:The_Var_department.jpg", [&](Location location, IOStatus status, DataPtr data) {
       if (status == IOStatus::kSuccess) {
         int width, height, components;
         stbi_set_unpremultiply_on_load(1);

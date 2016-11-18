@@ -2,6 +2,7 @@
 #include "core/Log.h"
 #include "graphics/Graphics.h"
 #include "asset/graphics/util/MeshUtil.h"
+#include "asset/graphics/Shader.h"
 #include "window/Window.h"
 #include "io/IO.h"
 #include "storage/Storage.h"
@@ -11,71 +12,6 @@
 #include <gtc/matrix_transform.hpp>
 
 #include <EASTL/chrono.h>
-
-#if X_OPENGL
-
-static const char *vertex_shader =
-    "#version 410 core\n"
-    "in vec3 aPosition;\n"
-    "in vec2 aTexcoord0;\n"
-    "out vec2 Texcoord;\n"
-    "uniform mat4 uModel;\n"
-    "uniform mat4 uView;\n"
-    "uniform mat4 uProjection;\n"
-    "void main()\n"
-    "{\n"
-    "    Texcoord = aTexcoord0;\n"
-    "    gl_Position = uProjection * uView * uModel * vec4(aPosition, 1.0);\n"
-    "}\n";
-
-static const char *fragment_shader =
-    "#version 410 core\n"
-    "in vec2 Texcoord;\n"
-    "out vec4 outColor;\n"
-    "uniform sampler2D uTexture;\n"
-    "void main()\n"
-    "{\n"
-    "    outColor = texture(uTexture, Texcoord);\n"
-    "}\n";
-
-#elif X_D3D11
-
-static const char *vertex_shader =
-  "float4x4 uModel;\n"
-  "float4x4 uView;\n"
-  "float4x4 uProjection;\n"
-  "struct VS_INPUT\n"
-  "{\n"
-  "    float3 aPosition: POSITION;\n"
-  "    float2 aTexcoord0: TEXCOORD;\n"
-  "};\n"
-  "struct VS_OUTPUT\n"
-  "{\n"
-  "    float4 Position: SV_POSITION;\n"
-  "    float2 Texcoord: TEXCOORD;\n"
-  "};\n"
-  "VS_OUTPUT main(const VS_INPUT input)\n"
-  "{\n"
-  "    VS_OUTPUT output;\n"
-  "    output.Texcoord = input.aTexcoord0;\n"
-  "    output.Position = mul(uProjection, mul(uView, mul(uModel, float4(input.aPosition, 1.0))));\n"
-  "    return output;\n"
-  "}\n";
-
-static const char *fragment_shader =
-  "Texture2D uTexture;\n"
-  "SamplerState uTexture_sampler;\n"
-  "struct PS_INPUT\n"
-  "{\n"
-  "    float4 Position: SV_POSITION;\n"
-  "    float2 Texcoord: TEXCOORD;\n"
-  "};\n"
-  "float4 main(const PS_INPUT input): SV_TARGET\n"
-  "{\n"
-  "    return uTexture.Sample(uTexture_sampler, input.Texcoord);\n"
-  "}\n";
-
-#endif
 
 using namespace xEngine;
 
@@ -90,6 +26,8 @@ class ShapeSample : public ApplicationDelegate, WindowDelegate {
     IO::GetInstance().Initialize();
     IO::GetInstance().AddPlaceholder("texture", "storage://" +
         Path::GetCurrentDirectory().ParentDirectory().Append("assets").Append("texture").string() + Path::separator());
+    IO::GetInstance().AddPlaceholder("shader", "storage://" +
+        Path::GetCurrentDirectory().ParentDirectory().Append("assets").Append("shader").string() + Path::separator());
     IO::GetInstance().RegisterFilesystem("storage", StorageFilesystem::Creator);
 
     start_time_ = eastl::chrono::high_resolution_clock::now();
@@ -97,7 +35,6 @@ class ShapeSample : public ApplicationDelegate, WindowDelegate {
     load_shader();
     load_sampler();
     load_texture();
-    load_mesh();
   }
 
   virtual void Finalize() override {
@@ -120,24 +57,17 @@ class ShapeSample : public ApplicationDelegate, WindowDelegate {
 
  private:
   void load_shader() {
-    auto shader_config = ShaderConfig::FromData(Data::Create(vertex_shader, strlen(vertex_shader) + 1), Data::Create(fragment_shader, strlen(fragment_shader) + 1));
-    shader_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(shader_config);
-    Window::GetInstance().GetGraphics(window_id_)->renderer()->ApplyShader(shader_);
-    auto view = glm::lookAt(
-        glm::vec3(0.0f, 0.0f, 10.0f),
-        glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, 1.0f, 0.0f)
-    );
-    Window::GetInstance().GetGraphics(window_id_)->renderer()->UpdateShaderResourceData(shader_,
-                                                                                        "uView",
-                                                                                        Data::Create(glm::value_ptr(view),
-                                                                                                     sizeof(view)));
-    auto projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 1.0f, 100.0f);
-    Window::GetInstance().GetGraphics(window_id_)->renderer()->UpdateShaderResourceData(shader_,
-                                                                                        "uProjection",
-                                                                                        Data::Create(glm::value_ptr(
-                                                                                            projection),
-                                                                                                     sizeof(projection)));
+    IO::GetInstance().Read("shader:Phong.shader", [&](Location location, IOStatus status, DataPtr data) {
+      if (status == IOStatus::kSuccess) {
+        shader_ = Shader::Parse(window_id_, data);
+        auto view = glm::lookAt(glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        shader_->UpdateResourceData("uView", Data::Create(glm::value_ptr(view), sizeof(view)));
+        auto projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 1.0f, 100.0f);
+        shader_->UpdateResourceData("uProjection", Data::Create(glm::value_ptr(projection), sizeof(projection)));
+
+        load_mesh();
+      }
+    });
   }
 
   void load_sampler() {
@@ -151,7 +81,7 @@ class ShapeSample : public ApplicationDelegate, WindowDelegate {
   }
 
   void load_texture() {
-    IO::GetInstance().Read("texture:test.jpg", [&](Location location, IOStatus status, DataPtr data) {
+    IO::GetInstance().Read("texture:The_Var_department.jpg", [&](Location location, IOStatus status, DataPtr data) {
       if (status == IOStatus::kSuccess) {
         int width, height, components;
         stbi_set_unpremultiply_on_load(1);
@@ -159,8 +89,7 @@ class ShapeSample : public ApplicationDelegate, WindowDelegate {
         auto result = stbi_info_from_memory(reinterpret_cast<const stbi_uc *>(data->buffer()),
                                             static_cast<int>(data->size()),
                                             &width, &height, &components);
-        if (result == 1 && width > 0 && height > 0)
-        {
+        if (result == 1 && width > 0 && height > 0) {
           auto buffer = stbi_load_from_memory(reinterpret_cast<const stbi_uc *>(data->buffer()),
                                               static_cast<int>(data->size()),
                                               &width, &height, &components, STBI_rgb_alpha);
@@ -180,12 +109,11 @@ class ShapeSample : public ApplicationDelegate, WindowDelegate {
 
   void load_mesh() {
     VertexLayout layout;
-    layout.AddElement(VertexElementSemantic::kPosition, VertexElementFormat::kFloat3)
-          .AddElement(VertexElementSemantic::kTexcoord0, VertexElementFormat::kFloat2);
+    layout.AddElement(VertexElementSemantic::kPosition, VertexElementFormat::kFloat3);
+    layout.AddElement(VertexElementSemantic::kTexcoord0, VertexElementFormat::kFloat2);
+    layout.AddElement(VertexElementSemantic::kNormal, VertexElementFormat::kFloat3);
 
     cube_mesh_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(MeshUtil::Cube().config());
-
-    plane_mesh_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(MeshUtil::Plane().config());
 
     sphere_mesh_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(MeshUtil::Sphere(sphere_division_).config());
 
@@ -193,7 +121,9 @@ class ShapeSample : public ApplicationDelegate, WindowDelegate {
 
     cylinder_mesh_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(MeshUtil::Cylinder(cylinder_division_).config());
 
-    auto pipeline_config = PipelineConfig::ShaderWithLayout(shader_, layout);
+    plane_mesh_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(MeshUtil::Plane().config());
+
+    auto pipeline_config = PipelineConfig::ShaderWithLayout(shader_->GetResourceID(), layout);
     pipeline_config.depth_stencil_state.depth_enable = true;
     pipeline_config.depth_stencil_state.depth_write_enable = true;
     pipeline_config.rasterizer_state.cull_face_enable = true;
@@ -201,16 +131,18 @@ class ShapeSample : public ApplicationDelegate, WindowDelegate {
   }
 
   void draw() {
+    if (shader_ == nullptr) return;
+    
     auto now = eastl::chrono::high_resolution_clock::now();
     auto time = eastl::chrono::duration_cast<eastl::chrono::duration<float>>(now - start_time_).count();
 
     auto &renderer = Window::GetInstance().GetGraphics(window_id_)->renderer();
     renderer->ApplyTarget(kInvalidResourceID, ClearState::ClearAll());
-    renderer->ApplyShader(shader_);
-
+    
     renderer->ApplyPipeline(pipeline_);
-    renderer->UpdateShaderResourceTexture(shader_, "uTexture", texture_);
-    renderer->UpdateShaderResourceSampler(shader_, "uTexture", sampler_);
+    
+    shader_->UpdateResourceTexture("uTexture", texture_);
+    shader_->UpdateResourceSampler("uTexture", sampler_);
 
     glm::mat4 rotation;
     rotation = glm::rotate(rotation, 0.3f * time * glm::radians(180.0f), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -220,31 +152,31 @@ class ShapeSample : public ApplicationDelegate, WindowDelegate {
     renderer->ApplyMesh(cube_mesh_);
     const auto cube_translate = glm::translate(glm::mat4(), glm::vec3(-3.5f, 1.5f, 0.0f));
     auto cube_model = cube_translate * rotation;
-    renderer->UpdateShaderResourceData(shader_, "uModel", Data::Create(glm::value_ptr(cube_model), sizeof(cube_model)));
+    shader_->UpdateResourceData("uModel", Data::Create(glm::value_ptr(cube_model), sizeof(cube_model)));
     renderer->Draw(DrawCallState::Triangles(36));
 
     renderer->ApplyMesh(sphere_mesh_);
     const auto sphere_translate = glm::translate(glm::mat4(), glm::vec3(0.0f, 1.5f, 0.0f));
     auto sphere_model = sphere_translate * rotation;
-    renderer->UpdateShaderResourceData(shader_, "uModel", Data::Create(glm::value_ptr(sphere_model), sizeof(sphere_model)));
+    shader_->UpdateResourceData("uModel", Data::Create(glm::value_ptr(sphere_model), sizeof(sphere_model)));
     renderer->Draw(DrawCallState::Triangles(6 * 6 * sphere_division_ * sphere_division_));
 
     renderer->ApplyMesh(capsule_mesh_);
     const auto capsule_translate = glm::translate(glm::mat4(), glm::vec3(3.5f, 1.5f, 0.0f));
     auto capsule_model = capsule_translate * rotation;
-    renderer->UpdateShaderResourceData(shader_, "uModel", Data::Create(glm::value_ptr(capsule_model), sizeof(capsule_model)));
+    shader_->UpdateResourceData("uModel", Data::Create(glm::value_ptr(capsule_model), sizeof(capsule_model)));
     renderer->Draw(DrawCallState::Triangles(6 * 6 * capsule_division_ * capsule_division_ + 4 * 6 * capsule_division_));
 
     renderer->ApplyMesh(cylinder_mesh_);
     const auto cylinder_translate = glm::translate(glm::mat4(), glm::vec3(-2.0f, -1.5f, 0.0f));
     auto cylinder_model = cylinder_translate * rotation;
-    renderer->UpdateShaderResourceData(shader_, "uModel", Data::Create(glm::value_ptr(cylinder_model), sizeof(cylinder_model)));
+    shader_->UpdateResourceData("uModel", Data::Create(glm::value_ptr(cylinder_model), sizeof(cylinder_model)));
     renderer->Draw(DrawCallState::Triangles(12 * cylinder_division_));
 
     renderer->ApplyMesh(plane_mesh_);
     const auto plane_translate = glm::translate(glm::mat4(), glm::vec3(2.0f, -1.5f, 0.0f));
     auto plane_model = plane_translate * rotation;
-    renderer->UpdateShaderResourceData(shader_, "uModel", Data::Create(glm::value_ptr(plane_model), sizeof(plane_model)));
+    shader_->UpdateResourceData("uModel", Data::Create(glm::value_ptr(plane_model), sizeof(plane_model)));
     renderer->Draw(DrawCallState::Triangles(6));
 
     renderer->Render();
@@ -257,7 +189,8 @@ class ShapeSample : public ApplicationDelegate, WindowDelegate {
 
   eastl::chrono::time_point<eastl::chrono::high_resolution_clock> start_time_;
 
-  ResourceID shader_{kInvalidResourceID};
+  ShaderPtr shader_;
+
   ResourceID texture_{kInvalidResourceID};
   ResourceID sampler_{kInvalidResourceID};
 

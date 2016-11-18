@@ -4,23 +4,23 @@
 #include "graphics/GraphicsDefine.h"
 #include "graphics/GraphicsResourceSignature.h"
 
-#include "core/Data.h"
+#include <EASTL/string.h>
 
 namespace xEngine {
 
 struct ShaderConfig {
 
-  static ShaderConfig FromData(DataPtr vertex, DataPtr fragment);
+  static ShaderConfig FromString(const eastl::string &vertex, const eastl::string &fragment);
 
   ResourceIdentity identity{ResourceIdentity::Shared(ShaderSignature)};
 
-  DataPtr vertex;
+  eastl::string vertex;
 
-  DataPtr fragment;
+  eastl::string fragment;
 
 };
 
-inline ShaderConfig ShaderConfig::FromData(DataPtr vertex, DataPtr fragment) {
+inline ShaderConfig ShaderConfig::FromString(const eastl::string &vertex, const eastl::string &fragment) {
   ShaderConfig config;
   config.vertex = vertex;
   config.fragment = fragment;

@@ -492,6 +492,9 @@ void OpenGLRenderer::ResetMesh() {
 }
 
 void OpenGLRenderer::Draw(const DrawCallState &state) {
+  if (cache_.program_id == 0) return;
+  if (cache_.vertex_buffer == 0) return;
+  if (cache_.vertex_array == 0) return;
   if (cache_.index_type == IndexFormat::kNone) {
     glDrawArrays(GLEnumForVertexTopology(state.topology),
                  static_cast<GLint>(state.first),

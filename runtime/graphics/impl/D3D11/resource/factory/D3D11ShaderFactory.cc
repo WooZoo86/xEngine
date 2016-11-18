@@ -142,8 +142,8 @@ void D3D11ShaderFactory::Create(D3D11Shader &resource) {
     return;
   }
 
-  auto vertex_blob = CompileShader("vs_5_0", static_cast<const char *>(resource.config().vertex->buffer()));
-  auto fragment_blob = CompileShader("ps_5_0", static_cast<const char *>(resource.config().fragment->buffer()));
+  auto vertex_blob = CompileShader("vs_5_0", resource.config().vertex.c_str());
+  auto fragment_blob = CompileShader("ps_5_0", resource.config().fragment.c_str());
 
   ID3D11VertexShader *vertex_shader = nullptr;
   ID3D11PixelShader *fragment_shader = nullptr;

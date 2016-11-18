@@ -130,7 +130,7 @@ void NuklearGUI::Initialize(NuklearGUIConfig config) {
 
   sampler_ = graphics_->resource_manager()->Create(SamplerConfig());
 
-  auto shader_config = ShaderConfig::FromData(Data::Create(vertex_shader, strlen(vertex_shader) + 1), Data::Create(fragment_shader, strlen(fragment_shader) + 1));
+  auto shader_config = ShaderConfig::FromString(vertex_shader, fragment_shader);
   shader_ = graphics_->resource_manager()->Create(shader_config);
 
   MeshConfig mesh_config;

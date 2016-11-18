@@ -127,7 +127,7 @@ class MeshSample : public ApplicationDelegate, WindowDelegate {
 
  private:
   void load_shader() {
-    auto shader_config = ShaderConfig::FromData(Data::Create(vertex_shader, strlen(vertex_shader) + 1), Data::Create(fragment_shader, strlen(fragment_shader) + 1));
+    auto shader_config = ShaderConfig::FromString(vertex_shader, fragment_shader);
     shader_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(shader_config);
   }
 

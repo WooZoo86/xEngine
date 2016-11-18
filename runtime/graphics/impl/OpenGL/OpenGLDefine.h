@@ -36,7 +36,7 @@ struct OpenGLRendererCache {
 
   GLuint frame_buffer{0};
 
-  GLuint program_id;
+  GLuint program_id{0};
 
   GLuint vertex_buffer{0};
   GLuint vertex_array{0};
