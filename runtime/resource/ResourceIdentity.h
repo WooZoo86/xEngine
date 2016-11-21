@@ -2,7 +2,6 @@
 #define XENGINE_RESOURCE_RESOURCENAME_H
 
 #include "core/Core.h"
-#include "core/Counter.h"
 #include "core/Types.h"
 
 #include <EASTL/string.h>
@@ -16,6 +15,11 @@ enum: ResourceSignature {
   kDefaultSignature = 0x7fffffff,
   kUniqueSignature = 0xffffffff,
 };
+
+inline ResourceSignature GenerateResourceSignature() {
+  static ResourceSignature last_resource_signature = kUniqueSignature;
+  return ++last_resource_signature;
+}
 
 class ResourceIdentity {
  public:
@@ -91,12 +95,6 @@ class ResourceIdentity {
   eastl::string name_;
   ResourceSignature signature_{kDefaultSignature};
 };
-
-struct ResourceSignatureCounter {};
-
-#define GetResourceSignature() COUNTER_READ(ResourceSignatureCounter)
-
-#define IncreaseResourceSignatureCounter() COUNTER_INC(ResourceSignatureCounter)
 
 } // namespace xEngine
 

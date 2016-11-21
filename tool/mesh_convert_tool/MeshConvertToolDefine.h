@@ -62,4 +62,4 @@ class MeshConvertTool : public ApplicationDelegate {
 
 } // namespace xEngine
 
-#endif XENGINE_TOOL_MESHCONVERTTOOL_MESHCONVERTTOOLDEFINE_H
+#endif // XENGINE_TOOL_MESHCONVERTTOOL_MESHCONVERTTOOLDEFINE_H

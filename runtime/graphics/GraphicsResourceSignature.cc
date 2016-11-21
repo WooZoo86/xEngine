@@ -2,22 +2,16 @@
 
 namespace xEngine {
 
-IncreaseResourceSignatureCounter();
-const ResourceSignature TextureSignature = GetResourceSignature();
+const ResourceSignature TextureSignature = GenerateResourceSignature();
 
-IncreaseResourceSignatureCounter();
-const ResourceSignature ShaderSignature = GetResourceSignature();
+const ResourceSignature ShaderSignature = GenerateResourceSignature();
 
-IncreaseResourceSignatureCounter();
-const ResourceSignature MeshSignature = GetResourceSignature();
+const ResourceSignature MeshSignature = GenerateResourceSignature();
 
-IncreaseResourceSignatureCounter();
-const ResourceSignature PipelineSignature = GetResourceSignature();
+const ResourceSignature PipelineSignature = GenerateResourceSignature();
 
-IncreaseResourceSignatureCounter();
-const ResourceSignature SamplerSignature = GetResourceSignature();
+const ResourceSignature SamplerSignature = GenerateResourceSignature();
 
-IncreaseResourceSignatureCounter();
-const ResourceSignature UniformBufferSignature = GetResourceSignature();
+const ResourceSignature UniformBufferSignature = GenerateResourceSignature();
 
 } // namespace xEngine

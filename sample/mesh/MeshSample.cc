@@ -79,6 +79,8 @@ class MeshSample : public ApplicationDelegate, WindowDelegate {
     IO::GetInstance().Initialize();
     IO::GetInstance().AddPlaceholder("texture", "storage://" +
         Path::GetCurrentDirectory().ParentDirectory().Append("assets").Append("texture").string() + Path::separator());
+    IO::GetInstance().AddPlaceholder("mesh", "storage://" +
+        Path::GetCurrentDirectory().ParentDirectory().Append("assets").Append("mesh").string() + Path::separator());
     IO::GetInstance().RegisterFilesystem("storage", StorageFilesystem::Creator);
 
     load_shader();
@@ -122,7 +124,7 @@ class MeshSample : public ApplicationDelegate, WindowDelegate {
   }
 
   virtual void OnWindowMouseScroll(const glm::vec2 &offset) override {
-    camera_->Zoom(offset.y / 50.0f);
+    camera_->set_zoom(camera_->zoom() + offset.y / 10.0f);
   }
 
  private:
@@ -133,13 +135,12 @@ class MeshSample : public ApplicationDelegate, WindowDelegate {
 
   void load_camera() {
     camera_ = Camera::CreateUnique();
+    camera_->set_render_window(window_id_);
     camera_->set_position(glm::vec3(0.0f, 0.0f, 3.0f));
     camera_->set_target(glm::vec3(0.0f, 0.0f, 0.0f));
     camera_->set_up_direction(glm::vec3(0.0f, 1.0f, 0.0f));
 
     auto &renderer = Window::GetInstance().GetGraphics(window_id_)->renderer();
-    auto projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 1.0f, 1000.0f);
-    renderer->UpdateShaderResourceData(shader_, "uProjection", Data::Create(glm::value_ptr(projection), sizeof(projection)));
     renderer->UpdateShaderResourceData(shader_, "uModel", Data::Create(glm::value_ptr(glm::mat4()), sizeof(glm::mat4)));
   }
 
@@ -173,7 +174,8 @@ class MeshSample : public ApplicationDelegate, WindowDelegate {
     renderer->ApplyShader(shader_);
     renderer->ApplyPipeline(pipeline_);
 
-    renderer->UpdateShaderResourceData(shader_, "uView", Data::Create(glm::value_ptr(camera_->matrix()), sizeof(glm::mat4)));
+    renderer->UpdateShaderResourceData(shader_, "uProjection", Data::Create(glm::value_ptr(camera_->projection_matrix()), sizeof(glm::mat4)));
+    renderer->UpdateShaderResourceData(shader_, "uView", Data::Create(glm::value_ptr(camera_->view_matrix()), sizeof(glm::mat4)));
 
     for (auto tuple : mesh_) {
       auto id = eastl::get<0>(tuple);

@@ -56,8 +56,8 @@ void MeshConverter::Convert(const eastl::string &in, const eastl::string &out) {
 }
 
 void MeshConverter::ProcessMeshConfig(MeshInfo &info, FbxMesh *mesh) {
-  info.mesh_util.config().vertex_count = mesh->GetControlPointsCount();
-  info.mesh_util.config().index_count = mesh->GetPolygonCount() * 3;
+  info.mesh_util.config().vertex_count = static_cast<size_t>(mesh->GetControlPointsCount());
+  info.mesh_util.config().index_count = static_cast<size_t>(mesh->GetPolygonCount() * 3);
   info.mesh_util.config().index_type = mesh->GetPolygonCount() * 3 > eastl::numeric_limits<uint16>::max() ? IndexFormat::kUint32 : IndexFormat::kUint16;
 
   info.mesh_util.config().layout.AddElement(VertexElementSemantic::kPosition, VertexElementFormat::kFloat3);
@@ -113,7 +113,11 @@ void MeshConverter::ProcessMeshConfig(MeshInfo &info, FbxMesh *mesh) {
 void MeshConverter::ProcessMeshVertexPosition(MeshInfo &info, FbxMesh *mesh) {
   for (auto index = 0; index < mesh->GetControlPointsCount(); ++index) {
     auto position = mesh->GetControlPointAt(index);
-    info.mesh_util.Vertex(VertexElementSemantic::kPosition, index, position[0], position[1], position[2]);
+    info.mesh_util.Vertex(VertexElementSemantic::kPosition,
+                          static_cast<size_t>(index),
+                          static_cast<float32>(position[0]),
+                          static_cast<float32>(position[1]),
+                          static_cast<float32>(position[2]));
   }
 }
 
@@ -131,13 +135,13 @@ void MeshConverter::ProcessMeshVertexTexcoord(MeshInfo &info, FbxMesh *mesh) {
       case FbxGeometryElement::eDirect: {
         for (auto index = 0; index < mesh->GetControlPointsCount(); ++index) {
           auto uv = uv_layer->GetDirectArray().GetAt(index);
-          info.mesh_util.Vertex(semantic, index, uv[0], uv[1]);
+          info.mesh_util.Vertex(semantic, static_cast<size_t>(index), static_cast<float32>(uv[0]), static_cast<float32>(uv[1]));
         }
       }
       case FbxGeometryElement::eIndexToDirect: {
         for (auto index = 0; index < mesh->GetControlPointsCount(); ++index) {
           auto uv = uv_layer->GetDirectArray().GetAt(uv_layer->GetIndexArray().GetAt(index));
-          info.mesh_util.Vertex(semantic, index, uv[0], uv[1]);
+          info.mesh_util.Vertex(semantic, static_cast<size_t>(index), static_cast<float32>(uv[0]), static_cast<float32>(uv[1]));
         }
       }
       default: break;
@@ -152,7 +156,7 @@ void MeshConverter::ProcessMeshVertexTexcoord(MeshInfo &info, FbxMesh *mesh) {
           for (auto position_index = 0; position_index < mesh->GetPolygonSize(polygon_index); ++position_index) {
             auto uv = uv_layer->GetDirectArray().GetAt(mesh->GetTextureUVIndex(polygon_index, position_index));
             auto index = mesh->GetPolygonVertex(polygon_index, position_index);
-            info.mesh_util.Vertex(semantic, index, uv[0], uv[1]);
+            info.mesh_util.Vertex(semantic, static_cast<size_t>(index), static_cast<float32>(uv[0]), static_cast<float32>(uv[1]));
           }
         }
       }
@@ -176,14 +180,18 @@ void MeshConverter::ProcessMeshIndex(MeshInfo &info, FbxMesh *mesh) {
   info.mesh_util.BeginIndex();
   for (auto polygon_index = 0; polygon_index < mesh->GetPolygonCount(); ++polygon_index) {
     auto vertex_count = mesh->GetPolygonSize(polygon_index);
-    if (vertex_count != 3) continue;
+    if (vertex_count == 0) continue;
+    if (vertex_count == 1 && remove_topology_flag.point) continue;
+    if (vertex_count == 2 && remove_topology_flag.line) continue;
+    if (vertex_count == 3 && remove_topology_flag.triangle) continue;
+    if (vertex_count > 3 && remove_topology_flag.polygon) continue;
     for (auto position_index = 0; position_index < vertex_count; ++position_index) {
       auto index = mesh->GetPolygonVertex(polygon_index, position_index);
       if (info.mesh_util.config().index_type == IndexFormat::kUint16) {
-        info.mesh_util.Index16(index);
+        info.mesh_util.Index16(static_cast<uint16>(index));
       }
       else {
-        info.mesh_util.Index32(index);
+        info.mesh_util.Index32(static_cast<uint32>(index));
       }
     }
   }

@@ -4,23 +4,17 @@
 
 namespace xEngine {
 
-IncreaseResourcePoolIDCounter();
-static const ResourcePoolID g_opengl_shader_resource_pool_id = GetResourcePoolID();
+static const ResourcePoolID g_opengl_shader_resource_pool_id = GenerateResourcePoolID();
 
-IncreaseResourcePoolIDCounter();
-static const ResourcePoolID g_opengl_texture_resource_pool_id = GetResourcePoolID();
+static const ResourcePoolID g_opengl_texture_resource_pool_id = GenerateResourcePoolID();
 
-IncreaseResourcePoolIDCounter();
-static const ResourcePoolID g_opengl_mesh_resource_pool_id = GetResourcePoolID();
+static const ResourcePoolID g_opengl_mesh_resource_pool_id = GenerateResourcePoolID();
 
-IncreaseResourcePoolIDCounter();
-static const ResourcePoolID g_opengl_pipeline_resource_pool_id = GetResourcePoolID();
+static const ResourcePoolID g_opengl_pipeline_resource_pool_id = GenerateResourcePoolID();
 
-IncreaseResourcePoolIDCounter();
-static const ResourcePoolID g_opengl_sampler_resource_pool_id = GetResourcePoolID();
+static const ResourcePoolID g_opengl_sampler_resource_pool_id = GenerateResourcePoolID();
 
-IncreaseResourcePoolIDCounter();
-static const ResourcePoolID g_opengl_uniform_buffer_resource_pool_id = GetResourcePoolID();
+static const ResourcePoolID g_opengl_uniform_buffer_resource_pool_id = GenerateResourcePoolID();
 
 void OpenGLGraphicsResourceManager::Initialize(const GraphicsConfig &config) {
   shader_pool_.Initialize(config.shader_pool_size, g_opengl_shader_resource_pool_id);
@@ -33,55 +27,43 @@ void OpenGLGraphicsResourceManager::Initialize(const GraphicsConfig &config) {
 
 void OpenGLGraphicsResourceManager::Finalize() {
   for (auto &id : resource_id_cache_) {
-    switch (GetResourcePoolIDOfResourceID(id)) {
-      case g_opengl_shader_resource_pool_id: {
-        auto &resource = shader_pool_.Find(id);
-        if (resource.status() != ResourceStatus::kInvalid) {
-          shader_factory_.Destroy(resource);
-        }
-        shader_pool_.Destroy(id);
-        break;
+    auto pool_id = GetResourcePoolIDOfResourceID(id);
+    if (pool_id == g_opengl_shader_resource_pool_id) {
+      auto &resource = shader_pool_.Find(id);
+      if (resource.status() != ResourceStatus::kInvalid) {
+        shader_factory_.Destroy(resource);
       }
-      case g_opengl_texture_resource_pool_id: {
-        auto &resource = texture_pool_.Find(id);
-        if (resource.status() != ResourceStatus::kInvalid) {
-          texture_factory_.Destroy(resource);
-        }
-        texture_pool_.Destroy(id);
-        break;
+      shader_pool_.Destroy(id);
+    } else if (pool_id == g_opengl_texture_resource_pool_id) {
+      auto &resource = texture_pool_.Find(id);
+      if (resource.status() != ResourceStatus::kInvalid) {
+        texture_factory_.Destroy(resource);
       }
-      case g_opengl_mesh_resource_pool_id: {
-        auto &resource = mesh_pool_.Find(id);
-        if (resource.status() != ResourceStatus::kInvalid) {
-          mesh_factory_.Destroy(resource);
-        }
-        mesh_pool_.Destroy(id);
-        break;
+      texture_pool_.Destroy(id);
+    } else if (pool_id == g_opengl_mesh_resource_pool_id) {
+      auto &resource = mesh_pool_.Find(id);
+      if (resource.status() != ResourceStatus::kInvalid) {
+        mesh_factory_.Destroy(resource);
       }
-      case g_opengl_pipeline_resource_pool_id: {
-        auto &resource = pipeline_pool_.Find(id);
-        if (resource.status() != ResourceStatus::kInvalid) {
-          pipeline_factory_.Destroy(resource);
-        }
-        pipeline_pool_.Destroy(id);
-        break;
+      mesh_pool_.Destroy(id);
+    } else if (pool_id == g_opengl_pipeline_resource_pool_id) {
+      auto &resource = pipeline_pool_.Find(id);
+      if (resource.status() != ResourceStatus::kInvalid) {
+        pipeline_factory_.Destroy(resource);
       }
-      case g_opengl_sampler_resource_pool_id: {
-        auto &resource = sampler_pool_.Find(id);
-        if (resource.status() != ResourceStatus::kInvalid) {
-          sampler_factory_.Destroy(resource);
-        }
-        sampler_pool_.Destroy(id);
-        break;
+      pipeline_pool_.Destroy(id);
+    } else if (pool_id == g_opengl_sampler_resource_pool_id) {
+      auto &resource = sampler_pool_.Find(id);
+      if (resource.status() != ResourceStatus::kInvalid) {
+        sampler_factory_.Destroy(resource);
       }
-      case g_opengl_uniform_buffer_resource_pool_id: {
-        auto &resource = uniform_buffer_pool_.Find(id);
-        if (resource.status() != ResourceStatus::kInvalid) {
-          uniform_buffer_factory_.Destroy(resource);
-        }
-        uniform_buffer_pool_.Destroy(id);
-        break;
+      sampler_pool_.Destroy(id);
+    } else if (pool_id == g_opengl_uniform_buffer_resource_pool_id) {
+      auto &resource = uniform_buffer_pool_.Find(id);
+      if (resource.status() != ResourceStatus::kInvalid) {
+        uniform_buffer_factory_.Destroy(resource);
       }
+      uniform_buffer_pool_.Destroy(id);
     }
   }
   shader_pool_.Finalize();
@@ -142,55 +124,43 @@ ResourceID OpenGLGraphicsResourceManager::Create(const UniformBufferConfig &conf
 }
 
 void OpenGLGraphicsResourceManager::Destroy(ResourceID id) {
-  switch (GetResourcePoolIDOfResourceID(id)) {
-    case g_opengl_shader_resource_pool_id: {
-      auto &resource = shader_pool_.Find(id);
-      if (resource.status() != ResourceStatus::kInvalid) {
-        shader_factory_.Destroy(resource);
-      }
-      shader_pool_.Destroy(id);
-      break;
+  auto pool_id = GetResourcePoolIDOfResourceID(id);
+  if (pool_id == g_opengl_shader_resource_pool_id) {
+    auto &resource = shader_pool_.Find(id);
+    if (resource.status() != ResourceStatus::kInvalid) {
+      shader_factory_.Destroy(resource);
     }
-    case g_opengl_texture_resource_pool_id: {
-      auto &resource = texture_pool_.Find(id);
-      if (resource.status() != ResourceStatus::kInvalid) {
-        texture_factory_.Destroy(resource);
-      }
-      texture_pool_.Destroy(id);
-      break;
+    shader_pool_.Destroy(id);
+  } else if (pool_id == g_opengl_texture_resource_pool_id) {
+    auto &resource = texture_pool_.Find(id);
+    if (resource.status() != ResourceStatus::kInvalid) {
+      texture_factory_.Destroy(resource);
     }
-    case g_opengl_mesh_resource_pool_id: {
-      auto &resource = mesh_pool_.Find(id);
-      if (resource.status() != ResourceStatus::kInvalid) {
-        mesh_factory_.Destroy(resource);
-      }
-      mesh_pool_.Destroy(id);
-      break;
+    texture_pool_.Destroy(id);
+  } else if (pool_id == g_opengl_mesh_resource_pool_id) {
+    auto &resource = mesh_pool_.Find(id);
+    if (resource.status() != ResourceStatus::kInvalid) {
+      mesh_factory_.Destroy(resource);
     }
-    case g_opengl_pipeline_resource_pool_id: {
-      auto &resource = pipeline_pool_.Find(id);
-      if (resource.status() != ResourceStatus::kInvalid) {
-        pipeline_factory_.Destroy(resource);
-      }
-      pipeline_pool_.Destroy(id);
-      break;
+    mesh_pool_.Destroy(id);
+  } else if (pool_id == g_opengl_pipeline_resource_pool_id) {
+    auto &resource = pipeline_pool_.Find(id);
+    if (resource.status() != ResourceStatus::kInvalid) {
+      pipeline_factory_.Destroy(resource);
     }
-    case g_opengl_sampler_resource_pool_id: {
-      auto &resource = sampler_pool_.Find(id);
-      if (resource.status() != ResourceStatus::kInvalid) {
-        sampler_factory_.Destroy(resource);
-      }
-      sampler_pool_.Destroy(id);
-      break;
+    pipeline_pool_.Destroy(id);
+  } else if (pool_id == g_opengl_sampler_resource_pool_id) {
+    auto &resource = sampler_pool_.Find(id);
+    if (resource.status() != ResourceStatus::kInvalid) {
+      sampler_factory_.Destroy(resource);
     }
-    case g_opengl_uniform_buffer_resource_pool_id: {
-      auto &resource = uniform_buffer_pool_.Find(id);
-      if (resource.status() != ResourceStatus::kInvalid) {
-        uniform_buffer_factory_.Destroy(resource);
-      }
-      uniform_buffer_pool_.Destroy(id);
-      break;
+    sampler_pool_.Destroy(id);
+  } else if (pool_id == g_opengl_uniform_buffer_resource_pool_id) {
+    auto &resource = uniform_buffer_pool_.Find(id);
+    if (resource.status() != ResourceStatus::kInvalid) {
+      uniform_buffer_factory_.Destroy(resource);
     }
+    uniform_buffer_pool_.Destroy(id);
   }
   Remove(id);
 }
