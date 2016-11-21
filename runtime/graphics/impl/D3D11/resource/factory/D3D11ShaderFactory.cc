@@ -136,12 +136,6 @@ void D3D11ShaderFactory::Create(D3D11Shader &resource) {
   x_assert(resource.status() == ResourceStatus::kPending);
   resource.Loading();
 
-  if (resource.config().vertex == nullptr || resource.config().fragment == nullptr) {
-    Log::GetInstance().Error("vertex or fragment is nullptr\n");
-    resource.Failed();
-    return;
-  }
-
   auto vertex_blob = CompileShader("vs_5_0", resource.config().vertex.c_str());
   auto fragment_blob = CompileShader("ps_5_0", resource.config().fragment.c_str());
 

@@ -4,6 +4,9 @@
 
 #if X_WINDOWS
 #include <direct.h>
+#ifndef S_ISDIR
+#define S_ISDIR(x) (((x) &_S_IFMT) == _S_IFDIR)
+#endif
 #else
 #include <unistd.h>
 #endif
@@ -39,7 +42,11 @@ void Path::CreateFile(const eastl::string &path) {
 }
 
 void Path::CreateDirectory(const eastl::string &path) {
-  mkdir(path.c_str(), 0644);
+  mkdir(path.c_str()
+#if !X_WINDOWS
+    , 0644
+#endif
+  );
 }
 
 void Path::Delete(const eastl::string &path) {
