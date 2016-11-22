@@ -53,6 +53,7 @@ void Graphics::Initialize(const GraphicsConfig &config) {
 void Graphics::Finalize() {
   x_assert(Available());
   config_ = GraphicsConfig();
+  renderer_->MakeCurrent();
   resource_manager_->Finalize();
   renderer_->Finalize();
   resource_manager_.reset();

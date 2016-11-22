@@ -92,6 +92,7 @@ void NuklearGUI::Initialize(NuklearGUIConfig config) {
   window_ = Window::GetInstance().Get(gui_config_.window).get();
   x_assert(window_ && window_->graphics());
   graphics_ = window_->graphics().get();
+  graphics_->renderer()->MakeCurrent();
 
   static const nk_draw_vertex_layout_element vertex_layout[] = {
       {NK_VERTEX_POSITION, NK_FORMAT_FLOAT, offsetof(vertex_struct, position)},
@@ -174,6 +175,7 @@ void NuklearGUI::Initialize(NuklearGUIConfig config) {
 
 void NuklearGUI::Finalize() {
   x_assert(Available());
+  graphics_->renderer()->MakeCurrent();
   graphics_->resource_manager()->Destroy(sampler_);
   graphics_->resource_manager()->Destroy(shader_);
   graphics_->resource_manager()->Destroy(mesh_);
@@ -212,6 +214,7 @@ void NuklearGUI::EndFrame() {
   nk_buffer_clear(&vertex_buffer);
   nk_buffer_clear(&index_buffer);
   nk_convert(&context_, &command, &vertex_buffer, &index_buffer, &config_);
+  graphics_->renderer()->MakeCurrent();
   graphics_->renderer()->ApplyPipeline(pipeline_);
   graphics_->renderer()->UpdateMesh(mesh_, vertex_data, index_data);
   graphics_->renderer()->UpdateShaderResourceData(shader_, "uProjectionMatrix", Data::Create(glm::value_ptr(matrix), sizeof(matrix)));
