@@ -7,6 +7,12 @@
 
 #include <glm.hpp>
 
+#pragma push_macro("near")
+#pragma push_macro("far")
+
+#undef near
+#undef far
+
 namespace xEngine {
 
 enum class CameraType {
@@ -96,5 +102,8 @@ class Camera {
 PTR_DECLARE(Camera)
 
 } // namespace xEngine
+
+#pragma pop_macro("near")
+#pragma pop_macro("far")
 
 #endif // XENGINE_ASSET_GRAPHICS_CAMERA_H
