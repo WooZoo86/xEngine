@@ -35,18 +35,26 @@ void MeshConverter::Convert(const eastl::string &in, const eastl::string &out) {
     return;
   }
   if (!importer->Initialize(in.c_str(), -1, io_setting)) {
-    Log::GetInstance().Error("unable to initialize FBX importer, file: %s, error: %s\n", in.c_str(), importer->GetStatus().GetErrorString());
+    Log::GetInstance().Error("unable to initialize FBX importer, file: %s, error: %s\n",
+                             in.c_str(),
+                             importer->GetStatus().GetErrorString());
     return;
   }
   if (!importer->Import(scene)) {
-    Log::GetInstance().Error("unable to import FBX scene, file: %s, error: %s\n", in.c_str(), importer->GetStatus().GetErrorString());
+    Log::GetInstance().Error("unable to import FBX scene, file: %s, error: %s\n",
+                             in.c_str(),
+                             importer->GetStatus().GetErrorString());
     return;
   }
   importer->Destroy();
+
   if (post_process_flag.triangulate) {
     FbxGeometryConverter converter(manager);
     converter.Triangulate(scene, true);
   }
+
+  FbxAxisSystem::OpenGL.ConvertScene(scene);
+
   Context context;
   context.file = out;
   ProcessNode(context, scene->GetRootNode());
@@ -57,8 +65,20 @@ void MeshConverter::Convert(const eastl::string &in, const eastl::string &out) {
 
 void MeshConverter::ProcessMeshConfig(MeshInfo &info, FbxMesh *mesh) {
   info.mesh_util.config().vertex_count = static_cast<size_t>(mesh->GetControlPointsCount());
-  info.mesh_util.config().index_count = static_cast<size_t>(mesh->GetPolygonCount() * 3);
-  info.mesh_util.config().index_type = mesh->GetPolygonCount() * 3 > eastl::numeric_limits<uint16>::max() ? IndexFormat::kUint32 : IndexFormat::kUint16;
+
+  for (auto polygon_index = 0; polygon_index < mesh->GetPolygonCount(); ++polygon_index) {
+    auto vertex_count = mesh->GetPolygonSize(polygon_index);
+    if (vertex_count == 0) continue;
+    if (vertex_count == 1 && remove_topology_flag.point) continue;
+    if (vertex_count == 2 && remove_topology_flag.line) continue;
+    if (vertex_count == 3 && remove_topology_flag.triangle) continue;
+    if (vertex_count > 3 && remove_topology_flag.polygon) continue;
+    info.mesh_util.config().index_count += vertex_count;
+  }
+
+  info.mesh_util.config().index_type = info.mesh_util.config().index_count > eastl::numeric_limits<uint16>::max() ?
+                                       IndexFormat::kUint32 :
+                                       IndexFormat::kUint16;
 
   info.mesh_util.config().layout.AddElement(VertexElementSemantic::kPosition, VertexElementFormat::kFloat3);
 
@@ -127,45 +147,85 @@ void MeshConverter::ProcessMeshVertexTexcoord(MeshInfo &info, FbxMesh *mesh) {
     if (uv_layer_index == 1 && remove_component_flag.texcoord1) continue;
     if (uv_layer_index == 2 && remove_component_flag.texcoord2) continue;
     if (uv_layer_index == 3 && remove_component_flag.texcoord3) continue;
+    if (uv_layer_index > 3) continue;
     auto uv_layer = mesh->GetElementUV(uv_layer_index);
     auto semantic = static_cast<VertexElementSemantic>(static_cast<uint8>(VertexElementSemantic::kTexcoord0) + uv_layer_index);
-    switch (uv_layer->GetMappingMode()) {
-    case FbxGeometryElement::eByControlPoint: {
-      switch (uv_layer->GetReferenceMode()) {
-      case FbxGeometryElement::eDirect: {
-        for (auto index = 0; index < mesh->GetControlPointsCount(); ++index) {
+    if (uv_layer->GetMappingMode() == FbxGeometryElement::eByControlPoint) {
+      for (auto index = 0; index < mesh->GetControlPointsCount(); ++index) {
+        if (uv_layer->GetReferenceMode() == FbxGeometryElement::eDirect) {
           auto uv = uv_layer->GetDirectArray().GetAt(index);
-          info.mesh_util.Vertex(semantic, static_cast<size_t>(index), static_cast<float32>(uv[0]), static_cast<float32>(uv[1]));
-        }
-      }
-      case FbxGeometryElement::eIndexToDirect: {
-        for (auto index = 0; index < mesh->GetControlPointsCount(); ++index) {
+          info.mesh_util.Vertex(semantic,
+                                static_cast<size_t>(index),
+                                static_cast<float32>(uv[0]),
+                                static_cast<float32>(uv[1]));
+        } else if (uv_layer->GetReferenceMode() == FbxGeometryElement::eIndexToDirect) {
           auto uv = uv_layer->GetDirectArray().GetAt(uv_layer->GetIndexArray().GetAt(index));
-          info.mesh_util.Vertex(semantic, static_cast<size_t>(index), static_cast<float32>(uv[0]), static_cast<float32>(uv[1]));
-        }
-      }
-      default: break;
-      }
-      break;
-    }
-    case FbxGeometryElement::eByPolygonVertex: {
-      switch (uv_layer->GetReferenceMode()) {
-      case FbxGeometryElement::eDirect:
-      case FbxGeometryElement::eIndexToDirect: {
-        for (auto polygon_index = 0; polygon_index < mesh->GetPolygonCount(); ++polygon_index) {
-          for (auto position_index = 0; position_index < mesh->GetPolygonSize(polygon_index); ++position_index) {
+          info.mesh_util.Vertex(semantic,
+                                static_cast<size_t>(index),
+                                static_cast<float32>(uv[0]),
+                                static_cast<float32>(uv[1]));
+        } // reference mode
+      } // for control point
+    } else if (uv_layer->GetMappingMode() == FbxGeometryElement::eByPolygonVertex) {
+      for (auto polygon_index = 0; polygon_index < mesh->GetPolygonCount(); ++polygon_index) {
+        for (auto position_index = 0; position_index < mesh->GetPolygonSize(polygon_index); ++position_index) {
+          if (uv_layer->GetReferenceMode() == FbxGeometryElement::eDirect ||
+              uv_layer->GetReferenceMode() == FbxGeometryElement::eIndexToDirect) {
             auto uv = uv_layer->GetDirectArray().GetAt(mesh->GetTextureUVIndex(polygon_index, position_index));
             auto index = mesh->GetPolygonVertex(polygon_index, position_index);
-            info.mesh_util.Vertex(semantic, static_cast<size_t>(index), static_cast<float32>(uv[0]), static_cast<float32>(uv[1]));
-          }
-        }
-      }
-      default: break;
-      }
-      break;
-    }
-    default: break;
-    }
+            info.mesh_util.Vertex(semantic,
+                                  static_cast<size_t>(index),
+                                  static_cast<float32>(uv[0]),
+                                  static_cast<float32>(uv[1]));
+          } // reference mode
+        } // for polygon point
+      } // for polygon
+    } // mapping mode
+  }
+}
+
+void MeshConverter::ProcessMeshVertexNormal(MeshInfo &info, FbxMesh *mesh) {
+  for (auto normal_layer_index = 0; normal_layer_index < mesh->GetElementNormalCount(); ++normal_layer_index) {
+    if (normal_layer_index == 0 && remove_component_flag.normal) continue;
+    if (normal_layer_index > 0) continue;
+    auto normal_layer = mesh->GetElementNormal(normal_layer_index);
+    if (normal_layer->GetMappingMode() == FbxGeometryElement::eByControlPoint) {
+      for (auto index = 0; index < mesh->GetControlPointsCount(); ++index) {
+        if (normal_layer->GetReferenceMode() == FbxGeometryElement::eDirect) {
+          auto normal = normal_layer->GetDirectArray().GetAt(index);
+          info.mesh_util.Vertex(VertexElementSemantic::kNormal,
+                                static_cast<size_t>(index),
+                                static_cast<float32>(normal[0]),
+                                static_cast<float32>(normal[1]),
+                                static_cast<float32>(normal[2]));
+        } // reference mode
+      } // for control point
+    } else if (normal_layer->GetMappingMode() == FbxGeometryElement::eByPolygonVertex) {
+      auto vertex_id = 0;
+      for (auto polygon_index = 0; polygon_index < mesh->GetPolygonCount(); ++polygon_index) {
+        for (auto position_index = 0; position_index < mesh->GetPolygonSize(polygon_index); ++position_index) {
+          auto index = mesh->GetPolygonVertex(polygon_index, position_index);
+          if (normal_layer->GetReferenceMode() == FbxGeometryElement::eDirect) {
+            auto normal = normal_layer->GetDirectArray().GetAt(vertex_id);
+            info.mesh_util.Vertex(VertexElementSemantic::kNormal,
+                                  static_cast<size_t>(index),
+                                  static_cast<float32>(normal[0]),
+                                  static_cast<float32>(normal[1]),
+                                  static_cast<float32>(normal[2]));
+          } else if (normal_layer->GetReferenceMode() == FbxGeometryElement::eIndexToDirect) {
+            auto id = normal_layer->GetIndexArray().GetAt(vertex_id);
+            auto normal = normal_layer->GetDirectArray().GetAt(id);
+            info.mesh_util.Vertex(VertexElementSemantic::kNormal,
+                                  static_cast<size_t>(index),
+                                  static_cast<float32>(normal[0]),
+                                  static_cast<float32>(normal[1]),
+                                  static_cast<float32>(normal[2]));
+
+          } // reference mode
+          ++vertex_id;
+        } // for polygon point
+      } // for polygon
+    } // mapping mode
   }
 }
 
@@ -173,6 +233,7 @@ void MeshConverter::ProcessMeshVertex(MeshInfo &info, FbxMesh *mesh) {
   info.mesh_util.BeginVertex();
   ProcessMeshVertexPosition(info, mesh);
   ProcessMeshVertexTexcoord(info, mesh);
+  ProcessMeshVertexNormal(info, mesh);
   info.mesh_util.EndVertex();
 }
 
@@ -189,8 +250,7 @@ void MeshConverter::ProcessMeshIndex(MeshInfo &info, FbxMesh *mesh) {
       auto index = mesh->GetPolygonVertex(polygon_index, position_index);
       if (info.mesh_util.config().index_type == IndexFormat::kUint16) {
         info.mesh_util.Index16(static_cast<uint16>(index));
-      }
-      else {
+      } else {
         info.mesh_util.Index32(static_cast<uint32>(index));
       }
     }

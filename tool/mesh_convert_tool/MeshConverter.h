@@ -18,6 +18,8 @@ class MeshConverter {
 
   static void ProcessMeshVertexTexcoord(MeshInfo &info, FbxMesh *mesh);
 
+  static void ProcessMeshVertexNormal(MeshInfo &info, FbxMesh *mesh);
+
   static void ProcessMeshVertex(MeshInfo &info, FbxMesh *mesh);
 
   static void ProcessMeshIndex(MeshInfo &info, FbxMesh *mesh);
