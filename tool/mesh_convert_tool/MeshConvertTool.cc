@@ -3,12 +3,20 @@
 #include "MeshViewerWindow.h"
 
 #include <application/ApplicationDelegate.h>
+#include <io/IO.h>
+#include <storage/Storage.h>
 #include <window/Window.h>
 
 namespace xEngine {
 
 void MeshConvertTool::Initialize() {
   Window::GetInstance().Initialize();
+  IO::GetInstance().Initialize();
+  IO::GetInstance().AddPlaceholder("texture", "storage://" +
+      Path::GetCurrentDirectory().ParentDirectory().Append("assets").Append("texture").string() + Path::separator());
+  IO::GetInstance().AddPlaceholder("shader", "storage://" +
+      Path::GetCurrentDirectory().ParentDirectory().Append("assets").Append("shader").string() + Path::separator());
+  IO::GetInstance().RegisterFilesystem("storage", StorageFilesystem::Creator);
   window_ = new MeshConvertToolWindow;
   viewer_ = new MeshViewerWindow;
 }
@@ -16,6 +24,7 @@ void MeshConvertTool::Initialize() {
 void MeshConvertTool::Finalize() {
   delete window_;
   delete viewer_;
+  IO::GetInstance().Finalize();
   Window::GetInstance().Finalize();
 }
 

@@ -20,11 +20,9 @@ class Shader {
  public:
   CREATE_FUNC_DECLARE(Shader)
 
-  Shader();
+  void Initialize();
 
-  ~Shader();
-
-  ResourceID GetResourceID();
+  void Finalize();
 
   void Apply();
 
@@ -36,11 +34,13 @@ class Shader {
 
   void UpdateResourceBlock(const eastl::string &name, ResourceID uniform_buffer_id);
 
+  ResourceID resource_id() const { return resource_id_; }
+
  private:
   ResourceID window_id_{kInvalidResourceID};
-  ResourceID resource_id_[static_cast<uint8>(GraphicsType::kCount)];
-  eastl::string vertex_[static_cast<uint8>(GraphicsType::kCount)];
-  eastl::string fragment_[static_cast<uint8>(GraphicsType::kCount)];
+  ResourceID resource_id_{kInvalidResourceID};
+  eastl::string vertex_;
+  eastl::string fragment_;
 };
 
 } // namespace xEngine

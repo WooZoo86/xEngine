@@ -3,6 +3,7 @@
 
 #include "MeshConvertToolDefine.h"
 
+#include <asset/graphics/Shader.h>
 #include <asset/graphics/Camera.h>
 #include <graphics/Graphics.h>
 #include <resource/Resource.h>
@@ -26,7 +27,7 @@ class MeshViewerWindow : public WindowDelegate {
 
   virtual void OnWindowMouseScroll(const glm::vec2 &offset) override;
 
-  void Show(Context &context);
+  void Show(SceneInfo &scene);
 
  private:
   void InitializeShader();
@@ -35,9 +36,11 @@ class MeshViewerWindow : public WindowDelegate {
 
   void InitializePipeline();
 
+  void InitializeTexture();
+
  private:
+  ShaderPtr shader_;
   CameraUniquePtr camera_;
-  ResourceID shader_{kInvalidResourceID};
   ResourceID pipeline_{kInvalidResourceID};
   ResourceID window_id_{kInvalidResourceID};
   eastl::vector<eastl::tuple<ResourceID, DrawCallState>> mesh_;

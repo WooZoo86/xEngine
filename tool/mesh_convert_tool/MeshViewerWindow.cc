@@ -1,62 +1,11 @@
 #include "MeshViewerWindow.h"
 
+#include <io/IO.h>
 #include <window/Window.h>
 
 #include <gtc/matrix_transform.hpp>
 
-#if X_OPENGL
-
-static const char *vertex_shader =
-"#version 410 core\n"
-"in vec3 aPosition;\n"
-"uniform mat4 uModel;\n"
-"uniform mat4 uView;\n"
-"uniform mat4 uProjection;\n"
-"void main()\n"
-"{\n"
-"    gl_Position = uProjection * uView * uModel * vec4(aPosition, 1.0);\n"
-"}\n";
-
-static const char *fragment_shader =
-"#version 410 core\n"
-"out vec4 outColor;\n"
-"void main()\n"
-"{\n"
-"    outColor = vec4(1.0, 0.0, 0.0, 1.0);\n"
-"}\n";
-
-#elif X_D3D11
-
-static const char *vertex_shader =
-"float4x4 uModel;\n"
-"float4x4 uView;\n"
-"float4x4 uProjection;\n"
-"struct VS_INPUT\n"
-"{\n"
-"    float3 aPosition: POSITION;\n"
-"};\n"
-"struct VS_OUTPUT\n"
-"{\n"
-"    float4 Position: SV_POSITION;\n"
-"};\n"
-"VS_OUTPUT main(const VS_INPUT input)\n"
-"{\n"
-"    VS_OUTPUT output;\n"
-"    output.Position = mul(uProjection, mul(uView, mul(uModel, float4(input.aPosition, 1.0))));\n"
-"    return output;\n"
-"}\n";
-
-static const char *fragment_shader =
-"struct PS_INPUT\n"
-"{\n"
-"    float4 Position: SV_POSITION;\n"
-"};\n"
-"float4 main(const PS_INPUT input): SV_TARGET\n"
-"{\n"
-"    return float4(1.0, 0.0, 0.0, 1.0);\n"
-"}\n";
-
-#endif
+#include <stb_image.h>
 
 namespace xEngine {
 
@@ -72,7 +21,7 @@ MeshViewerWindow::MeshViewerWindow() {
 
   InitializeShader();
   InitializeCamera();
-  InitializePipeline();
+  InitializeTexture();
 }
 
 MeshViewerWindow::~MeshViewerWindow() {
@@ -82,16 +31,17 @@ MeshViewerWindow::~MeshViewerWindow() {
 }
 
 void MeshViewerWindow::OnWindowUpdate() {
+  if (shader_ == nullptr) return;
+
   auto &renderer = Window::GetInstance().GetGraphics(window_id_)->renderer();
 
   renderer->MakeCurrent();
 
   renderer->ApplyTarget(kInvalidResourceID, ClearState::ClearAll());
-  renderer->ApplyShader(shader_);
   renderer->ApplyPipeline(pipeline_);
 
-  renderer->UpdateShaderResourceData(shader_, "uProjection", Data::Create(glm::value_ptr(camera_->projection_matrix()), sizeof(glm::mat4)));
-  renderer->UpdateShaderResourceData(shader_, "uView", Data::Create(glm::value_ptr(camera_->view_matrix()), sizeof(glm::mat4)));
+  shader_->UpdateResourceData("uProjection", Data::Create(glm::value_ptr(camera_->projection_matrix()), sizeof(glm::mat4)));
+  shader_->UpdateResourceData("uView", Data::Create(glm::value_ptr(camera_->view_matrix()), sizeof(glm::mat4)));
 
   for (auto tuple : mesh_) {
     auto id = eastl::get<0>(tuple);
@@ -130,18 +80,31 @@ void MeshViewerWindow::OnWindowClose() {
   window_id_ = kInvalidResourceID;
 }
 
-void MeshViewerWindow::Show(Context &context) {
+void MeshViewerWindow::Show(SceneInfo &scene) {
   mesh_.clear();
-  for (auto &mesh_info : context.meshes) {
-    auto id = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(mesh_info.mesh_util.config());
-    auto draw_call_state = DrawCallState::Triangles(mesh_info.mesh_util.config().index_count);
-    mesh_.push_back(eastl::make_tuple(id, draw_call_state));
+  for (auto &node_info : scene.root.children) {
+    for (auto mesh_index : node_info.meshes) {
+      auto mesh_info = scene.meshes[mesh_index];
+      auto id = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(mesh_info.util.config());
+      auto draw_call_state = DrawCallState::Triangles(mesh_info.util.config().index_count);
+      mesh_.push_back(eastl::make_tuple(id, draw_call_state));
+    }
   }
 }
 
 void MeshViewerWindow::InitializeShader() {
-  auto shader_config = ShaderConfig::FromString(vertex_shader, fragment_shader);
-  shader_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(shader_config);
+  IO::GetInstance().Read("shader:Phong.Color.shader", [&](Location location, IOStatus status, DataPtr data) {
+    if (status == IOStatus::kSuccess) {
+      Window::GetInstance().GetGraphics(window_id_)->renderer()->MakeCurrent();
+
+      shader_ = Shader::Parse(window_id_, data);
+      shader_->Initialize();
+      shader_->Apply();
+      shader_->UpdateResourceData("uModel", Data::Create(glm::value_ptr(glm::mat4()), sizeof(glm::mat4)));
+
+      InitializePipeline();
+    }
+  });
 }
 
 void MeshViewerWindow::InitializeCamera() {
@@ -150,22 +113,46 @@ void MeshViewerWindow::InitializeCamera() {
   camera_->set_position(glm::vec3(0.0f, 0.0f, 400.0f));
   camera_->set_target(glm::vec3(0.0f, 100.0f, 0.0f));
   camera_->set_up_direction(glm::vec3(0.0f, 1.0f, 0.0f));
-
-  auto &renderer = Window::GetInstance().GetGraphics(window_id_)->renderer();
-  renderer->UpdateShaderResourceData(shader_, "uModel", Data::Create(glm::value_ptr(glm::mat4()), sizeof(glm::mat4)));
 }
 
 void MeshViewerWindow::InitializePipeline() {
   VertexLayout layout;
-  layout.AddElement(VertexElementSemantic::kPosition, VertexElementFormat::kFloat3)
-    .AddElement(VertexElementSemantic::kTexcoord0, VertexElementFormat::kFloat2);
+  layout.AddElement(VertexElementSemantic::kPosition, VertexElementFormat::kFloat3);
+  layout.AddElement(VertexElementSemantic::kTexcoord0, VertexElementFormat::kFloat2);
+  layout.AddElement(VertexElementSemantic::kNormal, VertexElementFormat::kFloat3);
 
-  auto pipeline_config = PipelineConfig::ShaderWithLayout(shader_, layout);
+  auto pipeline_config = PipelineConfig::ShaderWithLayout(shader_->resource_id(), layout);
   pipeline_config.depth_stencil_state.depth_enable = true;
   pipeline_config.depth_stencil_state.depth_write_enable = true;
-  pipeline_config.rasterizer_state.fill_mode = FillMode::kWireframe;
-  pipeline_config.rasterizer_state.cull_face_enable = false;
+  pipeline_config.rasterizer_state.cull_face_enable = true;
   pipeline_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(pipeline_config);
+}
+
+void MeshViewerWindow::InitializeTexture() {
+//  IO::GetInstance().Read("texture:The_Var_department.jpg", [&](Location location, IOStatus status, DataPtr data) {
+//    if (status == IOStatus::kSuccess) {
+//      int width, height, components;
+//      stbi_set_unpremultiply_on_load(1);
+//      stbi_convert_iphone_png_to_rgb(1);
+//      auto result = stbi_info_from_memory(reinterpret_cast<const stbi_uc *>(data->buffer()),
+//                                          static_cast<int>(data->size()),
+//                                          &width, &height, &components);
+//      if (result == 1 && width > 0 && height > 0) {
+//        auto buffer = stbi_load_from_memory(reinterpret_cast<const stbi_uc *>(data->buffer()),
+//                                            static_cast<int>(data->size()),
+//                                            &width, &height, &components, STBI_rgb_alpha);
+//        auto pixel_data = Data::Create(reinterpret_cast<const char *>(buffer), static_cast<size_t>(width * height * 4));
+//        stbi_image_free(buffer);
+//        TextureConfig config;
+//        config.width = width;
+//        config.height = height;
+//        config.color_format = PixelFormat::RGBA8;
+//        config.data[0][0] = pixel_data;
+//        texture_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(config);
+//        sampler_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(SamplerConfig());
+//      }
+//    }
+//  });
 }
 
 }

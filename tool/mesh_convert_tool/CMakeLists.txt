@@ -1,5 +1,5 @@
-include_directories(${PROJECT_SOURCE_DIR}/third_party/fbx/include)
-link_directories(${PROJECT_SOURCE_DIR}/third_party/fbx/lib/${CMAKE_BUILD_TYPE}/${X_PLATFORM_NAME}/)
+include_directories(${PROJECT_SOURCE_DIR}/third_party/assimp/include)
+link_directories(${PROJECT_SOURCE_DIR}/third_party/assimp/lib/${CMAKE_BUILD_TYPE}/${X_PLATFORM_NAME}/)
 
 file(GLOB_RECURSE mesh_convert_tool_source *.h *.cc)
 
@@ -9,16 +9,11 @@ else()
     add_executable(MeshConvertTool ${mesh_convert_tool_source})
 endif()
 
-target_link_libraries(MeshConvertTool xEngine xEngineNuklear)
+target_link_libraries(MeshConvertTool xEngine xEngineNuklear assimp)
 
-if(X_WINDOWS)
-    target_link_libraries(MeshConvertTool libfbxsdk)
-    add_custom_command(TARGET MeshConvertTool POST_BUILD
-                       COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                       "${PROJECT_SOURCE_DIR}/third_party/fbx/bin/${CMAKE_BUILD_TYPE}/${X_PLATFORM_NAME}/libfbxsdk.dll"
-                       $<TARGET_FILE_DIR:MeshConvertTool>)
-elseif(X_MACOS)
-    target_link_libraries(MeshConvertTool fbxsdk)
-endif()
+add_custom_command(TARGET MeshConvertTool POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "${PROJECT_SOURCE_DIR}/third_party/assimp/bin/${CMAKE_BUILD_TYPE}/${X_PLATFORM_NAME}/*"
+    $<TARGET_FILE_DIR:MeshConvertTool>)
 
 set_target_properties(MeshConvertTool PROPERTIES FOLDER "tool")

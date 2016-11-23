@@ -1,8 +1,2 @@
 .idea/
 build/bin/
-*.lib
-*.dll
-*.dylib
-*.a
-*.so
-*.exe

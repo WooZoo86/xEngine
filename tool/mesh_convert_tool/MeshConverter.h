@@ -3,7 +3,8 @@
 
 #include "MeshConvertToolDefine.h"
 
-#include <fbxsdk.h>
+struct aiNode;
+struct aiMesh;
 
 namespace xEngine {
 
@@ -12,25 +13,29 @@ class MeshConverter {
   static void Convert(const eastl::string &in, const eastl::string &out);
 
  private:
-  static void ProcessMeshConfig(MeshInfo &info, FbxMesh *mesh);
+  static void ProcessMeshConfig(MeshUtil &util, aiMesh *mesh);
 
-  static void ProcessMeshVertexPosition(MeshInfo &info, FbxMesh *mesh);
+  static void ProcessMeshVertexPosition(MeshUtil &util, aiMesh *mesh);
 
-  static void ProcessMeshVertexTexcoord(MeshInfo &info, FbxMesh *mesh);
+  static void ProcessMeshVertexTexcoord(MeshUtil &util, aiMesh *mesh);
 
-  static void ProcessMeshVertexNormal(MeshInfo &info, FbxMesh *mesh);
+  static void ProcessMeshVertexNormal(MeshUtil &util, aiMesh *mesh);
 
-  static void ProcessMeshVertex(MeshInfo &info, FbxMesh *mesh);
+  static void ProcessMeshVertex(MeshUtil &util, aiMesh *mesh);
 
-  static void ProcessMeshIndex(MeshInfo &info, FbxMesh *mesh);
+  static void ProcessMeshIndex(MeshUtil &util, aiMesh *mesh);
 
-  static void ProcessMeshMaterial(MeshInfo &info, FbxNode *node);
+  static void ProcessMesh(MeshInfo &info, aiMesh *mesh);
 
-  static void ProcessMesh(Context &context, FbxNode *node);
+  static void ProcessNode(NodeInfo &info, aiNode *node);
 
-  static void ProcessNode(Context &context, FbxNode *node);
+  static void SaveContext(SceneInfo &scene);
 
-  static void SaveContext(Context &context);
+  static uint32 GetPostProcessFlag();
+
+  static uint32 GetRemoveComponentFlag();
+
+  static uint32 GetRemoveTopologyFlag();
 
 public:
   static PostProcessFlag post_process_flag;

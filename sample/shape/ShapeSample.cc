@@ -57,9 +57,11 @@ class ShapeSample : public ApplicationDelegate, WindowDelegate {
 
  private:
   void load_shader() {
-    IO::GetInstance().Read("shader:Phong.shader", [&](Location location, IOStatus status, DataPtr data) {
+    IO::GetInstance().Read("shader:Phong.Texture.shader", [&](Location location, IOStatus status, DataPtr data) {
       if (status == IOStatus::kSuccess) {
         shader_ = Shader::Parse(window_id_, data);
+        shader_->Initialize();
+
         auto view = glm::lookAt(glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         shader_->UpdateResourceData("uView", Data::Create(glm::value_ptr(view), sizeof(view)));
         auto projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 1.0f, 100.0f);
@@ -123,7 +125,7 @@ class ShapeSample : public ApplicationDelegate, WindowDelegate {
 
     plane_mesh_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(MeshUtil::Plane().config());
 
-    auto pipeline_config = PipelineConfig::ShaderWithLayout(shader_->GetResourceID(), layout);
+    auto pipeline_config = PipelineConfig::ShaderWithLayout(shader_->resource_id(), layout);
     pipeline_config.depth_stencil_state.depth_enable = true;
     pipeline_config.depth_stencil_state.depth_write_enable = true;
     pipeline_config.rasterizer_state.cull_face_enable = true;
