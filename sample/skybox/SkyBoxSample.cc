@@ -33,6 +33,7 @@ class SkyBoxSample : public ApplicationDelegate, WindowDelegate {
     load_shader();
     load_sampler();
     load_texture();
+    load_mesh();
   }
 
   virtual void Finalize() override {
@@ -64,10 +65,10 @@ class SkyBoxSample : public ApplicationDelegate, WindowDelegate {
       camera_->Rotate(delta.x, delta.y);
     }
 
-    if (Window::GetInstance().Get(window_id_)->IsMouseButtonPressed(MouseButtonType::kMiddle)) {
-      delta /= 50.0f;
-      camera_->Move(delta.x, delta.y);
-    }
+//    if (Window::GetInstance().Get(window_id_)->IsMouseButtonPressed(MouseButtonType::kMiddle)) {
+//      delta /= 50.0f;
+//      camera_->Move(delta.x, delta.y);
+//    }
   }
 
   virtual void OnWindowMouseScroll(const glm::vec2 &offset) override {
@@ -78,15 +79,18 @@ class SkyBoxSample : public ApplicationDelegate, WindowDelegate {
   void load_shader() {
     IO::GetInstance().Read("shader:SkyBox.shader", [&](Location location, IOStatus status, DataPtr data) {
       if (status == IOStatus::kSuccess) {
-        shader_ = Shader::Parse(window_id_, data);
-        shader_->Initialize();
+        skybox_shader_ = Shader::Parse(window_id_, data);
+        skybox_shader_->Initialize();
 
-        auto view = glm::lookAt(glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-        shader_->UpdateResourceData("uView", Data::Create(glm::value_ptr(view), sizeof(view)));
-        auto projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 1.0f, 100.0f);
-        shader_->UpdateResourceData("uProjection", Data::Create(glm::value_ptr(projection), sizeof(projection)));
+        load_skybox_pipeline();
+      }
+    });
+    IO::GetInstance().Read("shader:Blinn-Phong.Texture.shader", [&](Location location, IOStatus status, DataPtr data) {
+      if (status == IOStatus::kSuccess) {
+        cube_shader_ = Shader::Parse(window_id_, data);
+        cube_shader_->Initialize();
 
-        load_mesh();
+        load_cube_pipeline();
       }
     });
   }
@@ -102,6 +106,30 @@ class SkyBoxSample : public ApplicationDelegate, WindowDelegate {
   }
 
   void load_texture() {
+    IO::GetInstance().Read("texture:The_Var_department.jpg", [&](Location location, IOStatus status, DataPtr data) {
+      if (status == IOStatus::kSuccess) {
+        int width, height, components;
+        stbi_set_unpremultiply_on_load(1);
+        stbi_convert_iphone_png_to_rgb(1);
+        auto result = stbi_info_from_memory(reinterpret_cast<const stbi_uc *>(data->buffer()),
+                                            static_cast<int>(data->size()),
+                                            &width, &height, &components);
+        if (result == 1 && width > 0 && height > 0) {
+          auto buffer = stbi_load_from_memory(reinterpret_cast<const stbi_uc *>(data->buffer()),
+                                              static_cast<int>(data->size()),
+                                              &width, &height, &components, STBI_rgb_alpha);
+          auto pixel_data = Data::Create(reinterpret_cast<const char *>(buffer), static_cast<size_t>(width * height * 4));
+          stbi_image_free(buffer);
+          TextureConfig config;
+          config.width = width;
+          config.height = height;
+          config.color_format = PixelFormat::RGBA8;
+          config.data[0][0] = pixel_data;
+          texture_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(config);
+        }
+      }
+    });
+
     for (auto index = 0; index < static_cast<uint8>(GraphicsMaxDefine::kMaxCubeTextureFaceCount); ++index) {
       char path[32] = {0};
       sprintf(path, "texture:skybox/%d.jpg", index);
@@ -120,14 +148,14 @@ class SkyBoxSample : public ApplicationDelegate, WindowDelegate {
             texture_data_[index] = Data::Create(reinterpret_cast<const char *>(buffer), static_cast<size_t>(texture_width * texture_height * 4));
             stbi_image_free(buffer);
 
-            load_cube();
+            load_skybox_texture();
           }
         }
       });
     }
   }
 
-  void load_cube() {
+  void load_skybox_texture() {
     TextureConfig config;
     config.width = texture_width;
     config.height = texture_height;
@@ -137,41 +165,70 @@ class SkyBoxSample : public ApplicationDelegate, WindowDelegate {
       if (texture_data_[index] == nullptr) return;
       config.data[index][0] = texture_data_[index];
     }
-    cube_texture_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(config);
+    skybox_texture_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(config);
   }
 
   void load_mesh() {
+    box_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(MeshUtil::Cube().config());
+  }
+
+  void load_skybox_pipeline() {
     VertexLayout layout;
     layout.AddElement(VertexElementSemantic::kPosition, VertexElementFormat::kFloat3);
 
-    box_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(MeshUtil::Cube().config());
+    auto pipeline_config = PipelineConfig::ShaderWithLayout(skybox_shader_->resource_id(), layout);
+    pipeline_config.depth_stencil_state.depth_enable = true;
+    pipeline_config.depth_stencil_state.depth_write_enable = true;
+    pipeline_config.depth_stencil_state.depth_compare = CompareFunction::kLessEqual;
+    skybox_pipeline_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(pipeline_config);
+  }
 
-    auto pipeline_config = PipelineConfig::ShaderWithLayout(shader_->resource_id(), layout);
-    pipeline_config.depth_stencil_state.depth_enable = false;
-    pipeline_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(pipeline_config);
+  void load_cube_pipeline() {
+    VertexLayout layout;
+    layout.AddElement(VertexElementSemantic::kPosition, VertexElementFormat::kFloat3);
+    layout.AddElement(VertexElementSemantic::kTexcoord0, VertexElementFormat::kFloat2);
+    layout.AddElement(VertexElementSemantic::kNormal, VertexElementFormat::kFloat3);
+
+    auto pipeline_config = PipelineConfig::ShaderWithLayout(cube_shader_->resource_id(), layout);
+    pipeline_config.depth_stencil_state.depth_enable = true;
+    pipeline_config.rasterizer_state.cull_face_enable = true;
+    pipeline_config.depth_stencil_state.depth_compare = CompareFunction::kLess;
+    cube_pipeline_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(pipeline_config);
   }
 
   void load_camera() {
     camera_ = Camera::CreateUnique();
     camera_->set_render_window(window_id_);
-    camera_->set_position(glm::vec3(0.0f, 0.0f, 3.0f));
+    camera_->set_position(glm::vec3(3.0f, 3.0f, 10.0f));
     camera_->set_target(glm::vec3(0.0f, 0.0f, 0.0f));
     camera_->set_up_direction(glm::vec3(0.0f, 1.0f, 0.0f));
   }
 
   void draw() {
-    if (shader_ == nullptr) return;
+    if (skybox_shader_ == nullptr || cube_shader_ == nullptr) return;
 
     auto &renderer = Window::GetInstance().GetGraphics(window_id_)->renderer();
     renderer->ApplyTarget(kInvalidResourceID, ClearState::ClearAll());
     
-    renderer->ApplyPipeline(pipeline_);
+    renderer->ApplyPipeline(skybox_pipeline_);
 
-    shader_->UpdateResourceData("uProjection", Data::Create(glm::value_ptr(camera_->projection_matrix()), sizeof(glm::mat4)));
-    shader_->UpdateResourceData("uView", Data::Create(glm::value_ptr(glm::mat4(glm::mat3(camera_->view_matrix()))), sizeof(glm::mat4)));
-    
-    shader_->UpdateResourceSampler("uTexture", sampler_);
-    shader_->UpdateResourceTexture("uTexture", cube_texture_);
+    skybox_shader_->UpdateResourceData("uProjection", Data::Create(glm::value_ptr(camera_->projection_matrix()), sizeof(glm::mat4)));
+    skybox_shader_->UpdateResourceData("uView", Data::Create(glm::value_ptr(glm::mat4(glm::mat3(camera_->view_matrix()))), sizeof(glm::mat4)));
+
+    skybox_shader_->UpdateResourceSampler("uTexture", sampler_);
+    skybox_shader_->UpdateResourceTexture("uTexture", skybox_texture_);
+
+    renderer->ApplyMesh(box_);
+    renderer->Draw(DrawCallState::Triangles(36));
+
+    renderer->ApplyPipeline(cube_pipeline_);
+
+    cube_shader_->UpdateResourceData("uProjection", Data::Create(glm::value_ptr(camera_->projection_matrix()), sizeof(glm::mat4)));
+    cube_shader_->UpdateResourceData("uView", Data::Create(glm::value_ptr(camera_->view_matrix()), sizeof(glm::mat4)));
+    cube_shader_->UpdateResourceData("uModel", Data::Create(glm::value_ptr(glm::mat4()), sizeof(glm::mat4)));
+
+    cube_shader_->UpdateResourceSampler("uTexture", sampler_);
+    cube_shader_->UpdateResourceTexture("uTexture", texture_);
 
     renderer->ApplyMesh(box_);
     renderer->Draw(DrawCallState::Triangles(36));
@@ -180,7 +237,8 @@ class SkyBoxSample : public ApplicationDelegate, WindowDelegate {
   }
 
  private:
-  ShaderPtr shader_;
+  ShaderPtr skybox_shader_;
+  ShaderPtr cube_shader_;
   CameraUniquePtr camera_;
 
   DataPtr texture_data_[static_cast<uint8>(GraphicsMaxDefine::kMaxCubeTextureFaceCount)];
@@ -189,10 +247,14 @@ class SkyBoxSample : public ApplicationDelegate, WindowDelegate {
 
   ResourceID box_{kInvalidResourceID};
 
-  ResourceID cube_texture_{kInvalidResourceID};
+  ResourceID texture_{kInvalidResourceID};
+  ResourceID skybox_texture_{kInvalidResourceID};
+
   ResourceID sampler_{kInvalidResourceID};
 
-  ResourceID pipeline_{kInvalidResourceID};
+  ResourceID skybox_pipeline_{kInvalidResourceID};
+  ResourceID cube_pipeline_{kInvalidResourceID};
+
   ResourceID window_id_{kInvalidResourceID};
 };
 

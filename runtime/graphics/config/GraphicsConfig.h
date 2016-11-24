@@ -35,7 +35,7 @@ struct GraphicsConfig {
 
   PixelFormat depth_format{PixelFormat::D24S8};
 
-  uint8 sample_count{1};
+  uint8 sample_count{8};
 
   int32 swap_interval{1};
 
