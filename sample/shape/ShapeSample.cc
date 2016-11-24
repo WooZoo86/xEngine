@@ -57,7 +57,7 @@ class ShapeSample : public ApplicationDelegate, WindowDelegate {
 
  private:
   void load_shader() {
-    IO::GetInstance().Read("shader:Phong.Texture.shader", [&](Location location, IOStatus status, DataPtr data) {
+    IO::GetInstance().Read("shader:Blinn-Phong.Texture.shader", [&](Location location, IOStatus status, DataPtr data) {
       if (status == IOStatus::kSuccess) {
         shader_ = Shader::Parse(window_id_, data);
         shader_->Initialize();
