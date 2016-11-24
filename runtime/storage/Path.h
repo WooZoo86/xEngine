@@ -9,15 +9,15 @@ class Path {
  public:
   static const eastl::string &separator() { return separator_ ;}
 
-  static Path GetCurrentDirectory();
+  static Path ExecutablePath();
+
+  static Path CurrentDirectory();
 
   static bool Exist(const eastl::string &path);
 
   static bool IsDirectory(const eastl::string &path);
 
-  static void CreateFile(const eastl::string &path);
-
-  static void CreateDirectory(const eastl::string &path);
+  static void Create(const eastl::string &path);
 
   static void Delete(const eastl::string &path);
 

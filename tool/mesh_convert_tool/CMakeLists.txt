@@ -13,7 +13,7 @@ target_link_libraries(MeshConvertTool xEngine xEngineNuklear assimp)
 
 add_custom_command(TARGET MeshConvertTool POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    "${PROJECT_SOURCE_DIR}/third_party/assimp/bin/${CMAKE_BUILD_TYPE}/${X_PLATFORM_NAME}/*"
+    "${PROJECT_SOURCE_DIR}/third_party/assimp/bin/${CMAKE_BUILD_TYPE}/${X_PLATFORM_NAME}/libassimp${CMAKE_SHARED_LIBRARY_SUFFIX}"
     $<TARGET_FILE_DIR:MeshConvertTool>)
 
 set_target_properties(MeshConvertTool PROPERTIES FOLDER "tool")

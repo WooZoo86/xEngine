@@ -25,9 +25,9 @@ class ShapeSample : public ApplicationDelegate, WindowDelegate {
 
     IO::GetInstance().Initialize();
     IO::GetInstance().AddPlaceholder("texture", "storage://" +
-        Path::GetCurrentDirectory().ParentDirectory().Append("assets").Append("texture").string() + Path::separator());
+        Path::ExecutablePath().ParentDirectory().ParentDirectory().Append("assets").Append("texture").string() + Path::separator());
     IO::GetInstance().AddPlaceholder("shader", "storage://" +
-        Path::GetCurrentDirectory().ParentDirectory().Append("assets").Append("shader").string() + Path::separator());
+        Path::ExecutablePath().ParentDirectory().ParentDirectory().Append("assets").Append("shader").string() + Path::separator());
     IO::GetInstance().RegisterFilesystem("storage", StorageFilesystem::Creator);
 
     start_time_ = eastl::chrono::high_resolution_clock::now();

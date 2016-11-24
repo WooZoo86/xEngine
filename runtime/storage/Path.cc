@@ -3,6 +3,7 @@
 #include <sys/stat.h>
 
 #if X_WINDOWS
+#include <Windows.h>
 #include <direct.h>
 #ifndef S_ISDIR
 #define S_ISDIR(x) (((x) &_S_IFMT) == _S_IFDIR)
@@ -19,7 +20,15 @@ eastl::string Path::separator_ = "\\";
 eastl::string Path::separator_ = "/";
 #endif
 
-Path Path::GetCurrentDirectory() {
+Path Path::ExecutablePath() {
+#if X_WINDOWS
+  char path[MAX_PATH];
+  GetModuleFileName(nullptr, path, MAX_PATH);
+  return eastl::string(path);
+#endif
+}
+
+Path Path::CurrentDirectory() {
   auto result = getcwd(nullptr, 0);
   eastl::string string(result);
   free(result);
@@ -36,17 +45,17 @@ bool Path::IsDirectory(const eastl::string &path) {
   return stat(path.c_str(), &status) == 0 && S_ISDIR(status.st_mode);
 }
 
-void Path::CreateFile(const eastl::string &path) {
-  auto fd = fopen(path.c_str(), "w");
-  if (fd) fclose(fd);
-}
-
-void Path::CreateDirectory(const eastl::string &path) {
-  mkdir(path.c_str()
+void Path::Create(const eastl::string &path) {
+  if (IsDirectory(path)) {
+    mkdir(path.c_str()
 #if !X_WINDOWS
-    , 0644
+      , 0644
 #endif
-  );
+    );
+  } else {
+    auto fd = fopen(path.c_str(), "w");
+    if (fd) fclose(fd);
+  }
 }
 
 void Path::Delete(const eastl::string &path) {

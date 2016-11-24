@@ -33,8 +33,8 @@ static bool IsEqual(const char *left, const char *right, size_t left_size, size_
 
 static void Trim(const char *&begin, const char *&end) {
   x_assert(begin < end);
-  while (begin < end && (*begin == ' ' || *begin == '\t')) ++begin;
-  while (begin < end && (*(end - 1) == ' ' || *(end - 1) == '\t')) --end;
+  while (begin < end && (*begin == ' ' || *begin == '\t' || *begin == '\r')) ++begin;
+  while (begin < end && (*(end - 1) == ' ' || *(end - 1) == '\t') || *(end - 1) == '\r') --end;
 }
 
 static eastl::string ProcessMulExpression(GraphicsType type,
@@ -208,8 +208,11 @@ static eastl::string Generate(GraphicsType type, GraphicsPipelineStage stage, Da
   auto end = begin + data->size();
 
   auto shader = FindBlock(stage, begin, end);
-  shader = ProcessReplacement(type, shader.begin(), shader.end());
-  shader = ProcessExpression(type, shader.begin(), shader.end());
+  
+  if (!shader.empty()) {
+    shader = ProcessReplacement(type, shader.begin(), shader.end());
+    shader = ProcessExpression(type, shader.begin(), shader.end());
+  }
 
   Log::GetInstance().Info("=========\n%s\n", shader.c_str());
 
