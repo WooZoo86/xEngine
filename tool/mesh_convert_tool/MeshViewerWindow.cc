@@ -144,7 +144,7 @@ void MeshViewerWindow::Show(SceneInfo &scene) {
 }
 
 void MeshViewerWindow::InitializeShader() {
-  IO::GetInstance().Read("shader:Blinn-Phong.Color.shader", [&](Location location, IOStatus status, DataPtr data) {
+  IO::GetInstance().Read("shader:Blinn-Phong.Texture.shader", [&](Location location, IOStatus status, DataPtr data) {
     if (status == IOStatus::kSuccess) {
       Window::GetInstance().GetGraphics(window_id_)->renderer()->MakeCurrent();
 
@@ -161,8 +161,8 @@ void MeshViewerWindow::InitializeShader() {
 void MeshViewerWindow::InitializeCamera() {
   camera_ = Camera::CreateUnique();
   camera_->set_render_window(window_id_);
-  camera_->set_position(glm::vec3(0.0f, 0.0f, 5.0f));
-  camera_->set_target(glm::vec3(0.0f, 0.0f, 0.0f));
+  camera_->set_position(glm::vec3(0.0f, 0.0f, 400.0f));
+  camera_->set_target(glm::vec3(0.0f, 100.0f, 0.0f));
   camera_->set_up_direction(glm::vec3(0.0f, 1.0f, 0.0f));
 }
 
