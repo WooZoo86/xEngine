@@ -5,8 +5,6 @@
 
 #include <gtc/matrix_transform.hpp>
 
-#include <stb_image.h>
-
 namespace xEngine {
 
 static const auto window_width = 800;
@@ -21,7 +19,6 @@ MeshViewerWindow::MeshViewerWindow() {
 
   InitializeShader();
   InitializeCamera();
-  InitializeTexture();
 }
 
 MeshViewerWindow::~MeshViewerWindow() {
@@ -126,33 +123,6 @@ void MeshViewerWindow::InitializePipeline() {
   pipeline_config.depth_stencil_state.depth_write_enable = true;
   pipeline_config.rasterizer_state.cull_face_enable = true;
   pipeline_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(pipeline_config);
-}
-
-void MeshViewerWindow::InitializeTexture() {
-//  IO::GetInstance().Read("texture:The_Var_department.jpg", [&](Location location, IOStatus status, DataPtr data) {
-//    if (status == IOStatus::kSuccess) {
-//      int width, height, components;
-//      stbi_set_unpremultiply_on_load(1);
-//      stbi_convert_iphone_png_to_rgb(1);
-//      auto result = stbi_info_from_memory(reinterpret_cast<const stbi_uc *>(data->buffer()),
-//                                          static_cast<int>(data->size()),
-//                                          &width, &height, &components);
-//      if (result == 1 && width > 0 && height > 0) {
-//        auto buffer = stbi_load_from_memory(reinterpret_cast<const stbi_uc *>(data->buffer()),
-//                                            static_cast<int>(data->size()),
-//                                            &width, &height, &components, STBI_rgb_alpha);
-//        auto pixel_data = Data::Create(reinterpret_cast<const char *>(buffer), static_cast<size_t>(width * height * 4));
-//        stbi_image_free(buffer);
-//        TextureConfig config;
-//        config.width = width;
-//        config.height = height;
-//        config.color_format = PixelFormat::RGBA8;
-//        config.data[0][0] = pixel_data;
-//        texture_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(config);
-//        sampler_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(SamplerConfig());
-//      }
-//    }
-//  });
 }
 
 }

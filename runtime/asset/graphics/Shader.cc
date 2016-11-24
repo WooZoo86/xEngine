@@ -34,7 +34,7 @@ static bool IsEqual(const char *left, const char *right, size_t left_size, size_
 static void Trim(const char *&begin, const char *&end) {
   x_assert(begin < end);
   while (begin < end && (*begin == ' ' || *begin == '\t' || *begin == '\r')) ++begin;
-  while (begin < end && (*(end - 1) == ' ' || *(end - 1) == '\t') || *(end - 1) == '\r') --end;
+  while (begin < end && (*(end - 1) == ' ' || *(end - 1) == '\t' || *(end - 1) == '\r')) --end;
 }
 
 static eastl::string ProcessMulExpression(GraphicsType type,

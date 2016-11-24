@@ -1,5 +1,7 @@
 #include "Path.h"
 
+#include "core/Types.h"
+
 #include <sys/stat.h>
 
 #if X_WINDOWS
@@ -8,6 +10,9 @@
 #ifndef S_ISDIR
 #define S_ISDIR(x) (((x) &_S_IFMT) == _S_IFDIR)
 #endif
+#elif X_MACOS
+#include <mach-o/dyld.h>
+#include <unistd.h>
 #else
 #include <unistd.h>
 #endif
@@ -24,6 +29,11 @@ Path Path::ExecutablePath() {
 #if X_WINDOWS
   char path[MAX_PATH];
   GetModuleFileName(nullptr, path, MAX_PATH);
+  return eastl::string(path);
+#elif X_MACOS
+  char path[PATH_MAX];
+  uint32 length;
+  _NSGetExecutablePath(path, &length);
   return eastl::string(path);
 #endif
 }

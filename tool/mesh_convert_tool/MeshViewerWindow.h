@@ -36,8 +36,6 @@ class MeshViewerWindow : public WindowDelegate {
 
   void InitializePipeline();
 
-  void InitializeTexture();
-
  private:
   ShaderPtr shader_;
   CameraUniquePtr camera_;
