@@ -52,7 +52,7 @@ struct PostProcessFlag {
   int32 find_instances{0};
   int32 optimize_meshes{0};
   int32 optimize_graph{0};
-  int32 flip_uvs{0};
+  int32 flip_uvs{1};
   int32 flip_winding_order{1};
   int32 split_by_bone_count{0};
   int32 debone{0};

@@ -22,8 +22,8 @@ void MeshConverter::Convert(const eastl::string &in, const eastl::string &out) {
   importer.SetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE, GetRemoveTopologyFlag());
 
   auto scene = importer.ReadFile(in.c_str(), GetPostProcessFlag());
-  if (scene == nullptr) {
-    Log::GetInstance().Warning("cannot load mesh model from %s\n", in.c_str());
+  if (scene == nullptr || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || scene->mRootNode == nullptr) {
+    Log::GetInstance().Warning("Load %s Error:\n%s\n", in.c_str(), importer.GetErrorString());
     return;
   }
 

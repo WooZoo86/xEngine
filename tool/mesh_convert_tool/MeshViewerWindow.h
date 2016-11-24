@@ -10,6 +10,7 @@
 #include <window/WindowDelegate.h>
 
 #include <EASTL/tuple.h>
+#include <EASTL/hash_map.h>
 
 namespace xEngine {
 
@@ -36,12 +37,16 @@ class MeshViewerWindow : public WindowDelegate {
 
   void InitializePipeline();
 
+  void InitializeTexture();
+
  private:
   ShaderPtr shader_;
   CameraUniquePtr camera_;
   ResourceID pipeline_{kInvalidResourceID};
   ResourceID window_id_{kInvalidResourceID};
-  eastl::vector<eastl::tuple<ResourceID, DrawCallState>> mesh_;
+  eastl::vector<eastl::tuple<ResourceID, ResourceID, DrawCallState>> mesh_;
+  eastl::hash_map<eastl::string, ResourceID> textures_;
+  ResourceID sampler_{kInvalidResourceID};
 };
 
 } // namespace xEngine

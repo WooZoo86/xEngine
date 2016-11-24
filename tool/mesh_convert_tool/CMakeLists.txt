@@ -9,7 +9,7 @@ else()
     add_executable(MeshConvertTool ${mesh_convert_tool_source})
 endif()
 
-target_link_libraries(MeshConvertTool xEngine xEngineNuklear assimp)
+target_link_libraries(MeshConvertTool xEngine xEngineNuklear assimp stb_image)
 
 add_custom_command(TARGET MeshConvertTool POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
