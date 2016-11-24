@@ -21,6 +21,7 @@ static struct {
     { "float3x3", { "mat3", "float3x3" } },
     { "float4x4", { "mat4", "float4x4" } },
     { "sampler2d", { "sampler2D", "Texture2D" } },
+    { "samplerCube", { "samplerCube", "TextureCube" } },
     { "vs_position", { "gl_Position", "fuck" } },
     { "fs_color", { "outColor", "fuck" } },
     { "vs", { "void main()", "void main()" } },
