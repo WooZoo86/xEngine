@@ -23,8 +23,10 @@ void Camera::Move(float32 x, float32 y) {
 }
 
 void Camera::UpdateProjectionMatrix() {
-  if (render_window_ == kInvalidResourceID) return;
-  auto &config = Window::GetInstance().Get(render_window_)->config();
+  if (render_target_ == kInvalidResourceID) return;
+
+  auto &config = Window::GetInstance().Get(render_target_)->config(); // TODO just window for now
+
   if (type_ == CameraType::kPerspective) {
     auto aspect = static_cast<float32>(config.width) / static_cast<float32>(config.height);
     projection_matrix_ = glm::perspective(glm::radians(fov_ / zoom_), aspect, near_, far_);
@@ -37,6 +39,25 @@ void Camera::UpdateProjectionMatrix() {
 
 void Camera::UpdateViewMatrix() {
   view_matrix_ = glm::lookAt(position_, target_, up_direction_);
+}
+
+void Camera::Update() {
+  if (render_target_ == kInvalidResourceID) return;
+
+  // TODO just window for now
+  auto &renderer = Window::GetInstance().GetGraphics(render_target_)->renderer();
+  renderer->Render(); // inverse render & apply call order to make camera update once per frame
+  renderer->ApplyTarget(kInvalidResourceID, clear_state_);
+
+  // TODO SkyBox render
+}
+
+void Camera::Serialize() {
+
+}
+
+void Camera::Deserialize() {
+
 }
 
 } // namespace xEngine

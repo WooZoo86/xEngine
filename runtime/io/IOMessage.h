@@ -52,7 +52,7 @@ class IOReadMessage: public IOMessage {
 
   IOStatus status() const { return status_; }
 
-  Location location() const { return location_; }
+  const Location &location() const { return location_; }
 
   DataPtr data() const { return data_; }
 

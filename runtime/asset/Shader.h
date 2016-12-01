@@ -1,5 +1,5 @@
-#ifndef XENGINE_ASSET_GRAPHICS_SHADER_H
-#define XENGINE_ASSET_GRAPHICS_SHADER_H
+#ifndef XENGINE_ASSET_SHADER_H
+#define XENGINE_ASSET_SHADER_H
 
 #include "core/Data.h"
 #include "graphics/GraphicsDefine.h"
@@ -45,4 +45,4 @@ class Shader {
 
 } // namespace xEngine
 
-#endif // XENGINE_ASSET_GRAPHICS_SHADER_H
+#endif // XENGINE_ASSET_SHADER_H

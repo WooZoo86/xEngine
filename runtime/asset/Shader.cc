@@ -5,8 +5,8 @@
 namespace xEngine {
 
 static struct {
-  const char *key;
-  const char *value[static_cast<uint8>(GraphicsType::kCount)];
+  const char * const key;
+  const char * const value[static_cast<uint8>(GraphicsType::kCount)];
 } const g_replacement_table[] = {
     { "in", { "in", "" } },
     { "out", { "out", "" } },

@@ -52,12 +52,12 @@ void IOWorker::HandleWaitingMessage() {
   waiting_queue_lock_.unlock();
 #endif
   while (!pending_messages_.empty()) {
-    auto message = pending_messages_.front();
+    auto &message = pending_messages_.front();
     switch (message->type()) {
       case IOMessageType::kRead: {
         auto read_message = eastl::static_pointer_cast<IOReadMessage>(message);
-        auto location = read_message->location();
-        auto filesystem = filesystems_[location.filesystem_name()];
+        const auto &location = read_message->location();
+        auto &filesystem = filesystems_[location.filesystem_name()];
         if (filesystem) {
           read_message->set_data(filesystem->Read(location));
           read_message->set_status(filesystem->last_status());
@@ -67,8 +67,8 @@ void IOWorker::HandleWaitingMessage() {
       }
       case IOMessageType::kWrite: {
         auto write_message = eastl::static_pointer_cast<IOWriteMessage>(message);
-        auto location = write_message->location();
-        auto filesystem = filesystems_[location.filesystem_name()];
+        const auto &location = write_message->location();
+        auto &filesystem = filesystems_[location.filesystem_name()];
         if (filesystem) {
           filesystem->Write(location, write_message->data());
           write_message->set_status(filesystem->last_status());
@@ -137,7 +137,7 @@ void IOWorker::NotifyMessage() {
   forwarding_queue_lock_.unlock();
 #endif
   while (!notify_messages_.empty()) {
-    auto message = notify_messages_.front();
+    const auto &message = notify_messages_.front();
     switch (message->type()) {
       case IOMessageType::kRead: {
         auto read_message = eastl::static_pointer_cast<IOReadMessage>(message);

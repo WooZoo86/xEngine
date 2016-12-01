@@ -1,8 +1,11 @@
-#ifndef XENGINE_ASSET_GRAPHICS_CAMERA_H
-#define XENGINE_ASSET_GRAPHICS_CAMERA_H
+#ifndef XENGINE_OBJECT_COMPONENT_CAMERA_H
+#define XENGINE_OBJECT_COMPONENT_CAMERA_H
+
+#include "object/core/Component.h"
 
 #include "core/Core.h"
 #include "core/Types.h"
+#include "graphics/state/ClearState.h"
 #include "resource/Resource.h"
 
 #include <glm.hpp>
@@ -15,14 +18,37 @@
 
 namespace xEngine {
 
+enum class CameraClearType {
+  kSkyBox,
+  kSolidColor,
+  kDepthStencil,
+  kNone,
+};
+
+inline ClearType FromCameraClearType(CameraClearType type) {
+  switch (type) {
+    case CameraClearType::kSkyBox:
+    case CameraClearType::kSolidColor:
+      return ClearType::kColor;
+    case CameraClearType::kDepthStencil:
+      return ClearType::kDepthAndStencil;
+    default:
+      return ClearType::kNone;
+  }
+}
+
 enum class CameraType {
   kPerspective,
   kOrthographic,
 };
 
-class Camera {
+class Camera : public Component {
  public:
   CREATE_FUNC_DECLARE(Camera)
+
+  Camera(GameObject &game_object) : Component(game_object) {}
+
+  virtual ~Camera() {}
 
   void Rotate(float32 yaw, float32 pitch);
 
@@ -32,9 +58,15 @@ class Camera {
 
   float32 zoom() const { return zoom_; }
 
-  void set_render_window(ResourceID value) { render_window_ = value; UpdateProjectionMatrix(); }
+  void set_render_target(ResourceID value) { render_target_ = value; UpdateProjectionMatrix(); }
 
-  ResourceID render_window() const { return render_window_; }
+  ResourceID render_target() const { return render_target_; }
+
+  void set_clear_type(CameraClearType type) { clear_state_.type = FromCameraClearType(type); }
+
+  void set_background_color(Color color) { clear_state_.clear_color = color; }
+
+  Color background_color() const { return clear_state_.clear_color; }
 
   void set_type(CameraType value) { type_ = value; UpdateProjectionMatrix(); }
 
@@ -72,6 +104,14 @@ class Camera {
 
   const glm::mat4 &view_matrix() const { return view_matrix_; }
 
+  virtual void Update() override;
+
+  virtual void Serialize() override;
+
+  virtual void Deserialize() override;
+
+  virtual ComponentType type() override { return ComponentType::kCamera; }
+
  private:
   void UpdateProjectionMatrix();
 
@@ -80,7 +120,8 @@ class Camera {
  private:
   float32 zoom_{1.0f};
 
-  ResourceID render_window_{kInvalidResourceID};
+  ResourceID render_target_{kInvalidResourceID};
+  ClearState clear_state_;
 
   CameraType type_{CameraType::kPerspective};
 
@@ -106,4 +147,4 @@ PTR_DECLARE(Camera)
 #pragma pop_macro("near")
 #pragma pop_macro("far")
 
-#endif // XENGINE_ASSET_GRAPHICS_CAMERA_H
+#endif // XENGINE_OBJECT_COMPONENT_CAMERA_H

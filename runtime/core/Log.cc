@@ -81,7 +81,7 @@ void Log::Assert(const char *condition, const char *message, const char *filenam
     loggers = loggers_;
   }
 
-  for (auto logger : loggers) {
+  for (auto &logger : loggers) {
     logger->Assert(condition, message, filename, line, function);
   }
 }
@@ -112,7 +112,7 @@ void Log::Record(LogLevel mask, const char *message, va_list args) {
     loggers = loggers_;
   }
 
-  for (auto logger : loggers) {
+  for (auto &logger : loggers) {
     logger->Record(mask, message, args);
   }
 }

@@ -282,10 +282,10 @@ void D3D11Renderer::UpdateShaderResourceData(ResourceID shader_id, const eastl::
     auto find = false;
 
     if (shader.vertex_global_uniform_block != nullptr) {
-      auto element_pair = shader.vertex_global_uniform_block_info.elements.find(name.c_str());
+      const auto &element_pair = shader.vertex_global_uniform_block_info.elements.find(name.c_str());
       if (element_pair != shader.vertex_global_uniform_block_info.elements.end()) {
         find = true;
-        auto info = element_pair->second;
+        const auto &info = element_pair->second;
         if (data != nullptr && data->size() >= info.size) {
           memcpy(static_cast<uint8 *>(shader.vertex_global_uniform_buffer) + info.offset, data->buffer(), info.size);
           D3D11_MAPPED_SUBRESOURCE source;
@@ -300,10 +300,10 @@ void D3D11Renderer::UpdateShaderResourceData(ResourceID shader_id, const eastl::
     }
 
     if (shader.fragment_global_uniform_block != nullptr) {
-      auto element_pair = shader.fragment_global_uniform_block_info.elements.find(name.c_str());
+      const auto &element_pair = shader.fragment_global_uniform_block_info.elements.find(name.c_str());
       if (element_pair != shader.fragment_global_uniform_block_info.elements.end()) {
         find = true;
-        auto info = element_pair->second;
+        const auto &info = element_pair->second;
         if (data != nullptr && data->size() >= info.size) {
           memcpy(static_cast<uint8 *>(shader.fragment_global_uniform_buffer) + info.offset, data->buffer(), info.size);
           D3D11_MAPPED_SUBRESOURCE source;
@@ -331,13 +331,13 @@ void D3D11Renderer::UpdateShaderResourceTexture(ResourceID shader_id, const east
 
     auto find = false;
 
-    auto vertex_pair = shader.vertex_texture_index.find(name.c_str());
+    const auto &vertex_pair = shader.vertex_texture_index.find(name.c_str());
     if (vertex_pair != shader.vertex_texture_index.end()) {
       ApplyTexture(texture_id, vertex_pair->second, GraphicsPipelineStage::kVertexShader);
       find = true;
     }
 
-    auto fragment_pair = shader.fragment_texture_index.find(name.c_str());
+    const auto &fragment_pair = shader.fragment_texture_index.find(name.c_str());
     if (fragment_pair != shader.fragment_texture_index.end()) {
       ApplyTexture(texture_id, fragment_pair->second, GraphicsPipelineStage::kFragmentShader);
       find = true;
@@ -358,7 +358,7 @@ void D3D11Renderer::UpdateShaderResourceSampler(ResourceID shader_id, const east
     auto fragment_index = -1;
     auto sampler_name = name + "_sampler";
 
-    auto vertex_pair = shader.vertex_sampler_index.find(name.c_str());
+    const auto &vertex_pair = shader.vertex_sampler_index.find(name.c_str());
     if (vertex_pair != shader.vertex_sampler_index.end()) {
       vertex_index = vertex_pair->second;
     } else {
@@ -368,7 +368,7 @@ void D3D11Renderer::UpdateShaderResourceSampler(ResourceID shader_id, const east
       }
     }
 
-    auto fragment_pair = shader.fragment_sampler_index.find(name.c_str());
+    const auto &fragment_pair = shader.fragment_sampler_index.find(name.c_str());
     if (fragment_pair != shader.fragment_sampler_index.end()) {
       fragment_index = fragment_pair->second;
     } else {
@@ -398,18 +398,18 @@ void D3D11Renderer::UpdateShaderResourceBlock(ResourceID shader_id, const eastl:
 
     auto &uniform_buffer = resource_manager()->uniform_buffer_pool_.Find(uniform_buffer_id);
     if (uniform_buffer.status() == ResourceStatus::kCompleted) {
-      auto vertex_pair = shader.vertex_uniform_block_info.find(name.c_str());
+      const auto &vertex_pair = shader.vertex_uniform_block_info.find(name.c_str());
       if (vertex_pair != shader.vertex_uniform_block_info.end()) {
-        auto &info = vertex_pair->second;
+        const auto &info = vertex_pair->second;
         if (info.size < uniform_buffer.config().size) {
           Log::GetInstance().Error("bind uniform buffer, but size too large\n");
         } else {
           context_->VSSetConstantBuffers(info.location, 1, &uniform_buffer.uniform_buffer);
         }
       }
-      auto fragment_pair = shader.fragment_uniform_block_info.find(name.c_str());
+      const auto &fragment_pair = shader.fragment_uniform_block_info.find(name.c_str());
       if (fragment_pair != shader.fragment_uniform_block_info.end()) {
-        auto &info = vertex_pair->second;
+        const auto &info = vertex_pair->second;
         if (info.size < uniform_buffer.config().size) {
           Log::GetInstance().Error("bind uniform buffer, but size too large\n");
         } else {

@@ -87,23 +87,6 @@ struct RemoveTopologyFlag {
   int32 polygon{1};
 };
 
-class MeshConvertToolWindow;
-
-class MeshViewerWindow;
-
-class MeshConvertTool : public ApplicationDelegate {
- public:
-  virtual void Initialize() override;
-
-  virtual void Finalize() override;
-
-  MeshViewerWindow *viewer() const { return viewer_; }
-
- private:
-  MeshConvertToolWindow *window_{nullptr};
-  MeshViewerWindow *viewer_{nullptr};
-};
-
 } // namespace xEngine
 
 #endif // XENGINE_TOOL_MESHCONVERTTOOL_MESHCONVERTTOOLDEFINE_H

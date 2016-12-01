@@ -16,6 +16,8 @@ RemoveComponentFlag MeshConverter::remove_component_flag;
 
 RemoveTopologyFlag MeshConverter::remove_topology_flag;
 
+MeshViewerWindow *MeshConverter::viewer_ = nullptr;
+
 void MeshConverter::Convert(const eastl::string &in, const eastl::string &out) {
   Assimp::Importer importer;
   importer.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS, GetRemoveComponentFlag());
@@ -40,7 +42,9 @@ void MeshConverter::Convert(const eastl::string &in, const eastl::string &out) {
 
   importer.FreeScene();
 
-  static_cast<MeshConvertTool *>(Application::GetInstance().delegate())->viewer()->Show(scene_info);
+  if (viewer_ == nullptr) viewer_ = new MeshViewerWindow;
+
+  viewer_->Show(scene_info);
 }
 
 void MeshConverter::ProcessMeshConfig(MeshUtil &util, aiMesh *mesh) {

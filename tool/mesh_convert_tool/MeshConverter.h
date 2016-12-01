@@ -8,6 +8,8 @@ struct aiMesh;
 
 namespace xEngine {
 
+class MeshViewerWindow;
+
 class MeshConverter {
  public:
   static void Convert(const eastl::string &in, const eastl::string &out);
@@ -43,6 +45,9 @@ public:
   static RemoveComponentFlag remove_component_flag;
 
   static RemoveTopologyFlag remove_topology_flag;
+
+ private:
+  static MeshViewerWindow *viewer_;
 };
 
 } // namespace xEngine

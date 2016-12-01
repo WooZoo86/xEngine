@@ -1,9 +1,9 @@
 #include "application/ApplicationDelegate.h"
 #include "core/Log.h"
 #include "graphics/Graphics.h"
-#include "asset/graphics/Shader.h"
-#include "asset/graphics/Camera.h"
-#include "asset/graphics/util/MeshUtil.h"
+#include "asset/Shader.h"
+#include "object/component/Camera.h"
+#include "util/MeshUtil.h"
 #include "window/Window.h"
 #include "io/IO.h"
 #include "storage/Storage.h"
@@ -198,7 +198,7 @@ class SkyBoxSample : public ApplicationDelegate, WindowDelegate {
 
   void load_camera() {
     camera_ = Camera::CreateUnique();
-    camera_->set_render_window(window_id_);
+    camera_->set_render_target(window_id_);
     camera_->set_position(glm::vec3(3.0f, 3.0f, 10.0f));
     camera_->set_target(glm::vec3(0.0f, 0.0f, 0.0f));
     camera_->set_up_direction(glm::vec3(0.0f, 1.0f, 0.0f));

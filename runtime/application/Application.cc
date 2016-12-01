@@ -43,14 +43,14 @@ void Application::RemoveLoopDelegate(ApplicationTickDelegate *delegate) {
 
 void Application::InvokeBeforeEvent() {
   auto list = loop_delegate_list_;
-  for (auto delegate : list) {
+  for (auto &delegate : list) {
     delegate->OnBeforeEventTick();
   }
 }
 
 void Application::InvokeAfterEvent() {
   auto list = loop_delegate_list_;
-  for (auto delegate : list) {
+  for (auto &delegate : list) {
     delegate->OnAfterEventTick();
   }
 }

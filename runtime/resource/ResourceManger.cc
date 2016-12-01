@@ -13,10 +13,10 @@ void ResourceManager::Add(const ResourceIdentity &identity, ResourceID id) {
 }
 
 void ResourceManager::Remove(ResourceID id) {
-  auto cache = eastl::find(resource_id_cache_.begin(), resource_id_cache_.end(), id);
+  const auto &cache = eastl::find(resource_id_cache_.begin(), resource_id_cache_.end(), id);
   if (cache != resource_id_cache_.end()) {
     resource_id_cache_.erase(cache);
-    auto node = id_to_identity_.find(id);
+    const auto &node = id_to_identity_.find(id);
     if (node != id_to_identity_.end()) {
       identity_to_id_.erase(node->second);
       id_to_identity_.erase(id);
@@ -33,7 +33,7 @@ void ResourceManager::RemoveAll() {
 ResourceID ResourceManager::Find(const ResourceIdentity &identity) const {
   ResourceID id = kInvalidResourceID;
   if (!identity.IsUnique()) {
-    auto node = identity_to_id_.find(identity);
+    const auto &node = identity_to_id_.find(identity);
     if (node != identity_to_id_.end()) {
       id = node->second;
     }

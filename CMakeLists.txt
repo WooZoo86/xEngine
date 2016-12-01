@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.4)
 
 project(xEngine)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 option(X_ENGINE_OPTION_BUILD_PLUGIN "Build Plugin" ON)

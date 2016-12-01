@@ -15,7 +15,7 @@
 
 using namespace xEngine;
 
-class ShapeSample : public ApplicationDelegate, WindowDelegate {
+class ObjectSample : public ApplicationDelegate, WindowDelegate {
  public:
   virtual void Initialize() override {
     Window::GetInstance().Initialize();

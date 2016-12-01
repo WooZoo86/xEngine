@@ -12,7 +12,7 @@ void D3D11PipelineFactory::Create(D3D11Pipeline &resource) {
   x_assert(resource.status() == ResourceStatus::kPending);
   resource.Loading();
 
-  auto shader = manager_->shader_pool_.Find(resource.config().shader);
+  auto &shader = manager_->shader_pool_.Find(resource.config().shader);
   if (shader.status() != ResourceStatus::kCompleted) {
     Log::GetInstance().Error("[D3D11PipelineFactory::Create] invalid shader\n");
     resource.Failed();

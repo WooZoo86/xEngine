@@ -9,24 +9,28 @@
 
 namespace xEngine {
 
-void MeshConvertTool::Initialize() {
-  Window::GetInstance().Initialize();
-  IO::GetInstance().Initialize();
-  IO::GetInstance().AddPlaceholder("texture", "storage://" +
-      Path::ExecutablePath().ParentDirectory().ParentDirectory().Append("assets").Append("texture").string() + Path::separator());
-  IO::GetInstance().AddPlaceholder("shader", "storage://" +
-      Path::ExecutablePath().ParentDirectory().ParentDirectory().Append("assets").Append("shader").string() + Path::separator());
-  IO::GetInstance().RegisterFilesystem("storage", StorageFilesystem::Creator);
-  window_ = new MeshConvertToolWindow;
-  viewer_ = new MeshViewerWindow;
-}
+class MeshConvertTool : public ApplicationDelegate {
+ public:
+  virtual void Initialize() override {
+    Window::GetInstance().Initialize();
+    IO::GetInstance().Initialize();
+    IO::GetInstance().AddPlaceholder("texture", "storage://" +
+        Path::ExecutablePath().ParentDirectory().ParentDirectory().Append("assets").Append("texture").string() + Path::separator());
+    IO::GetInstance().AddPlaceholder("shader", "storage://" +
+        Path::ExecutablePath().ParentDirectory().ParentDirectory().Append("assets").Append("shader").string() + Path::separator());
+    IO::GetInstance().RegisterFilesystem("storage", StorageFilesystem::Creator);
+    window_ = new MeshConvertToolWindow;
+  }
 
-void MeshConvertTool::Finalize() {
-  delete window_;
-  delete viewer_;
-  IO::GetInstance().Finalize();
-  Window::GetInstance().Finalize();
-}
+  virtual void Finalize() override {
+    delete window_;
+    IO::GetInstance().Finalize();
+    Window::GetInstance().Finalize();
+  }
+
+ private:
+  MeshConvertToolWindow *window_{nullptr};
+};
 
 } // namespace xEngine
 

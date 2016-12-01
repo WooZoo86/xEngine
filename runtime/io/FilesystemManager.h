@@ -13,7 +13,7 @@ class FilesystemManager {
   }
 
   FilesystemPtr CreateFilesystem(const eastl::string &name) {
-    auto iterator = filesystem_creators_.find(name);
+    const auto &iterator = filesystem_creators_.find(name);
     if (iterator != filesystem_creators_.end() && iterator->second != nullptr) {
       return iterator->second();
     }

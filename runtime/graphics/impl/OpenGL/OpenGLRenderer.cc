@@ -176,7 +176,7 @@ void OpenGLRenderer::UpdateShaderResourceData(ResourceID shader_id, const eastl:
       glUseProgram(shader.program_id);
       cache_.program_id = shader.program_id;
     }
-    auto pair = shader.uniform_info.find(name);
+    const auto &pair = shader.uniform_info.find(name);
     if (pair != shader.uniform_info.end()) {
       auto &info = pair->second;
       if (data != nullptr && data->size() >= info.size * SizeOfOpenGLType(info.type)) {
@@ -341,7 +341,7 @@ void OpenGLRenderer::UpdateShaderResourceTexture(ResourceID shader_id, const eas
       glUseProgram(shader.program_id);
       cache_.program_id = shader.program_id;
     }
-    auto pair = shader.uniform_info.find(name);
+    const auto &pair = shader.uniform_info.find(name);
     if (pair != shader.uniform_info.end()) {
       auto &info = pair->second;
       if (info.type == GL_SAMPLER_2D) {
@@ -365,7 +365,7 @@ void OpenGLRenderer::UpdateShaderResourceSampler(ResourceID shader_id, const eas
       cache_.program_id = shader.program_id;
     }
     auto index = -1;
-    auto pair = shader.uniform_info.find(name);
+    const auto &pair = shader.uniform_info.find(name);
     if (pair != shader.uniform_info.end()) {
       auto &info = pair->second;
       if (info.type == GL_SAMPLER_2D) {
@@ -393,7 +393,7 @@ void OpenGLRenderer::UpdateShaderResourceBlock(ResourceID shader_id, const eastl
     }
     auto &uniform_buffer = resource_manager()->uniform_buffer_pool_.Find(uniform_buffer_id);
     if (uniform_buffer.status() == ResourceStatus::kCompleted) {
-      auto pair = shader.uniform_block_info.find(name);
+      const auto &pair = shader.uniform_block_info.find(name);
       if (pair != shader.uniform_block_info.end()) {
         if (cache_.uniform_buffer[pair->second.location] != uniform_buffer.uniform_buffer_id) {
           glBindBufferBase(GL_UNIFORM_BUFFER, pair->second.location, uniform_buffer.uniform_buffer_id);
