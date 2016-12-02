@@ -5,13 +5,13 @@
 
 namespace xEngine {
 
-typedef uint64 ResourceID;
+using ResourceID = uint64;
 
-typedef uint16 ResourcePoolID;
+using ResourcePoolID = uint16;
 
-typedef uint16 ResourceSlotID;
+using ResourceSlotID = uint16;
 
-typedef uint32 ResourceUniqueID;
+using ResourceUniqueID = uint32;
 
 enum: ResourceID {
   kInvalidResourceID = 0xffffffffffffffff,

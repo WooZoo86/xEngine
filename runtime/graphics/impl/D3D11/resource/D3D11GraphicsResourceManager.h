@@ -17,12 +17,12 @@
 
 namespace xEngine {
 
-typedef ResourcePool<D3D11Shader, ShaderConfig> D3D11ShaderPool;
-typedef ResourcePool<D3D11Texture, TextureConfig> D3D11TexturePool;
-typedef ResourcePool<D3D11Mesh, MeshConfig> D3D11MeshPool;
-typedef ResourcePool<D3D11Pipeline, PipelineConfig> D3D11PipelinePool;
-typedef ResourcePool<D3D11Sampler, SamplerConfig> D3D11SamplerPool;
-typedef ResourcePool<D3D11UniformBuffer, UniformBufferConfig> D3D11UniformBufferPool;
+using D3D11ShaderPool = ResourcePool<D3D11Shader, ShaderConfig>;
+using D3D11TexturePool = ResourcePool<D3D11Texture, TextureConfig>;
+using D3D11MeshPool = ResourcePool<D3D11Mesh, MeshConfig>;
+using D3D11PipelinePool = ResourcePool<D3D11Pipeline, PipelineConfig>;
+using D3D11SamplerPool = ResourcePool<D3D11Sampler, SamplerConfig>;
+using D3D11UniformBufferPool = ResourcePool<D3D11UniformBuffer, UniformBufferConfig>;
 
 class D3D11GraphicsResourceManager: public GraphicsResourceManagerInterface {
  public:

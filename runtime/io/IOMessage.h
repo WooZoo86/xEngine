@@ -16,7 +16,7 @@ enum class IOStatus {
   kFailed,
 };
 
-typedef eastl::function<void(Location, IOStatus, DataPtr)> IOCallbackFunction;
+using IOCallbackFunction = eastl::function<void(Location, IOStatus, DataPtr)>;
 
 enum class IOMessageType {
   kInvalid,

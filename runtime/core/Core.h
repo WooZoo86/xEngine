@@ -39,8 +39,8 @@
   }
 
 #define PTR_DECLARE(clazz) \
-  typedef eastl::shared_ptr<clazz> clazz##Ptr; \
-  typedef eastl::unique_ptr<clazz> clazz##UniquePtr;
+  using clazz##Ptr = eastl::shared_ptr<clazz>; \
+  using clazz##UniquePtr = eastl::unique_ptr<clazz>;
 
 #define DISALLOW_ASSIGN(clazz) void operator=(const clazz &) = delete;
 

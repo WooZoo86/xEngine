@@ -9,7 +9,7 @@
 
 namespace xEngine {
 
-typedef ResourcePool<WindowResource, WindowConfig> WindowPool;
+using WindowPool = ResourcePool<WindowResource, WindowConfig>;
 
 class Window: public ResourceManager {
  public:

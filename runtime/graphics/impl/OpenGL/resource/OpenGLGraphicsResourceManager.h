@@ -17,12 +17,12 @@
 
 namespace xEngine {
 
-typedef ResourcePool<OpenGLShader, ShaderConfig> OpenGLShaderPool;
-typedef ResourcePool<OpenGLTexture, TextureConfig> OpenGLTexturePool;
-typedef ResourcePool<OpenGLMesh, MeshConfig> OpenGLMeshPool;
-typedef ResourcePool<OpenGLPipeline, PipelineConfig> OpenGLPipelinePool;
-typedef ResourcePool<OpenGLSampler, SamplerConfig> OpenGLSamplerPool;
-typedef ResourcePool<OpenGLUniformBuffer, UniformBufferConfig> OpenGLUniformBufferPool;
+using OpenGLShaderPool = ResourcePool<OpenGLShader, ShaderConfig>;
+using OpenGLTexturePool = ResourcePool<OpenGLTexture, TextureConfig>;
+using OpenGLMeshPool = ResourcePool<OpenGLMesh, MeshConfig>;
+using OpenGLPipelinePool = ResourcePool<OpenGLPipeline, PipelineConfig>;
+using OpenGLSamplerPool = ResourcePool<OpenGLSampler, SamplerConfig>;
+using OpenGLUniformBufferPool = ResourcePool<OpenGLUniformBuffer, UniformBufferConfig>;
 
 class OpenGLGraphicsResourceManager: public GraphicsResourceManagerInterface {
  public:

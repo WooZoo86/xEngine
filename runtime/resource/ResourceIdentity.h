@@ -9,7 +9,7 @@
 
 namespace xEngine {
 
-typedef uint32 ResourceSignature;
+using ResourceSignature = uint32;
 
 enum: ResourceSignature {
   kDefaultSignature = 0x7fffffff,

@@ -13,9 +13,13 @@
 
 namespace xEngine {
 
+class Filesystem;
+
+PTR_DECLARE(Filesystem)
+
 class Filesystem {
  public:
-  typedef eastl::function<eastl::shared_ptr<Filesystem>()> Creator;
+  using Creator = eastl::function<FilesystemPtr()>;
 
   virtual ~Filesystem() {}
 
@@ -25,8 +29,6 @@ class Filesystem {
 
   virtual IOStatus last_status() const = 0;
 };
-
-PTR_DECLARE(Filesystem)
 
 }
 

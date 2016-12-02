@@ -6,29 +6,29 @@
 
 namespace xEngine {
 
-typedef std::int8_t int8;
+using int8 = std::int8_t;
 
-typedef std::uint8_t uint8;
+using uint8 = std::uint8_t;
 
-typedef std::int16_t int16;
+using int16 = std::int16_t;
 
-typedef std::uint16_t uint16;
+using uint16 = std::uint16_t;
 
-typedef std::int32_t int32;
+using int32 = std::int32_t;
 
-typedef std::uint32_t uint32;
+using uint32 = std::uint32_t;
 
-typedef std::int64_t int64;
+using int64 = std::int64_t;
 
-typedef std::uint64_t uint64;
+using uint64 = std::uint64_t;
 
-typedef unsigned char uchar;
+using uchar = unsigned char;
 
-typedef wchar_t wchar;
+using wchar = wchar_t;
 
-typedef float float32;
+using float32 = float;
 
-typedef double float64;
+using float64 = double;
 
 } // namespace xEngine
 

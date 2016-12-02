@@ -10,9 +10,9 @@
 
 namespace xEngine {
 
-typedef glm::vec4 Color;
+using Color = glm::vec4;
 
-typedef glm::highp_ivec4 IntColor;
+using IntColor = glm::highp_ivec4;
 
 enum class GraphicsMaxDefine: uint16 {
   kMaxTextureCount = 16,

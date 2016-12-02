@@ -10,8 +10,6 @@
 
 #pragma comment(lib, "opengl32.lib")
 
-typedef BOOL(*wglSwapIntervalEXTProc)(int interval);
-
 namespace xEngine {
 
 struct Win32OpenGLContext{
@@ -65,7 +63,7 @@ void OpenGLContextMakeCurrent(void *value) {
 
 void OpenGLContextSetSwapInterval(void *value, int32 interval) {
   auto context = static_cast<Win32OpenGLContext *>(value);
-  auto wglSwapIntervalEXT = reinterpret_cast<wglSwapIntervalEXTProc>(wglGetProcAddress("wglSwapIntervalEXT"));
+  auto wglSwapIntervalEXT = reinterpret_cast<BOOL(*)(int)>(wglGetProcAddress("wglSwapIntervalEXT"));
   if (wglSwapIntervalEXT != nullptr) {
     wglSwapIntervalEXT(interval);
   }
