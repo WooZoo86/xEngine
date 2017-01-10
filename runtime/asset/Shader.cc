@@ -228,45 +228,48 @@ ShaderPtr Shader::Parse(ResourceID window, DataPtr data) {
   
   auto type = Window::GetInstance().GetGraphics(window)->config().type;
 
-  shader->vertex_ = Generate(type, GraphicsPipelineStage::kVertexShader, data);
-  shader->fragment_ = Generate(type, GraphicsPipelineStage::kFragmentShader, data);
+  shader->shader_config_.vertex = Generate(type, GraphicsPipelineStage::kVertexShader, data);
+  shader->shader_config_.fragment = Generate(type, GraphicsPipelineStage::kFragmentShader, data);
 
   return shader;
 }
 
 void Shader::Initialize() {
-  x_assert(resource_id_ == kInvalidResourceID);
-  resource_id_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(ShaderConfig::FromString(vertex_, fragment_));
+  x_assert(shader_id_ == kInvalidResourceID);
+  shader_id_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(shader_config_);
+  pipeline_config_.shader = shader_id_;
+  pipeline_id_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(pipeline_config_);
 }
 
 void Shader::Finalize() {
-  x_assert(resource_id_ != kInvalidResourceID);
-  Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Destroy(resource_id_);
+  x_assert(shader_id_ != kInvalidResourceID);
+  Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Destroy(shader_id_);
 }
 
 void Shader::Apply() {
-  x_assert(resource_id_ != kInvalidResourceID);
-  Window::GetInstance().GetGraphics(window_id_)->renderer()->ApplyShader(resource_id_);
+  x_assert(shader_id_ != kInvalidResourceID);
+  Window::GetInstance().GetGraphics(window_id_)->renderer()->ApplyPipeline(pipeline_id_);
+  Window::GetInstance().GetGraphics(window_id_)->renderer()->ApplyShader(shader_id_);
 }
 
 void Shader::UpdateResourceData(const eastl::string &name, DataPtr data) {
-  x_assert(resource_id_ != kInvalidResourceID);
-  Window::GetInstance().GetGraphics(window_id_)->renderer()->UpdateShaderResourceData(resource_id_, name, data);
+  x_assert(shader_id_ != kInvalidResourceID);
+  Window::GetInstance().GetGraphics(window_id_)->renderer()->UpdateShaderResourceData(shader_id_, name, data);
 }
 
 void Shader::UpdateResourceTexture(const eastl::string &name, ResourceID texture_id) {
-  x_assert(resource_id_ != kInvalidResourceID);
-  Window::GetInstance().GetGraphics(window_id_)->renderer()->UpdateShaderResourceTexture(resource_id_, name, texture_id);
+  x_assert(shader_id_ != kInvalidResourceID);
+  Window::GetInstance().GetGraphics(window_id_)->renderer()->UpdateShaderResourceTexture(shader_id_, name, texture_id);
 }
 
 void Shader::UpdateResourceSampler(const eastl::string &name, ResourceID sampler_id) {
-  x_assert(resource_id_ != kInvalidResourceID);
-  Window::GetInstance().GetGraphics(window_id_)->renderer()->UpdateShaderResourceSampler(resource_id_, name, sampler_id);
+  x_assert(shader_id_ != kInvalidResourceID);
+  Window::GetInstance().GetGraphics(window_id_)->renderer()->UpdateShaderResourceSampler(shader_id_, name, sampler_id);
 }
 
 void Shader::UpdateResourceBlock(const eastl::string &name, ResourceID uniform_buffer_id) {
-  x_assert(resource_id_ != kInvalidResourceID);
-  Window::GetInstance().GetGraphics(window_id_)->renderer()->UpdateShaderResourceBlock(resource_id_, name, uniform_buffer_id);
+  x_assert(shader_id_ != kInvalidResourceID);
+  Window::GetInstance().GetGraphics(window_id_)->renderer()->UpdateShaderResourceBlock(shader_id_, name, uniform_buffer_id);
 }
 
 } // namespace xEngine

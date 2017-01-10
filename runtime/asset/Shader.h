@@ -2,7 +2,7 @@
 #define XENGINE_ASSET_SHADER_H
 
 #include "core/Data.h"
-#include "graphics/GraphicsDefine.h"
+#include "graphics/Graphics.h"
 #include "resource/Resource.h"
 
 #include <EASTL/string.h>
@@ -34,13 +34,12 @@ class Shader {
 
   void UpdateResourceBlock(const eastl::string &name, ResourceID uniform_buffer_id);
 
-  ResourceID resource_id() const { return resource_id_; }
-
  private:
   ResourceID window_id_{kInvalidResourceID};
-  ResourceID resource_id_{kInvalidResourceID};
-  eastl::string vertex_;
-  eastl::string fragment_;
+  ResourceID shader_id_{kInvalidResourceID};
+  ResourceID pipeline_id_{kInvalidResourceID};
+  ShaderConfig shader_config_;
+  PipelineConfig pipeline_config_;
 };
 
 } // namespace xEngine

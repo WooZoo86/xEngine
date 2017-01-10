@@ -16,7 +16,6 @@ enum class ComponentType : uint8 {
   kInvalid,
   kTransform,
   kCamera,
-  kMeshFilter,
   kMeshRenderer,
 };
 

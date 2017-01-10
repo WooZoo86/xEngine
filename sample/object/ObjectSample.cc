@@ -2,6 +2,7 @@
 #include "window/Window.h"
 #include "object/core/Scene.h"
 #include "object/component/Camera.h"
+#include "object/component/MeshRenderer.h"
 
 using namespace xEngine;
 
@@ -14,10 +15,19 @@ class ObjectSample : public ApplicationDelegate, WindowDelegate {
     Window::GetInstance().GetGraphics(window_id_)->renderer()->MakeCurrent();
 
     Scene::GetInstance().Initialize();
+
     auto camera = Scene::GetInstance().AddGameObject();
-    component_ = eastl::static_pointer_cast<Camera>(camera->AttachComponent(ComponentType::kCamera));
-    component_->set_render_target(window_id_);
-    component_->set_clear_type(CameraClearType::kSolidColor);
+    auto camera_component = eastl::static_pointer_cast<Camera>(camera->AttachComponent(ComponentType::kCamera));
+    camera_component->set_render_target(window_id_);
+    camera_component->set_clear_type(CameraClearType::kSolidColor);
+
+    auto cube = Scene::GetInstance().AddGameObject();
+    auto cube_component = eastl::static_pointer_cast<MeshRenderer>(cube->AttachComponent(ComponentType::kMeshRenderer));
+    cube_component->set_mesh(Mesh::Parse(window_id_, MeshUtil::Cube()));
+    cube_component->SetMaterialCount(1);
+    auto material = cube_component->GetMaterial(0);
+    material.reset(new Material);
+    material->set_shader(Shader::Parse(window_id_, ));
   }
 
   virtual void Finalize() override {
@@ -35,13 +45,11 @@ class ObjectSample : public ApplicationDelegate, WindowDelegate {
   }
 
   virtual void OnWindowUpdate() override {
-    component_->set_background_color(glm::mod(component_->background_color() + Color(0.01f, 0.005f, 0.0025f, 0.0f), 1.0f));
     Scene::GetInstance().Update();
   }
 
  private:
   ResourceID window_id_{kInvalidResourceID};
-  CameraPtr component_;
 };
 
 XENGINE_WINDOW_APPLICATION(ObjectSample)

@@ -1,7 +1,7 @@
 #ifndef XENGINE_TOOL_MESHCONVERTTOOL_MESHCONVERTTOOLDEFINE_H
 #define XENGINE_TOOL_MESHCONVERTTOOL_MESHCONVERTTOOLDEFINE_H
 
-#include <asset/graphics/util/MeshUtil.h>
+#include <util/MeshUtil.h>
 #include <application/ApplicationDelegate.h>
 
 #include <EASTL/string.h>

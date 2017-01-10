@@ -45,6 +45,8 @@ void MeshConverter::Convert(const eastl::string &in, const eastl::string &out) {
   if (viewer_ == nullptr) viewer_ = new MeshViewerWindow;
 
   viewer_->Show(scene_info);
+
+  SaveContext(scene_info);
 }
 
 void MeshConverter::ProcessMeshConfig(MeshUtil &util, aiMesh *mesh) {

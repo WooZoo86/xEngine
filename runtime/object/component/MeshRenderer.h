@@ -1,6 +1,7 @@
 #ifndef XENGINE_OBJECT_COMPONENT_MESHRENDERER_H
 #define XENGINE_OBJECT_COMPONENT_MESHRENDERER_H
 
+#include "asset/Mesh.h"
 #include "asset/Material.h"
 #include "object/core/Component.h"
 
@@ -30,7 +31,12 @@ class MeshRenderer : public Component {
 
   virtual ComponentType type() override { return ComponentType::kMeshRenderer; }
 
+  MeshPtr mesh() const { return mesh_; }
+
+  void set_mesh(MeshPtr value) { mesh_ = value; }
+
  private:
+  MeshPtr mesh_;
   eastl::vector<MaterialPtr> materials_;
 };
 
