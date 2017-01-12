@@ -1,15 +1,13 @@
 #include "MeshRenderer.h"
 
-#include "object/core/GameObject.h"
-
 namespace xEngine {
 
 void MeshRenderer::Update() {
   for (auto &material : materials_) {
+    if (material == nullptr) continue;
     material->Apply();
-    if (mesh_ != nullptr) {
-      mesh_->Apply();
-    }
+    if (mesh_ == nullptr) continue;
+    mesh_->Apply();
   }
 }
 

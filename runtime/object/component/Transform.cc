@@ -13,6 +13,9 @@ void Transform::FromMatrix(const glm::mat4 &matrix) {
 }
 
 glm::mat4 Transform::ToMatrix() const {
+  if (parent_ == nullptr) {
+    return glm::translate(translation_) * glm::mat4_cast(rotation_) * glm::scale(scale_);
+  }
   return parent_->ToMatrix() * (glm::translate(translation_) * glm::mat4_cast(rotation_) * glm::scale(scale_));
 }
 

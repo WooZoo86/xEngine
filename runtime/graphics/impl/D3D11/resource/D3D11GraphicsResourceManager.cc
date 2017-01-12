@@ -2,6 +2,8 @@
 
 #include "D3D11GraphicsResourceManager.h"
 
+#include "core/Log.h"
+
 namespace xEngine {
 
 static const ResourcePoolID g_d3d11_shader_resource_pool_id = GenerateResourcePoolID();
@@ -31,48 +33,54 @@ void D3D11GraphicsResourceManager::Finalize() {
     if (pool_id == g_d3d11_shader_resource_pool_id) {
       auto &resource = shader_pool_.Find(id);
       if (resource.status() != ResourceStatus::kInvalid) {
+        Log::GetInstance().Warning("Graphics resource not release: %ld\n", id);
         shader_factory_.Destroy(resource);
       }
       shader_pool_.Destroy(id);
     } else if (pool_id == g_d3d11_texture_resource_pool_id) {
       auto &resource = texture_pool_.Find(id);
       if (resource.status() != ResourceStatus::kInvalid) {
+        Log::GetInstance().Warning("Graphics resource not release: %ld\n", id);
         texture_factory_.Destroy(resource);
       }
       texture_pool_.Destroy(id);
     } else if (pool_id == g_d3d11_mesh_resource_pool_id) {
       auto &resource = mesh_pool_.Find(id);
       if (resource.status() != ResourceStatus::kInvalid) {
+        Log::GetInstance().Warning("Graphics resource not release: %ld\n", id);
         mesh_factory_.Destroy(resource);
       }
       mesh_pool_.Destroy(id);
     } else if (pool_id == g_d3d11_pipeline_resource_pool_id) {
       auto &resource = pipeline_pool_.Find(id);
       if (resource.status() != ResourceStatus::kInvalid) {
+        Log::GetInstance().Warning("Graphics resource not release: %ld\n", id);
         pipeline_factory_.Destroy(resource);
       }
       pipeline_pool_.Destroy(id);
     } else if (pool_id == g_d3d11_sampler_resource_pool_id) {
       auto &resource = sampler_pool_.Find(id);
       if (resource.status() != ResourceStatus::kInvalid) {
+        Log::GetInstance().Warning("Graphics resource not release: %ld\n", id);
         sampler_factory_.Destroy(resource);
       }
       sampler_pool_.Destroy(id);
     } else if (pool_id == g_d3d11_uniform_buffer_resource_pool_id) {
       auto &resource = uniform_buffer_pool_.Find(id);
       if (resource.status() != ResourceStatus::kInvalid) {
+        Log::GetInstance().Warning("Graphics resource not release: %ld\n", id);
         uniform_buffer_factory_.Destroy(resource);
       }
       uniform_buffer_pool_.Destroy(id);
     }
-    shader_pool_.Finalize();
-    texture_pool_.Finalize();
-    mesh_pool_.Finalize();
-    pipeline_pool_.Finalize();
-    sampler_pool_.Finalize();
-    uniform_buffer_pool_.Finalize();
-    RemoveAll();
   }
+  shader_pool_.Finalize();
+  texture_pool_.Finalize();
+  mesh_pool_.Finalize();
+  pipeline_pool_.Finalize();
+  sampler_pool_.Finalize();
+  uniform_buffer_pool_.Finalize();
+  RemoveAll();
 }
 
 ResourceID D3D11GraphicsResourceManager::Create(const ShaderConfig &config) {

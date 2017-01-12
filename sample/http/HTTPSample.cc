@@ -16,7 +16,10 @@ class HTTPSample : public ApplicationDelegate {
     IO::GetInstance().Read("web:index.html", [&](Location location, IOStatus status, DataPtr data) {
       if (status == IOStatus::kSuccess) {
         Log::GetInstance().Debug("read complete: %s\n", data->buffer());
-        complete_ = true;
+
+#if X_WINDOWS
+        Application::GetInstance().Quit();
+#endif
       }
     });
   }
@@ -24,9 +27,6 @@ class HTTPSample : public ApplicationDelegate {
   virtual void Finalize() override {
     IO::GetInstance().Finalize();
   }
-
- private:
-  bool complete_{false};
 };
 
 XENGINE_APPLICATION(HTTPSample)

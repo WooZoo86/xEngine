@@ -9,8 +9,8 @@ option(X_ENGINE_OPTION_BUILD_PLUGIN "Build Plugin" ON)
 option(X_ENGINE_OPTION_BUILD_SAMPLE "Build Sample" ON)
 option(X_ENGINE_OPTION_BUILD_TOOL "Build Tool" ON)
 
-option(X_ENGINE_OPTION_OPENGL "Use OpenGL" ON)
-option(X_ENGINE_OPTION_D3D11 "Use DirectX3D 11" OFF)
+option(X_ENGINE_OPTION_OPENGL "Use OpenGL" OFF)
+option(X_ENGINE_OPTION_D3D11 "Use DirectX3D 11" ON)
 
 option(X_ENGINE_OPTION_GLAD_DEBUG "OpenGL Loader Debug Mode" ON)
 option(X_ENGINE_OPTION_DEBUG "Debug Mode" ON)

@@ -29,3 +29,4 @@ include_directories(
 )
 
 add_subdirectory(mesh_convert_tool)
+add_subdirectory(shader_compile_tool)

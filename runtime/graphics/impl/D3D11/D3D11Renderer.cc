@@ -358,7 +358,7 @@ void D3D11Renderer::UpdateShaderResourceSampler(ResourceID shader_id, const east
     auto fragment_index = -1;
     auto sampler_name = name + "_sampler";
 
-    const auto &vertex_pair = shader.vertex_sampler_index.find(name.c_str());
+    auto &vertex_pair = shader.vertex_sampler_index.find(name.c_str());
     if (vertex_pair != shader.vertex_sampler_index.end()) {
       vertex_index = vertex_pair->second;
     } else {
@@ -368,7 +368,7 @@ void D3D11Renderer::UpdateShaderResourceSampler(ResourceID shader_id, const east
       }
     }
 
-    const auto &fragment_pair = shader.fragment_sampler_index.find(name.c_str());
+    auto &fragment_pair = shader.fragment_sampler_index.find(name.c_str());
     if (fragment_pair != shader.fragment_sampler_index.end()) {
       fragment_index = fragment_pair->second;
     } else {

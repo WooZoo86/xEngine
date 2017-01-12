@@ -46,7 +46,7 @@ void Camera::Update() {
 
   // TODO just window for now
   auto &renderer = Window::GetInstance().GetGraphics(render_target_)->renderer();
-  renderer->Render(); // inverse render & apply call order to make camera update once per frame
+  renderer->Render(); // invert render & apply call order to make camera update once per frame
   renderer->ApplyTarget(kInvalidResourceID, clear_state_);
 
   // TODO SkyBox render

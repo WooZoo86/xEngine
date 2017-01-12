@@ -2,6 +2,7 @@
 
 #include "object/component/Transform.h"
 #include "object/component/Camera.h"
+#include "object/component/MeshRenderer.h"
 
 namespace xEngine {
 
@@ -23,6 +24,9 @@ ComponentPtr GameObject::AttachComponent(ComponentType type) {
       break;
     case ComponentType::kCamera:
       component = Camera::Create(*this);
+      break;
+    case ComponentType::kMeshRenderer:
+      component = MeshRenderer::Create(*this);
       break;
     default:
       x_error("invalid component type");

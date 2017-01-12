@@ -1,5 +1,23 @@
 //////////////////////////////////////////////////////
 
+@begin variable
+
+<-color-> light_color;
+
+<-texture2d-> texture;
+
+<-float4x4-> model;
+<-float4x4-> view;
+<-float4x4-> projection;
+
+<-float-> ambient;
+<-float-> specular;
+<-float-> diffuse; 
+
+@end variable
+
+//////////////////////////////////////////////////////
+
 @begin vertex
 
 <-in-> <-float3-> aPosition;

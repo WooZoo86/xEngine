@@ -46,7 +46,7 @@ class Camera : public Component {
  public:
   CREATE_FUNC_DECLARE(Camera)
 
-  Camera(GameObject &game_object) : Component(game_object) {}
+  explicit Camera(GameObject &game_object) : Component(game_object) {}
 
   virtual ~Camera() {}
 

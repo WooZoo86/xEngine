@@ -53,7 +53,7 @@ Data::Data(Data &other) {
   size_ = other.size_;
 }
 
-Data::Data(Data &&other) {
+Data::Data(Data &&other) noexcept {
   base_ = other.base_;
   offset_ = other.offset_;
   size_ = other.size_;
@@ -72,7 +72,7 @@ void Data::operator=(Data &other) {
   size_ = other.size_;
 }
 
-void Data::operator=(Data &&other) {
+void Data::operator=(Data &&other) noexcept {
   base_ = other.base_;
   offset_ = other.offset_;
   size_ = other.size_;

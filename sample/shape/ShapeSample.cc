@@ -1,8 +1,8 @@
 #include "application/ApplicationDelegate.h"
 #include "core/Log.h"
 #include "graphics/Graphics.h"
-#include "asset/graphics/util/MeshUtil.h"
-#include "asset/graphics/Shader.h"
+#include "util/MeshUtil.h"
+#include "asset/Shader.h"
 #include "window/Window.h"
 #include "io/IO.h"
 #include "storage/Storage.h"
@@ -15,7 +15,7 @@
 
 using namespace xEngine;
 
-class ObjectSample : public ApplicationDelegate, WindowDelegate {
+class ShapeSample : public ApplicationDelegate, WindowDelegate {
  public:
   virtual void Initialize() override {
     Window::GetInstance().Initialize();
@@ -60,6 +60,9 @@ class ObjectSample : public ApplicationDelegate, WindowDelegate {
     IO::GetInstance().Read("shader:Blinn-Phong.Texture.shader", [&](Location location, IOStatus status, DataPtr data) {
       if (status == IOStatus::kSuccess) {
         shader_ = Shader::Parse(window_id_, data);
+        shader_->pipeline_config().depth_stencil_state.depth_enable = true;
+        shader_->pipeline_config().depth_stencil_state.depth_write_enable = true;
+        shader_->pipeline_config().rasterizer_state.cull_face_enable = true;
         shader_->Initialize();
 
         auto view = glm::lookAt(glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -124,12 +127,6 @@ class ObjectSample : public ApplicationDelegate, WindowDelegate {
     cylinder_mesh_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(MeshUtil::Cylinder(cylinder_division_).config());
 
     plane_mesh_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(MeshUtil::Plane().config());
-
-    auto pipeline_config = PipelineConfig::ShaderWithLayout(shader_->resource_id(), layout);
-    pipeline_config.depth_stencil_state.depth_enable = true;
-    pipeline_config.depth_stencil_state.depth_write_enable = true;
-    pipeline_config.rasterizer_state.cull_face_enable = true;
-    pipeline_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(pipeline_config);
   }
 
   void draw() {
@@ -141,7 +138,7 @@ class ObjectSample : public ApplicationDelegate, WindowDelegate {
     auto &renderer = Window::GetInstance().GetGraphics(window_id_)->renderer();
     renderer->ApplyTarget(kInvalidResourceID, ClearState::ClearAll());
     
-    renderer->ApplyPipeline(pipeline_);
+    shader_->Apply();
     
     shader_->UpdateResourceTexture("uTexture", texture_);
     shader_->UpdateResourceSampler("uTexture", sampler_);
@@ -202,7 +199,6 @@ class ObjectSample : public ApplicationDelegate, WindowDelegate {
   ResourceID cylinder_mesh_{kInvalidResourceID};
   ResourceID plane_mesh_{kInvalidResourceID};
 
-  ResourceID pipeline_{kInvalidResourceID};
   ResourceID window_id_{kInvalidResourceID};
 };
 

@@ -10,44 +10,7 @@
 
 namespace xEngine {
 
-static ID3D10Blob *CompileShader(const char *type, const char *source) {
-  ID3D10Blob *shader = nullptr;
-  ID3D10Blob *log = nullptr;
-  auto flag = D3D10_SHADER_ENABLE_STRICTNESS | D3D10_SHADER_WARNINGS_ARE_ERRORS;
-#if X_DEBUG
-  flag |= D3D10_SHADER_DEBUG;
-#else
-  vertex_flag |= D3D10_SHADER_OPTIMIZATION_LEVEL3;
-#endif
-
-  if (FAILED(D3DCompile(
-    source,
-    strlen(source),
-    nullptr,
-    nullptr,
-    nullptr,
-    "main",
-    type,
-    flag,
-    0,
-    &shader,
-    &log
-  ))) {
-    if (log != nullptr) {
-      Log::GetInstance().Error("compile error: \n%s\n%s\n", source, log->GetBufferPointer());
-      log->Release();
-      log = nullptr;
-    }
-    if (shader != nullptr) {
-      shader->Release();
-      shader = nullptr;
-    }
-  }
-
-  return shader;
-}
-
-static void ReflectShader(ID3D11Device *device, ID3D10Blob *blob, void **data, ID3D11Buffer **buffer,
+static void ReflectShader(ID3D11Device *device, DataPtr blob, void **data, ID3D11Buffer **buffer,
                           D3D11Shader::UniformBlockInfo &global_info,
                           eastl::hash_map<eastl::string, D3D11Shader::UniformBlockInfo> &block_map,
                           eastl::hash_map<eastl::string, uint32> &texture_map,
@@ -55,8 +18,8 @@ static void ReflectShader(ID3D11Device *device, ID3D10Blob *blob, void **data, I
   ID3D11ShaderReflection *reflection = nullptr;
 
   x_d3d11_assert_msg(D3DReflect(
-    blob->GetBufferPointer(),
-    blob->GetBufferSize(),
+    blob->buffer(),
+    blob->size(),
     IID_ID3D11ShaderReflection,
     reinterpret_cast<void **>(&reflection)
   ), "create reflect failed\n");
@@ -136,21 +99,20 @@ void D3D11ShaderFactory::Create(D3D11Shader &resource) {
   x_assert(resource.status() == ResourceStatus::kPending);
   resource.Loading();
 
-  auto vertex_blob = CompileShader("vs_5_0", resource.config().vertex.c_str());
-  auto fragment_blob = CompileShader("ps_5_0", resource.config().fragment.c_str());
+  auto &config = resource.config();
 
   ID3D11VertexShader *vertex_shader = nullptr;
   ID3D11PixelShader *fragment_shader = nullptr;
 
-  if (vertex_blob != nullptr) {
+  if (config.vertex != nullptr && config.vertex->buffer() != nullptr && config.vertex->size() > 0) {
     x_d3d11_assert_msg(device_->CreateVertexShader(
-      vertex_blob->GetBufferPointer(),
-      vertex_blob->GetBufferSize(),
+      config.vertex->buffer(),
+      config.vertex->size(),
       nullptr,
       &vertex_shader
     ), "create vertex shader failed\n");
 
-    ReflectShader(device_, vertex_blob,
+    ReflectShader(device_, config.vertex,
       &resource.vertex_global_uniform_buffer,
       &resource.vertex_global_uniform_block,
       resource.vertex_global_uniform_block_info,
@@ -159,15 +121,15 @@ void D3D11ShaderFactory::Create(D3D11Shader &resource) {
       resource.vertex_sampler_index);
   }
 
-  if (fragment_blob != nullptr) {
+  if (config.fragment != nullptr && config.fragment->buffer() != nullptr && config.fragment->size() > 0) {
     x_d3d11_assert_msg(device_->CreatePixelShader(
-      fragment_blob->GetBufferPointer(),
-      fragment_blob->GetBufferSize(),
+      config.fragment->buffer(),
+      config.fragment->size(),
       nullptr,
       &fragment_shader
     ), "create fragment shader failed\n");
 
-    ReflectShader(device_, fragment_blob,
+    ReflectShader(device_, config.fragment,
       &resource.fragment_global_uniform_buffer,
       &resource.fragment_global_uniform_block,
       resource.fragment_global_uniform_block_info,
@@ -176,8 +138,6 @@ void D3D11ShaderFactory::Create(D3D11Shader &resource) {
       resource.fragment_sampler_index);
   }
 
-  resource.vertex_blob = vertex_blob;
-  resource.fragment_blob = fragment_blob;
   resource.vertex_shader = vertex_shader;
   resource.fragment_shader = fragment_shader;
 
@@ -186,12 +146,6 @@ void D3D11ShaderFactory::Create(D3D11Shader &resource) {
 
 void D3D11ShaderFactory::Destroy(D3D11Shader &resource) {
   x_assert(resource.status() == ResourceStatus::kFailed || resource.status() == ResourceStatus::kCompleted);
-  if (resource.vertex_blob != nullptr) {
-    resource.vertex_blob->Release();
-  }
-  if (resource.fragment_blob != nullptr) {
-    resource.fragment_blob->Release();
-  }
   if (resource.vertex_shader != nullptr) {
     resource.vertex_shader->Release();
   }

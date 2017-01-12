@@ -21,9 +21,14 @@ class Mesh {
  public:
   CREATE_FUNC_DECLARE(Mesh)
 
+  void Initialize();
+
+  void Finalize();
+
   void Apply();
 
  private:
+  MeshConfig config_;
   ResourceID window_id_{kInvalidResourceID};
   ResourceID mesh_id_{kInvalidResourceID};
   DrawCallState draw_call_state_;

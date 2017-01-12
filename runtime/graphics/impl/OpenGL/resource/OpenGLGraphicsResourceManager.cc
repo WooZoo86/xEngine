@@ -2,6 +2,8 @@
 
 #include "OpenGLGraphicsResourceManager.h"
 
+#include "core/Log.h"
+
 namespace xEngine {
 
 static const ResourcePoolID g_opengl_shader_resource_pool_id = GenerateResourcePoolID();
@@ -31,36 +33,42 @@ void OpenGLGraphicsResourceManager::Finalize() {
     if (pool_id == g_opengl_shader_resource_pool_id) {
       auto &resource = shader_pool_.Find(id);
       if (resource.status() != ResourceStatus::kInvalid) {
+        Log::GetInstance().Warning("Graphics resource not release: %ld\n", id);
         shader_factory_.Destroy(resource);
       }
       shader_pool_.Destroy(id);
     } else if (pool_id == g_opengl_texture_resource_pool_id) {
       auto &resource = texture_pool_.Find(id);
       if (resource.status() != ResourceStatus::kInvalid) {
+        Log::GetInstance().Warning("Graphics resource not release: %ld\n", id);
         texture_factory_.Destroy(resource);
       }
       texture_pool_.Destroy(id);
     } else if (pool_id == g_opengl_mesh_resource_pool_id) {
       auto &resource = mesh_pool_.Find(id);
       if (resource.status() != ResourceStatus::kInvalid) {
+        Log::GetInstance().Warning("Graphics resource not release: %ld\n", id);
         mesh_factory_.Destroy(resource);
       }
       mesh_pool_.Destroy(id);
     } else if (pool_id == g_opengl_pipeline_resource_pool_id) {
       auto &resource = pipeline_pool_.Find(id);
       if (resource.status() != ResourceStatus::kInvalid) {
+        Log::GetInstance().Warning("Graphics resource not release: %ld\n", id);
         pipeline_factory_.Destroy(resource);
       }
       pipeline_pool_.Destroy(id);
     } else if (pool_id == g_opengl_sampler_resource_pool_id) {
       auto &resource = sampler_pool_.Find(id);
       if (resource.status() != ResourceStatus::kInvalid) {
+        Log::GetInstance().Warning("Graphics resource not release: %ld\n", id);
         sampler_factory_.Destroy(resource);
       }
       sampler_pool_.Destroy(id);
     } else if (pool_id == g_opengl_uniform_buffer_resource_pool_id) {
       auto &resource = uniform_buffer_pool_.Find(id);
       if (resource.status() != ResourceStatus::kInvalid) {
+        Log::GetInstance().Warning("Graphics resource not release: %ld\n", id);
         uniform_buffer_factory_.Destroy(resource);
       }
       uniform_buffer_pool_.Destroy(id);

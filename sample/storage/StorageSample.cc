@@ -24,6 +24,9 @@ class StorageSample : public ApplicationDelegate {
         IO::GetInstance().Read("local:test.txt", [&](Location location2, IOStatus status2, DataPtr data2) {
           if (status2 == IOStatus::kSuccess) {
             Log::GetInstance().Debug("read complete: %s\n", data2->buffer());
+#if X_WINDOWS
+            Application::GetInstance().Quit();
+#endif
           }
         });
       }

@@ -7,6 +7,10 @@ class ApplicationSample : public ApplicationDelegate {
  public:
   virtual void Initialize() override {
     Log::GetInstance().Info("Initialize\n");
+
+#if X_WINDOWS
+    Application::GetInstance().Quit();
+#endif
   }
 
   virtual void Finalize() override {

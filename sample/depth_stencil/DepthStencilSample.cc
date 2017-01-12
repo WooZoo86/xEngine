@@ -1,7 +1,7 @@
 #include "application/ApplicationDelegate.h"
 #include "core/Log.h"
 #include "graphics/Graphics.h"
-#include "asset/graphics/util/MeshUtil.h"
+#include "util/MeshUtil.h"
 #include "window/Window.h"
 #include "io/IO.h"
 #include "storage/Storage.h"

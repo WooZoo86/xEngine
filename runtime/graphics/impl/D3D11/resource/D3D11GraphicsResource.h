@@ -34,10 +34,6 @@ struct D3D11Shader : public Resource<ShaderConfig> {
     eastl::hash_map<eastl::string, UniformElementInfo> elements;
   };
 
-  ID3D10Blob *vertex_blob{nullptr};
-
-  ID3D10Blob *fragment_blob{nullptr};
-
   ID3D11VertexShader *vertex_shader{nullptr};
 
   ID3D11PixelShader *fragment_shader{nullptr};
@@ -66,8 +62,6 @@ struct D3D11Shader : public Resource<ShaderConfig> {
   eastl::hash_map<eastl::string, uint32> fragment_sampler_index;
 
   virtual void Reset() override {
-    vertex_blob = nullptr;
-    fragment_blob = nullptr;
     vertex_shader = nullptr;
     fragment_shader = nullptr;
     vertex_global_uniform_block_info = UniformBlockInfo();

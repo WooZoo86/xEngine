@@ -19,13 +19,13 @@ class Data {
 
   Data(Data &other);
 
-  Data(Data &&other);
+  Data(Data &&other) noexcept;
 
   ~Data();
 
   void operator=(Data &other);
 
-  void operator=(Data &&other);
+  void operator=(Data &&other) noexcept;
 
   Data SubData(size_t offset, size_t size);
 

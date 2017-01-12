@@ -39,8 +39,8 @@ void D3D11PipelineFactory::Create(D3D11Pipeline &resource) {
   x_d3d11_assert_msg(device_->CreateInputLayout(
     input_element_desc,
     layout.element_count,
-    shader.vertex_blob->GetBufferPointer(),
-    shader.vertex_blob->GetBufferSize(),
+    shader.config().vertex->buffer(),
+    shader.config().vertex->size(),
     &input_layout
   ), "create input layout failed\n");
 

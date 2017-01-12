@@ -15,7 +15,7 @@ class MeshRenderer : public Component {
  public:
   CREATE_FUNC_DECLARE(MeshRenderer)
 
-  MeshRenderer(GameObject &game_object) : Component(game_object) {}
+  explicit MeshRenderer(GameObject &game_object) : Component(game_object) {}
 
   virtual ~MeshRenderer() {}
 

@@ -20,7 +20,7 @@ class Transform : public Component {
  public:
   CREATE_FUNC_DECLARE(Transform)
 
-  Transform(GameObject &game_object) : Component(game_object) {}
+  explicit Transform(GameObject &game_object) : Component(game_object) {}
 
   virtual ~Transform() {}
 

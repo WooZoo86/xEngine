@@ -34,6 +34,8 @@ class Shader {
 
   void UpdateResourceBlock(const eastl::string &name, ResourceID uniform_buffer_id);
 
+  PipelineConfig &pipeline_config() { return pipeline_config_; }
+
  private:
   ResourceID window_id_{kInvalidResourceID};
   ResourceID shader_id_{kInvalidResourceID};
