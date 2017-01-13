@@ -35,14 +35,16 @@ void D3D11PipelineFactory::Create(D3D11Pipeline &resource) {
     desc.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA; // TODO
     desc.InstanceDataStepRate = 0; //TODO
   }
- 
-  x_d3d11_assert_msg(device_->CreateInputLayout(
-    input_element_desc,
-    layout.element_count,
-    shader.config().vertex->buffer(),
-    shader.config().vertex->size(),
-    &input_layout
-  ), "create input layout failed\n");
+
+  if (shader.config().vertex != nullptr) {
+    x_d3d11_assert_msg(device_->CreateInputLayout(
+      input_element_desc,
+      layout.element_count,
+      shader.config().vertex->buffer(),
+      shader.config().vertex->size(),
+      &input_layout
+    ), "create input layout failed\n");
+  }
 
   resource.input_layout = input_layout;
 

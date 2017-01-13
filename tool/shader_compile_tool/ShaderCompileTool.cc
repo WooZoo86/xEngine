@@ -1,3 +1,5 @@
+#include "ShaderCompileToolWindow.h"
+
 #include <application/ApplicationDelegate.h>
 #include <io/IO.h>
 #include <storage/Storage.h>
@@ -15,12 +17,17 @@ class ShaderCompileTool : public ApplicationDelegate {
     IO::GetInstance().AddPlaceholder("shader", "storage://" +
         Path::ExecutablePath().ParentDirectory().ParentDirectory().Append("assets").Append("shader").string() + Path::separator());
     IO::GetInstance().RegisterFilesystem("storage", StorageFilesystem::Creator);
+    window_ = new ShaderCompileToolWindow;
   }
 
   virtual void Finalize() override {
+    delete window_;
     IO::GetInstance().Finalize();
     Window::GetInstance().Finalize();
   }
+
+ private:
+  ShaderCompileToolWindow *window_{nullptr};
 };
 
 } // namespace xEngine

@@ -62,4 +62,6 @@ PS_OUTPUT PS(PS_INPUT input)
     float3 result = ambient + diffuse + specular;
 
     output.Color = float4(result, 1.0) * uTexture.Sample(uSampler, input.Texcoord);
+
+    return output;
 }

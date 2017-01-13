@@ -12,11 +12,13 @@ namespace xEngine {
 
 struct ShaderConfig {
 
-  static ShaderConfig FromBuffer(const uchar *vertex, size_t vertex_length, const uchar *fragment, size_t fragment_length);
+  static ShaderConfig FromSource(const eastl::string &source);
 
   static ShaderConfig FromData(const DataPtr &vertex, const DataPtr &fragment);
 
   ResourceIdentity identity{ResourceIdentity::Shared(ShaderSignature)};
+
+  eastl::string source;
 
   DataPtr vertex;
 
@@ -24,10 +26,9 @@ struct ShaderConfig {
 
 };
 
-inline ShaderConfig ShaderConfig::FromBuffer(const uchar *vertex, size_t vertex_length, const uchar *fragment, size_t fragment_length) {
+inline ShaderConfig ShaderConfig::FromSource(const eastl::string &source) {
   ShaderConfig config;
-  config.vertex = Data::Create(vertex, vertex_length);
-  config.fragment = Data::Create(fragment, fragment_length);
+  config.source = source;
   return config;
 }
 

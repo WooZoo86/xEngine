@@ -45,6 +45,7 @@ struct D3D11Shader : public Resource<ShaderConfig> {
   ID3D11Buffer *vertex_global_uniform_block{nullptr};
 
   UniformBlockInfo fragment_global_uniform_block_info;
+
   void *fragment_global_uniform_buffer{nullptr};
 
   ID3D11Buffer *fragment_global_uniform_block{nullptr};

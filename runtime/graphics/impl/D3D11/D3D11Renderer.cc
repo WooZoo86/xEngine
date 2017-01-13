@@ -311,8 +311,7 @@ void D3D11Renderer::UpdateShaderResourceData(ResourceID shader_id, const eastl::
           x_d3d11_assert_msg(context_->Map(shader.fragment_global_uniform_block, 0, D3D11_MAP_WRITE_DISCARD, 0, &source), "map fragment global uniform buffer falied!\n");
           memcpy(source.pData, shader.fragment_global_uniform_buffer, shader.fragment_global_uniform_block_info.size);
           context_->Unmap(shader.fragment_global_uniform_block, 0);
-        }
-        else {
+        } else {
           Log::GetInstance().Error("buffer size is too small to fit into uniform: %s\n", name.c_str());
         }
       }
@@ -356,26 +355,15 @@ void D3D11Renderer::UpdateShaderResourceSampler(ResourceID shader_id, const east
 
     auto vertex_index = -1;
     auto fragment_index = -1;
-    auto sampler_name = name + "_sampler";
 
     auto &vertex_pair = shader.vertex_sampler_index.find(name.c_str());
     if (vertex_pair != shader.vertex_sampler_index.end()) {
       vertex_index = vertex_pair->second;
-    } else {
-      vertex_pair = shader.vertex_sampler_index.find(sampler_name.c_str());
-      if (vertex_pair != shader.vertex_sampler_index.end()) {
-        vertex_index = vertex_pair->second;
-      }
     }
 
     auto &fragment_pair = shader.fragment_sampler_index.find(name.c_str());
     if (fragment_pair != shader.fragment_sampler_index.end()) {
       fragment_index = fragment_pair->second;
-    } else {
-      fragment_pair = shader.fragment_sampler_index.find(sampler_name.c_str());
-      if (fragment_pair != shader.fragment_sampler_index.end()) {
-        fragment_index = fragment_pair->second;
-      }
     }
 
     if (vertex_index != -1) {
@@ -386,7 +374,7 @@ void D3D11Renderer::UpdateShaderResourceSampler(ResourceID shader_id, const east
     }
 
     if (vertex_index == -1 && fragment_index == -1) {
-      Log::GetInstance().Error("cannot find uniform sampler state: %s or %s\n", name.c_str(), sampler_name.c_str());
+      Log::GetInstance().Error("cannot find uniform sampler state: %s\n", name.c_str());
     }
   }
 }

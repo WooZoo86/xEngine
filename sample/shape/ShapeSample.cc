@@ -57,9 +57,12 @@ class ShapeSample : public ApplicationDelegate, WindowDelegate {
 
  private:
   void load_shader() {
-    IO::GetInstance().Read("shader:Blinn-Phong.Texture.shader", [&](Location location, IOStatus status, DataPtr data) {
+    IO::GetInstance().Read("shader:Blinn-Phong.Texture.hlsl", [&](Location location, IOStatus status, DataPtr data) {
       if (status == IOStatus::kSuccess) {
         shader_ = Shader::Parse(window_id_, data);
+        shader_->pipeline_config().vertex_layout.AddElement(VertexElementSemantic::kPosition, VertexElementFormat::kFloat3);
+        shader_->pipeline_config().vertex_layout.AddElement(VertexElementSemantic::kTexcoord0, VertexElementFormat::kFloat2);
+        shader_->pipeline_config().vertex_layout.AddElement(VertexElementSemantic::kNormal, VertexElementFormat::kFloat3);
         shader_->pipeline_config().depth_stencil_state.depth_enable = true;
         shader_->pipeline_config().depth_stencil_state.depth_write_enable = true;
         shader_->pipeline_config().rasterizer_state.cull_face_enable = true;
@@ -113,11 +116,6 @@ class ShapeSample : public ApplicationDelegate, WindowDelegate {
   }
 
   void load_mesh() {
-    VertexLayout layout;
-    layout.AddElement(VertexElementSemantic::kPosition, VertexElementFormat::kFloat3);
-    layout.AddElement(VertexElementSemantic::kTexcoord0, VertexElementFormat::kFloat2);
-    layout.AddElement(VertexElementSemantic::kNormal, VertexElementFormat::kFloat3);
-
     cube_mesh_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(MeshUtil::Cube().config());
 
     sphere_mesh_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(MeshUtil::Sphere(sphere_division_).config());
@@ -141,7 +139,7 @@ class ShapeSample : public ApplicationDelegate, WindowDelegate {
     shader_->Apply();
     
     shader_->UpdateResourceTexture("uTexture", texture_);
-    shader_->UpdateResourceSampler("uTexture", sampler_);
+    shader_->UpdateResourceSampler("uSampler", sampler_);
 
     glm::mat4 rotation;
     rotation = glm::rotate(rotation, 0.3f * time * glm::radians(180.0f), glm::vec3(1.0f, 0.0f, 0.0f));

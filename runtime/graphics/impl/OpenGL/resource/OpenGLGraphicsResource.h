@@ -16,7 +16,6 @@
 
 #include <EASTL/hash_map.h>
 #include <EASTL/string.h>
-#include <EASTL/tuple.h>
 
 namespace xEngine {
 

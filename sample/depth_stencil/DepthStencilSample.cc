@@ -12,72 +12,41 @@
 
 #include <EASTL/chrono.h>
 
-#if X_OPENGL
-
-static const char *vertex_shader =
-  "#version 410 core\n"
-  "in vec3 aPosition;\n"
-  "in vec2 aTexcoord0;\n"
-  "out vec2 Texcoord;\n"
-  "uniform mat4 uModel;\n"
-  "uniform mat4 uView;\n"
-  "uniform mat4 uProjection;\n"
-  "void main()\n"
-  "{\n"
-  "    Texcoord = aTexcoord0;\n"
-  "    gl_Position = uProjection * uView * uModel * vec4(aPosition, 1.0);\n"
-  "}\n";
-
-static const char *fragment_shader =
-  "#version 410 core\n"
-  "in vec2 Texcoord;\n"
-  "out vec4 outColor;\n"
-  "uniform sampler2D uTexture;\n"
-  "uniform vec3 uColor;\n"
-  "void main()\n"
-  "{\n"
-  "    outColor = vec4(uColor, 1.0) * texture(uTexture, Texcoord);\n"
-  "}\n";
-
-#elif X_D3D11
-
-static const char *vertex_shader =
+static const char *shader_source =
   "float4x4 uModel;\n"
   "float4x4 uView;\n"
   "float4x4 uProjection;\n"
   "struct VS_INPUT\n"
   "{\n"
-  "    float3 aPosition: POSITION;\n"
-  "    float2 aTexcoord0: TEXCOORD;\n"
+  "    float3 aPosition : POSITION;\n"
+  "    float2 aTexcoord0 : TEXCOORD;\n"
   "};\n"
   "struct VS_OUTPUT\n"
   "{\n"
-  "    float4 Position: SV_POSITION;\n"
-  "    float2 Texcoord: TEXCOORD;\n"
+  "    float4 Position : SV_Position;\n"
+  "    float2 Texcoord : TEXCOORD;\n"
   "};\n"
-  "VS_OUTPUT main(const VS_INPUT input)\n"
+  "VS_OUTPUT VS(const VS_INPUT input)\n"
   "{\n"
   "    VS_OUTPUT output;\n"
   "    output.Texcoord = input.aTexcoord0;\n"
   "    output.Position = mul(uProjection, mul(uView, mul(uModel, float4(input.aPosition, 1.0))));\n"
   "    return output;\n"
-  "}\n";
-
-static const char *fragment_shader =
+  "}\n"
+  "#define PS_INPUT VS_OUTPUT\n"
+  "struct PS_OUTPUT\n"
+  "{\n"
+  "    float4 Color: SV_Target;\n"
+  "};\n"
   "float3 uColor;\n"
   "Texture2D uTexture;\n"
-  "SamplerState uTexture_sampler;\n"
-  "struct PS_INPUT\n"
+  "SamplerState uSampler;\n"
+  "PS_OUTPUT PS(const PS_INPUT input)\n"
   "{\n"
-  "    float4 Position: SV_POSITION;\n"
-  "    float2 Texcoord: TEXCOORD;\n"
-  "};\n"
-  "float4 main(const PS_INPUT input): SV_TARGET\n"
-  "{\n"
-  "    return uTexture.Sample(uTexture_sampler, input.Texcoord) * float4(uColor, 1.0);\n"
+  "    PS_OUTPUT output;\n"
+  "    output.Color = uTexture.Sample(uSampler, input.Texcoord) * float4(uColor, 1.0);\n"
+  "    return output;\n"
   "}\n";
-
-#endif
 
 using namespace xEngine;
 
@@ -122,7 +91,7 @@ class DepthStencilSample : public ApplicationDelegate, WindowDelegate {
 
  private:
   void load_shader() {
-    auto shader_config = ShaderConfig::FromString(vertex_shader, fragment_shader);
+    auto shader_config = ShaderConfig::FromSource(shader_source);
     shader_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(shader_config);
     Window::GetInstance().GetGraphics(window_id_)->renderer()->ApplyShader(shader_);
     auto view = glm::lookAt(
@@ -240,7 +209,7 @@ class DepthStencilSample : public ApplicationDelegate, WindowDelegate {
     renderer->UpdateShaderResourceData(shader_, "uModel", Data::Create(glm::value_ptr(cube_model), sizeof(cube_model)));
     renderer->UpdateShaderResourceData(shader_, "uColor", Data::Create(glm::value_ptr(Color(1.0, 1.0, 1.0, 1.0)), sizeof(Color)));
     renderer->UpdateShaderResourceTexture(shader_, "uTexture", texture_);
-    renderer->UpdateShaderResourceSampler(shader_, "uTexture", sampler_);
+    renderer->UpdateShaderResourceSampler(shader_, "uSampler", sampler_);
     renderer->Draw(DrawCallState::Triangles(36));
   }
 
@@ -255,7 +224,7 @@ class DepthStencilSample : public ApplicationDelegate, WindowDelegate {
     renderer->UpdateShaderResourceData(shader_, "uModel", Data::Create(glm::value_ptr(plane_model), sizeof(plane_model)));
     renderer->UpdateShaderResourceData(shader_, "uColor", Data::Create(glm::value_ptr(Color(0.0, 0.0, 0.0, 1.0)), sizeof(Color)));
     renderer->UpdateShaderResourceTexture(shader_, "uTexture", texture_);
-    renderer->UpdateShaderResourceSampler(shader_, "uTexture", sampler_);
+    renderer->UpdateShaderResourceSampler(shader_, "uSampler", sampler_);
     renderer->Draw(DrawCallState::Triangles(6));
   }
 
@@ -275,7 +244,7 @@ class DepthStencilSample : public ApplicationDelegate, WindowDelegate {
                                        Data::Create(glm::value_ptr(reflection_model), sizeof(reflection_model)));
     renderer->UpdateShaderResourceData(shader_, "uColor", Data::Create(glm::value_ptr(Color(0.3, 0.3, 0.3, 1.0)), sizeof(Color)));
     renderer->UpdateShaderResourceTexture(shader_, "uTexture", texture_);
-    renderer->UpdateShaderResourceSampler(shader_, "uTexture", sampler_);
+    renderer->UpdateShaderResourceSampler(shader_, "uSampler", sampler_);
     renderer->Draw(DrawCallState::Triangles(36));
   }
 

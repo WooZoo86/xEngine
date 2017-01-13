@@ -50,8 +50,8 @@ void OpenGLShaderFactory::Create(OpenGLShader &resource) {
   x_assert(resource.status() == ResourceStatus::kPending);
   resource.Loading();
 
-  auto vertex_shader = CompileShader(GL_VERTEX_SHADER, resource.config().vertex.c_str());
-  auto fragment_shader = CompileShader(GL_FRAGMENT_SHADER, resource.config().fragment.c_str());
+  auto vertex_shader = CompileShader(GL_VERTEX_SHADER, resource.config().source.c_str());
+  auto fragment_shader = CompileShader(GL_FRAGMENT_SHADER, resource.config().source.c_str());
 
   auto program = glCreateProgram();
   x_assert(program != 0);

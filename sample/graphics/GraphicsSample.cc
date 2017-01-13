@@ -7,70 +7,40 @@
 
 #include <stb_image.h>
 
-#if X_OPENGL
-
-static const char *vertex_shader =
-  "#version 410 core\n"
-  "in vec2 aPosition;\n"
-  "in vec2 aTexcoord0;\n"
-  "in vec3 aColor0;\n"
-  "out vec2 Texcoord;\n"
-  "out vec3 Color;\n"
-  "void main() {\n"
-  "    Texcoord = aTexcoord0;\n"
-  "    Color = aColor0;\n"
-  "    gl_Position = vec4(aPosition, 0, 1);\n"
-  "}\n";
-
-static const char *fragment_shader =
-  "#version 410 core\n"
-  "in vec2 Texcoord;\n"
-  "in vec3 Color;\n"
-  "uniform sampler2D uTexture;\n"
-  "out vec4 outColor;\n"
-  "void main() {\n"
-  "    outColor = texture(uTexture, Texcoord) * vec4(Color, 1);\n"
-  "}\n";
-
-#elif X_D3D11
-
-static const char *vertex_shader =
+static const char *shader_source =
   "struct VS_INPUT\n"
   "{\n"
-  "    float2 aPosition: POSITION;\n"
-  "    float2 aTexcoord0: TEXCOORD;\n"
-  "    float3 aColor0: COLOR;\n"
+  "    float2 aPosition : POSITION;\n"
+  "    float2 aTexcoord0 : TEXCOORD;\n"
+  "    float3 aColor0 : COLOR;\n"
   "};\n"
   "struct VS_OUTPUT\n"
   "{\n"
-  "    float4 Position: SV_POSITION;\n"
-  "    float2 Texcoord: TEXCOORD;\n"
-  "    float3 Color: COLOR;\n"
+  "    float4 Position : SV_Position;\n"
+  "    float2 Texcoord : TEXCOORD;\n"
+  "    float3 Color : COLOR;\n"
   "};\n"
-  "VS_OUTPUT main(const VS_INPUT input)\n"
+  "VS_OUTPUT VS(const VS_INPUT input)\n"
   "{\n"
   "    VS_OUTPUT output;\n"
   "    output.Texcoord = input.aTexcoord0;\n"
   "    output.Color = input.aColor0;\n"
   "    output.Position = float4(input.aPosition, 0.0, 1.0);\n"
   "    return output;\n"
-  "}\n";
-
-static const char *fragment_shader =
-  "Texture2D uTexture;\n"
-  "SamplerState uTexture_sampler;\n"
-  "struct PS_INPUT\n"
+  "}\n"
+  "#define PS_INPUT VS_OUTPUT\n"
+  "struct PS_OUTPUT\n"
   "{\n"
-  "    float4 Position: SV_POSITION;\n"
-  "    float2 Texcoord: TEXCOORD;\n"
-  "    float3 Color: COLOR;\n"
+  "    float4 Color : SV_Target;\n"
   "};\n"
-  "float4 main(const PS_INPUT input): SV_TARGET\n"
+  "Texture2D uTexture;\n"
+  "SamplerState uSampler;\n"
+  "PS_OUTPUT PS(const PS_INPUT input)\n"
   "{\n"
-  "    return uTexture.Sample(uTexture_sampler, input.Texcoord) * float4(input.Color, 1.0);\n"
+  "    PS_OUTPUT output;\n"
+  "    output.Color = uTexture.Sample(uSampler, input.Texcoord) * float4(input.Color, 1.0);\n"
+  "    return output;\n"
   "}\n";
-
-#endif
 
 using namespace xEngine;
 
@@ -113,7 +83,7 @@ class GraphicsSample : public ApplicationDelegate, WindowDelegate {
 
  private:
   void load_shader() {
-    auto shader_config = ShaderConfig::FromString(vertex_shader, fragment_shader);
+    auto shader_config = ShaderConfig::FromSource(shader_source);
     shader_ = Window::GetInstance().GetGraphics(window_id_)->resource_manager()->Create(shader_config);
   }
 
@@ -181,7 +151,7 @@ class GraphicsSample : public ApplicationDelegate, WindowDelegate {
       renderer->ApplyMesh(mesh_);
       renderer->ApplyPipeline(pipeline_);
       renderer->UpdateShaderResourceTexture(shader_, "uTexture", texture_);
-      renderer->UpdateShaderResourceSampler(shader_, "uTexture", sampler_);
+      renderer->UpdateShaderResourceSampler(shader_, "uSampler", sampler_);
       renderer->Draw(DrawCallState::Triangles(6));
       renderer->Render();
     }

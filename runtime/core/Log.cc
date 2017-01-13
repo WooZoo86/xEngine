@@ -4,7 +4,7 @@
 
 #if X_WINDOWS
 #   include <Windows.h>
-#   define LOG_BUFFER_SIZE 1024
+#   define LOG_BUFFER_SIZE 2048
 #endif // X_WINDOWS
 
 namespace xEngine {

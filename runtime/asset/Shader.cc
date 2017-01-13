@@ -9,10 +9,7 @@ ShaderPtr Shader::Parse(ResourceID window, DataPtr data) {
   
   auto shader = Shader::Create();
   shader->window_id_ = window;
-  
-  auto type = Window::GetInstance().GetGraphics(window)->config().type;
-
-  // TODO 
+  shader->shader_config_.source = eastl::string(static_cast<char *>(data->buffer()), data->size());
 
   return shader;
 }

@@ -10,6 +10,47 @@
 
 namespace xEngine {
 
+static DataPtr CompileShader(const char *type, const char *source, const char *entry_point) {
+  DataPtr result = nullptr;
+
+  ID3D10Blob *shader = nullptr;
+  ID3D10Blob *log = nullptr;
+
+  auto flag = D3D10_SHADER_ENABLE_STRICTNESS | D3D10_SHADER_WARNINGS_ARE_ERRORS;
+#if X_DEBUG
+  flag |= D3D10_SHADER_DEBUG;
+#else
+    vertex_flag |= D3D10_SHADER_OPTIMIZATION_LEVEL3;
+#endif
+
+  if (FAILED(D3DCompile(
+    source,
+    strlen(source),
+    nullptr,
+    nullptr,
+    nullptr,
+    entry_point,
+    type,
+    flag,
+    0,
+    &shader,
+    &log
+  ))) {
+    if (log != nullptr) {
+      Log::GetInstance().Error("compile error: \n%s\n%s\n", source, log->GetBufferPointer());
+      log->Release();
+      log = nullptr;
+    }
+  }
+  if (shader != nullptr) {
+    result = Data::Create(shader->GetBufferPointer(), shader->GetBufferSize());
+    shader->Release();
+    shader = nullptr;
+  }
+
+  return result;
+}
+
 static void ReflectShader(ID3D11Device *device, DataPtr blob, void **data, ID3D11Buffer **buffer,
                           D3D11Shader::UniformBlockInfo &global_info,
                           eastl::hash_map<eastl::string, D3D11Shader::UniformBlockInfo> &block_map,
@@ -39,7 +80,7 @@ static void ReflectShader(ID3D11Device *device, DataPtr blob, void **data, ID3D1
       x_assert(uniform_count < static_cast<uint16>(GraphicsMaxDefine::kMaxUniformBlockCount));
 
       D3D11Shader::UniformBlockInfo info;
-      info.location = resource_index;
+      info.location = resource_desc.BindPoint;
 
       auto uniform_block_reflection = reflection->GetConstantBufferByName(resource_desc.Name);
 
@@ -104,6 +145,10 @@ void D3D11ShaderFactory::Create(D3D11Shader &resource) {
   ID3D11VertexShader *vertex_shader = nullptr;
   ID3D11PixelShader *fragment_shader = nullptr;
 
+  if (config.vertex == nullptr) {
+    config.vertex = CompileShader("vs_5_0", config.source.c_str(), "VS");
+  }
+
   if (config.vertex != nullptr && config.vertex->buffer() != nullptr && config.vertex->size() > 0) {
     x_d3d11_assert_msg(device_->CreateVertexShader(
       config.vertex->buffer(),
@@ -119,6 +164,10 @@ void D3D11ShaderFactory::Create(D3D11Shader &resource) {
       resource.vertex_uniform_block_info,
       resource.vertex_texture_index,
       resource.vertex_sampler_index);
+  }
+
+  if (config.fragment == nullptr) {
+    config.fragment = CompileShader("ps_5_0", config.source.c_str(), "PS");
   }
 
   if (config.fragment != nullptr && config.fragment->buffer() != nullptr && config.fragment->size() > 0) {
@@ -137,6 +186,9 @@ void D3D11ShaderFactory::Create(D3D11Shader &resource) {
       resource.fragment_texture_index,
       resource.fragment_sampler_index);
   }
+
+  x_assert_msg(vertex_shader, "create vertex shader failed!\n");
+  x_assert_msg(fragment_shader, "create fragment shader failed!\n");
 
   resource.vertex_shader = vertex_shader;
   resource.fragment_shader = fragment_shader;
