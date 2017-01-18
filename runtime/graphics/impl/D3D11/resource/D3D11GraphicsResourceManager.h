@@ -52,6 +52,8 @@ class D3D11GraphicsResourceManager: public GraphicsResourceManagerInterface {
 
   virtual void Destroy(ResourceID id) override;
 
+  virtual ShaderInfo QueryInfo(ResourceID id) override;
+
  private:
   D3D11ShaderPool shader_pool_;
   D3D11TexturePool texture_pool_;

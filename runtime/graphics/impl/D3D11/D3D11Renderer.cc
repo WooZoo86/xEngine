@@ -282,8 +282,8 @@ void D3D11Renderer::UpdateShaderResourceData(ResourceID shader_id, const eastl::
     auto find = false;
 
     if (shader.vertex_global_uniform_block != nullptr) {
-      const auto &element_pair = shader.vertex_global_uniform_block_info.elements.find(name.c_str());
-      if (element_pair != shader.vertex_global_uniform_block_info.elements.end()) {
+      const auto &element_pair = shader.info.vertex.global_uniform_block_info.elements.find(name.c_str());
+      if (element_pair != shader.info.vertex.global_uniform_block_info.elements.end()) {
         find = true;
         const auto &info = element_pair->second;
         if (data != nullptr && data->size() >= info.size) {
@@ -291,7 +291,7 @@ void D3D11Renderer::UpdateShaderResourceData(ResourceID shader_id, const eastl::
           D3D11_MAPPED_SUBRESOURCE source;
           ZeroMemory(&source, sizeof(source));
           x_d3d11_assert_msg(context_->Map(shader.vertex_global_uniform_block, 0, D3D11_MAP_WRITE_DISCARD, 0, &source), "map vertex global uniform buffer falied!\n");
-          memcpy(source.pData, shader.vertex_global_uniform_buffer, shader.vertex_global_uniform_block_info.size);
+          memcpy(source.pData, shader.vertex_global_uniform_buffer, shader.info.vertex.global_uniform_block_info.size);
           context_->Unmap(shader.vertex_global_uniform_block, 0);
         } else {
           Log::GetInstance().Error("buffer size is too small to fit into uniform: %s\n", name.c_str());
@@ -300,8 +300,8 @@ void D3D11Renderer::UpdateShaderResourceData(ResourceID shader_id, const eastl::
     }
 
     if (shader.fragment_global_uniform_block != nullptr) {
-      const auto &element_pair = shader.fragment_global_uniform_block_info.elements.find(name.c_str());
-      if (element_pair != shader.fragment_global_uniform_block_info.elements.end()) {
+      const auto &element_pair = shader.info.fragment.global_uniform_block_info.elements.find(name.c_str());
+      if (element_pair != shader.info.fragment.global_uniform_block_info.elements.end()) {
         find = true;
         const auto &info = element_pair->second;
         if (data != nullptr && data->size() >= info.size) {
@@ -309,7 +309,7 @@ void D3D11Renderer::UpdateShaderResourceData(ResourceID shader_id, const eastl::
           D3D11_MAPPED_SUBRESOURCE source;
           ZeroMemory(&source, sizeof(source));
           x_d3d11_assert_msg(context_->Map(shader.fragment_global_uniform_block, 0, D3D11_MAP_WRITE_DISCARD, 0, &source), "map fragment global uniform buffer falied!\n");
-          memcpy(source.pData, shader.fragment_global_uniform_buffer, shader.fragment_global_uniform_block_info.size);
+          memcpy(source.pData, shader.fragment_global_uniform_buffer, shader.info.fragment.global_uniform_block_info.size);
           context_->Unmap(shader.fragment_global_uniform_block, 0);
         } else {
           Log::GetInstance().Error("buffer size is too small to fit into uniform: %s\n", name.c_str());
@@ -330,14 +330,14 @@ void D3D11Renderer::UpdateShaderResourceTexture(ResourceID shader_id, const east
 
     auto find = false;
 
-    const auto &vertex_pair = shader.vertex_texture_index.find(name.c_str());
-    if (vertex_pair != shader.vertex_texture_index.end()) {
+    const auto &vertex_pair = shader.info.vertex.texture_index.find(name.c_str());
+    if (vertex_pair != shader.info.vertex.texture_index.end()) {
       ApplyTexture(texture_id, vertex_pair->second, GraphicsPipelineStage::kVertexShader);
       find = true;
     }
 
-    const auto &fragment_pair = shader.fragment_texture_index.find(name.c_str());
-    if (fragment_pair != shader.fragment_texture_index.end()) {
+    const auto &fragment_pair = shader.info.fragment.texture_index.find(name.c_str());
+    if (fragment_pair != shader.info.fragment.texture_index.end()) {
       ApplyTexture(texture_id, fragment_pair->second, GraphicsPipelineStage::kFragmentShader);
       find = true;
     }
@@ -356,13 +356,13 @@ void D3D11Renderer::UpdateShaderResourceSampler(ResourceID shader_id, const east
     auto vertex_index = -1;
     auto fragment_index = -1;
 
-    auto &vertex_pair = shader.vertex_sampler_index.find(name.c_str());
-    if (vertex_pair != shader.vertex_sampler_index.end()) {
+    auto vertex_pair = shader.info.vertex.sampler_index.find(name.c_str());
+    if (vertex_pair != shader.info.vertex.sampler_index.end()) {
       vertex_index = vertex_pair->second;
     }
 
-    auto &fragment_pair = shader.fragment_sampler_index.find(name.c_str());
-    if (fragment_pair != shader.fragment_sampler_index.end()) {
+    auto fragment_pair = shader.info.fragment.sampler_index.find(name.c_str());
+    if (fragment_pair != shader.info.fragment.sampler_index.end()) {
       fragment_index = fragment_pair->second;
     }
 
@@ -386,8 +386,8 @@ void D3D11Renderer::UpdateShaderResourceBlock(ResourceID shader_id, const eastl:
 
     auto &uniform_buffer = resource_manager()->uniform_buffer_pool_.Find(uniform_buffer_id);
     if (uniform_buffer.status() == ResourceStatus::kCompleted) {
-      const auto &vertex_pair = shader.vertex_uniform_block_info.find(name.c_str());
-      if (vertex_pair != shader.vertex_uniform_block_info.end()) {
+      const auto &vertex_pair = shader.info.vertex.uniform_block_info.find(name.c_str());
+      if (vertex_pair != shader.info.vertex.uniform_block_info.end()) {
         const auto &info = vertex_pair->second;
         if (info.size < uniform_buffer.config().size) {
           Log::GetInstance().Error("bind uniform buffer, but size too large\n");
@@ -395,8 +395,8 @@ void D3D11Renderer::UpdateShaderResourceBlock(ResourceID shader_id, const eastl:
           context_->VSSetConstantBuffers(info.location, 1, &uniform_buffer.uniform_buffer);
         }
       }
-      const auto &fragment_pair = shader.fragment_uniform_block_info.find(name.c_str());
-      if (fragment_pair != shader.fragment_uniform_block_info.end()) {
+      const auto &fragment_pair = shader.info.fragment.uniform_block_info.find(name.c_str());
+      if (fragment_pair != shader.info.fragment.uniform_block_info.end()) {
         const auto &info = vertex_pair->second;
         if (info.size < uniform_buffer.config().size) {
           Log::GetInstance().Error("bind uniform buffer, but size too large\n");
@@ -440,7 +440,7 @@ void D3D11Renderer::ApplyMesh(ResourceID id) {
     // TODO multi vertex buffer
     if (mesh.vertex_buffer != cache_.vertex_buffer) {
       static const uint32 offset = 0;
-      context_->IASetVertexBuffers(0, 1, &mesh.vertex_buffer, &mesh.config().layout.size, &offset);
+      context_->IASetVertexBuffers(0, 1, &mesh.vertex_buffer, reinterpret_cast<UINT *>(&mesh.config().layout.size), &offset);
       cache_.vertex_buffer = mesh.vertex_buffer;
     }
     if (mesh.index_buffer != cache_.index_buffer) {
@@ -457,7 +457,7 @@ void D3D11Renderer::UpdateMesh(ResourceID id, DataPtr vertex_data, DataPtr index
     // TODO multi vertex buffer
     if (mesh.vertex_buffer != cache_.vertex_buffer) {
       static const uint32 offset = 0;
-      context_->IASetVertexBuffers(0, 1, &mesh.vertex_buffer, &mesh.config().layout.size, &offset);
+      context_->IASetVertexBuffers(0, 1, &mesh.vertex_buffer, reinterpret_cast<UINT *>(&mesh.config().layout.size), &offset);
       cache_.vertex_buffer = mesh.vertex_buffer;
     }
     if (vertex_data != nullptr && vertex_data->size() > 0) {
@@ -521,14 +521,14 @@ void D3D11Renderer::ApplyD3D11Shader(D3D11Shader &shader) {
   if (shader.vertex_shader != cache_.vertex_shader) {
     context_->VSSetShader(shader.vertex_shader, nullptr, 0);
     if (shader.vertex_global_uniform_block != nullptr) {
-      context_->VSSetConstantBuffers(shader.vertex_global_uniform_block_info.location, 1, &shader.vertex_global_uniform_block);
+      context_->VSSetConstantBuffers(shader.info.vertex.global_uniform_block_info.location, 1, &shader.vertex_global_uniform_block);
     }
     cache_.vertex_shader = shader.vertex_shader;
   }
   if (shader.fragment_shader != cache_.fragment_shader) {
     context_->PSSetShader(shader.fragment_shader, nullptr, 0);
     if (shader.fragment_global_uniform_block != nullptr) {
-      context_->PSSetConstantBuffers(shader.fragment_global_uniform_block_info.location, 1, &shader.fragment_global_uniform_block);
+      context_->PSSetConstantBuffers(shader.info.fragment.global_uniform_block_info.location, 1, &shader.fragment_global_uniform_block);
     }
     cache_.fragment_shader = shader.fragment_shader;
   }

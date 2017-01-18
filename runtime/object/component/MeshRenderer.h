@@ -21,7 +21,7 @@ class MeshRenderer : public Component {
 
   void SetMaterialCount(size_t value) { materials_.resize(value); }
 
-  MaterialPtr GetMaterial(size_t index) { return index < materials_.size() ?  materials_.at(index) : nullptr; }
+  MaterialPtr &GetMaterial(size_t index) { return materials_.at(index); }
 
   virtual void Update() override;
 

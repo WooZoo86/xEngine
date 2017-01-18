@@ -333,6 +333,82 @@ static uint32 IndexForVertexElementSemantic(VertexElementSemantic semantic) {
   }
 }
 
+static VertexElementSemantic VertexElementSemanticForSemanticAndIndex(const char *semantic, uint32 index) {
+  if (strcmp(semantic, "POSITION") == 0) {
+    switch (index) {
+      case 0: return VertexElementSemantic::kPosition;
+      default: 
+        x_error("unsupport semantic POSITION index\n");
+        return VertexElementSemantic::kInvalid;
+    }
+  } else if (strcmp(semantic, "TEXCOORD") == 0) {
+    switch (index) {
+      case 0: return VertexElementSemantic::kTexcoord0;
+      case 1: return VertexElementSemantic::kTexcoord1;
+      case 2: return VertexElementSemantic::kTexcoord2;
+      case 3: return VertexElementSemantic::kTexcoord3;
+      default: 
+        x_error("unsupport semantic TEXCOORD index\n");
+        return VertexElementSemantic::kInvalid;
+    }
+  } else if (strcmp(semantic, "COLOR") == 0) {
+    switch (index) {
+      case 0: return VertexElementSemantic::kColor0;
+      case 1: return VertexElementSemantic::kColor1;
+      default: 
+        x_error("unsupport semantic COLOR index\n");
+        return VertexElementSemantic::kInvalid;
+    }
+  } else if (strcmp(semantic, "NORMAL") == 0) {
+    switch (index) {
+      case 0: return VertexElementSemantic::kNormal;
+      default: 
+        x_error("unsupport semantic NORMAL index\n");
+        return VertexElementSemantic::kInvalid;
+    }
+  } else if (strcmp(semantic, "TANGENT") == 0) {
+    switch (index) {
+      case 0: return VertexElementSemantic::kTangent;
+      default: 
+        x_error("unsupport semantic TANGENT index\n");
+        return VertexElementSemantic::kInvalid;
+    }
+  } else if (strcmp(semantic, "BINORMAL") == 0) {
+    switch (index) {
+      case 0: return VertexElementSemantic::kBinormal;
+      default: 
+        x_error("unsupport semantic BINORMAL index\n");
+        return VertexElementSemantic::kInvalid;
+    }
+  } else if (strcmp(semantic, "BLENDWEIGHT") == 0) {
+    switch (index) {
+      case 0: return VertexElementSemantic::kWeights;
+      default: 
+        x_error("unsupport semantic BLENDWEIGHT index\n");
+        return VertexElementSemantic::kInvalid;
+    }
+  } else if (strcmp(semantic, "BLENDINDICES") == 0) {
+    switch (index) {
+      case 0: return VertexElementSemantic::kIndices;
+      default: 
+        x_error("unsupport semantic BLENDINDICES index\n");
+        return VertexElementSemantic::kInvalid;
+    }
+  } else if (strcmp(semantic, "INSTANCE") == 0) {
+    switch (index) {
+      case 0: return VertexElementSemantic::kInstance0;
+      case 1: return VertexElementSemantic::kInstance1;
+      case 2: return VertexElementSemantic::kInstance2;
+      case 3: return VertexElementSemantic::kInstance3;
+      default: 
+        x_error("unsupport semantic INSTANCE index\n");
+        return VertexElementSemantic::kInvalid;
+    }
+  } else {
+    return VertexElementSemantic::kInvalid;
+  }
+}
+
 static DXGI_FORMAT EnumForVertexElementFormat(VertexElementFormat format) {
   switch (format) {
     case VertexElementFormat::kFloat1: return DXGI_FORMAT_R32_FLOAT;
@@ -349,6 +425,26 @@ static DXGI_FORMAT EnumForVertexElementFormat(VertexElementFormat format) {
     case VertexElementFormat::kShort4Normalized: return DXGI_FORMAT_R16G16B16A16_SNORM;
     default: x_error("unsupport VertexElementFormat!\n"); return DXGI_FORMAT_UNKNOWN;
   }
+}
+
+static VertexElementFormat VertexElementFormatForComponentTypeAndMask(D3D_REGISTER_COMPONENT_TYPE type, uint8_t mask) {
+  if (type == D3D_REGISTER_COMPONENT_FLOAT32) {
+    if (mask == 1) {
+      return VertexElementFormat::kFloat1;
+    } else if (mask == 3) {
+      return VertexElementFormat::kFloat2;
+    } else if (mask == 7) {
+      return VertexElementFormat::kFloat3;
+    } else if (mask == 15) {
+      return VertexElementFormat::kFloat4;
+    }
+  } else if (type == D3D_REGISTER_COMPONENT_SINT32) {
+    // TODO
+  } else if (type == D3D_REGISTER_COMPONENT_UINT32) {
+    // TODO
+  }
+  x_error("Invalid component type and mask\n");
+  return VertexElementFormat::kInvalid;
 }
 
 static DXGI_FORMAT EnumForIndexFormat(IndexFormat format) {

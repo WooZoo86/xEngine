@@ -4,6 +4,6 @@ else()
     add_executable(ObjectSample ObjectSample.cc)
 endif()
 
-target_link_libraries(ObjectSample xEngine)
+target_link_libraries(ObjectSample xEngine stb_image)
 
 set_target_properties(ObjectSample PROPERTIES FOLDER "sample")

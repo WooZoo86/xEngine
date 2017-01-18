@@ -52,8 +52,9 @@ static DataPtr CompileShader(const char *type, const char *source, const char *e
 }
 
 static void ReflectShader(ID3D11Device *device, DataPtr blob, void **data, ID3D11Buffer **buffer,
-                          D3D11Shader::UniformBlockInfo &global_info,
-                          eastl::hash_map<eastl::string, D3D11Shader::UniformBlockInfo> &block_map,
+                          VertexLayout *input_layout,
+                          ShaderInfo::UniformBlockInfo &global_info,
+                          eastl::hash_map<eastl::string, ShaderInfo::UniformBlockInfo> &block_map,
                           eastl::hash_map<eastl::string, uint32> &texture_map,
                           eastl::hash_map<eastl::string, uint32> &sampler_map) {
   ID3D11ShaderReflection *reflection = nullptr;
@@ -71,36 +72,53 @@ static void ReflectShader(ID3D11Device *device, DataPtr blob, void **data, ID3D1
   auto uniform_count = 0;
   auto texture_count = 0;
 
+  if (input_layout) {
+    for (auto input_index = 0; input_index < desc.InputParameters; ++input_index) {
+      D3D11_SIGNATURE_PARAMETER_DESC input_desc;
+      ZeroMemory(&input_desc, sizeof(input_desc));
+      x_d3d11_assert_msg(reflection->GetInputParameterDesc(input_index, &input_desc), "get input description failed\n");
+
+      input_layout->AddElement(VertexElementSemanticForSemanticAndIndex(input_desc.SemanticName, input_desc.SemanticIndex),
+                               VertexElementFormatForComponentTypeAndMask(input_desc.ComponentType, input_desc.Mask));
+    }
+  }
+
   for (auto resource_index = 0; resource_index < desc.BoundResources; ++resource_index) {
     D3D11_SHADER_INPUT_BIND_DESC resource_desc;
+    ZeroMemory(&resource_desc, sizeof(resource_desc));
     x_d3d11_assert_msg(reflection->GetResourceBindingDesc(resource_index, &resource_desc), "get resource description failed\n");
 
     if (resource_desc.Type == D3D_SIT_CBUFFER) {
       ++uniform_count;
       x_assert(uniform_count < static_cast<uint16>(GraphicsMaxDefine::kMaxUniformBlockCount));
 
-      D3D11Shader::UniformBlockInfo info;
-      info.location = resource_desc.BindPoint;
+      ShaderInfo::UniformBlockInfo block_info;
+      block_info.location = resource_desc.BindPoint;
 
       auto uniform_block_reflection = reflection->GetConstantBufferByName(resource_desc.Name);
 
       D3D11_SHADER_BUFFER_DESC uniform_block_desc;
+      ZeroMemory(&uniform_block_desc, sizeof(uniform_block_desc));
       x_d3d11_assert_msg(uniform_block_reflection->GetDesc(&uniform_block_desc), "get constant reflection failed\n");
-      info.size = uniform_block_desc.Size;
+      block_info.size = uniform_block_desc.Size;
 
       for (auto variable_index = 0; variable_index < uniform_block_desc.Variables; ++variable_index) {
         auto variable_reflection = uniform_block_reflection->GetVariableByIndex(variable_index);
+
         D3D11_SHADER_VARIABLE_DESC variable_desc;
+        ZeroMemory(&variable_desc, sizeof(variable_desc));
         x_d3d11_assert_msg(variable_reflection->GetDesc(&variable_desc), "get variable description failed\n");
         auto variable_type_reflection = variable_reflection->GetType();
+
         D3D11_SHADER_TYPE_DESC variable_type_desc;
+        ZeroMemory(&variable_type_desc, sizeof(variable_type_desc));
         x_d3d11_assert_msg(variable_type_reflection->GetDesc(&variable_type_desc), "get variable type description failed\n");
 
-        D3D11Shader::UniformElementInfo element_info;
+        ShaderInfo::UniformElementInfo element_info;
         element_info.offset = variable_desc.StartOffset;
         element_info.size = variable_desc.Size;
 
-        info.elements.insert({ variable_desc.Name, element_info });
+        block_info.elements.insert({ variable_desc.Name, element_info });
       }
 
       if (strcmp(uniform_block_desc.Name, "$Globals") == 0 && uniform_block_desc.Size > 0) {
@@ -116,19 +134,17 @@ static void ReflectShader(ID3D11Device *device, DataPtr blob, void **data, ID3D1
 
         x_d3d11_assert_msg(device->CreateBuffer(&uniform_buffer_desc, nullptr, &uniform_buffer), "create global uniform buffer failed\n");
 
-        *data = eastl::GetDefaultAllocator()->allocate(info.size);
+        *data = eastl::GetDefaultAllocator()->allocate(block_info.size);
         *buffer = uniform_buffer;
-        global_info = info;
+        global_info = block_info;
       } else {
-        block_map.insert({ uniform_block_desc.Name, info });
+        block_map.insert({ uniform_block_desc.Name, block_info });
       }
-    }
-    else if (resource_desc.Type == D3D_SIT_TEXTURE) {
+    } else if (resource_desc.Type == D3D_SIT_TEXTURE) {
       ++texture_count;
       x_assert(uniform_count < static_cast<uint16>(GraphicsMaxDefine::kMaxTextureCount));
       texture_map.insert(eastl::make_pair(resource_desc.Name, resource_desc.BindPoint));
-    }
-    else if (resource_desc.Type == D3D_SIT_SAMPLER) {
+    } else if (resource_desc.Type == D3D_SIT_SAMPLER) {
       sampler_map.insert(eastl::make_pair(resource_desc.Name, resource_desc.BindPoint));
     }
   }
@@ -160,10 +176,11 @@ void D3D11ShaderFactory::Create(D3D11Shader &resource) {
     ReflectShader(device_, config.vertex,
       &resource.vertex_global_uniform_buffer,
       &resource.vertex_global_uniform_block,
-      resource.vertex_global_uniform_block_info,
-      resource.vertex_uniform_block_info,
-      resource.vertex_texture_index,
-      resource.vertex_sampler_index);
+      &resource.info.input_layout,
+      resource.info.vertex.global_uniform_block_info,
+      resource.info.vertex.uniform_block_info,
+      resource.info.vertex.texture_index,
+      resource.info.vertex.sampler_index);
   }
 
   if (config.fragment == nullptr) {
@@ -181,10 +198,11 @@ void D3D11ShaderFactory::Create(D3D11Shader &resource) {
     ReflectShader(device_, config.fragment,
       &resource.fragment_global_uniform_buffer,
       &resource.fragment_global_uniform_block,
-      resource.fragment_global_uniform_block_info,
-      resource.fragment_uniform_block_info,
-      resource.fragment_texture_index,
-      resource.fragment_sampler_index);
+      nullptr,
+      resource.info.fragment.global_uniform_block_info,
+      resource.info.fragment.uniform_block_info,
+      resource.info.fragment.texture_index,
+      resource.info.fragment.sampler_index);
   }
 
   x_assert_msg(vertex_shader, "create vertex shader failed!\n");
@@ -205,13 +223,13 @@ void D3D11ShaderFactory::Destroy(D3D11Shader &resource) {
     resource.fragment_shader->Release();
   }
   if (resource.vertex_global_uniform_buffer != nullptr) {
-    eastl::GetDefaultAllocator()->deallocate(resource.vertex_global_uniform_buffer, resource.vertex_global_uniform_block_info.size);
+    eastl::GetDefaultAllocator()->deallocate(resource.vertex_global_uniform_buffer, resource.info.vertex.global_uniform_block_info.size);
   }
   if (resource.vertex_global_uniform_block != nullptr) {
     resource.vertex_global_uniform_block->Release();
   }
   if (resource.fragment_global_uniform_buffer != nullptr) {
-    eastl::GetDefaultAllocator()->deallocate(resource.fragment_global_uniform_buffer, resource.fragment_global_uniform_block_info.size);
+    eastl::GetDefaultAllocator()->deallocate(resource.fragment_global_uniform_buffer, resource.info.fragment.global_uniform_block_info.size);
   }
   if (resource.fragment_global_uniform_block != nullptr) {
     resource.fragment_global_uniform_block->Release();

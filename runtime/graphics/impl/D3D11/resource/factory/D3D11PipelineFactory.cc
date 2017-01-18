@@ -13,13 +13,19 @@ void D3D11PipelineFactory::Create(D3D11Pipeline &resource) {
   resource.Loading();
 
   auto &shader = manager_->shader_pool_.Find(resource.config().shader);
-  if (shader.status() != ResourceStatus::kCompleted) {
+  if (shader.status() != ResourceStatus::kCompleted || shader.config().vertex == nullptr) {
     Log::GetInstance().Error("[D3D11PipelineFactory::Create] invalid shader\n");
     resource.Failed();
     return;
   }
 
   auto &layout = resource.config().vertex_layout;
+  if (layout.element_count == 0) {
+    Log::GetInstance().Error("[D3D11PipelineFactory::Create] input layout is empty\n");
+    resource.Failed();
+    return;
+  }
+
   ID3D11InputLayout *input_layout = nullptr;
 
   D3D11_INPUT_ELEMENT_DESC input_element_desc[static_cast<uint16>(GraphicsMaxDefine::kMaxVertexElementCount)];
@@ -36,15 +42,13 @@ void D3D11PipelineFactory::Create(D3D11Pipeline &resource) {
     desc.InstanceDataStepRate = 0; //TODO
   }
 
-  if (shader.config().vertex != nullptr) {
-    x_d3d11_assert_msg(device_->CreateInputLayout(
-      input_element_desc,
-      layout.element_count,
-      shader.config().vertex->buffer(),
-      shader.config().vertex->size(),
-      &input_layout
-    ), "create input layout failed\n");
-  }
+  x_d3d11_assert_msg(device_->CreateInputLayout(
+    input_element_desc,
+    layout.element_count,
+    shader.config().vertex->buffer(),
+    shader.config().vertex->size(),
+    &input_layout
+  ), "create input layout failed\n");
 
   resource.input_layout = input_layout;
 

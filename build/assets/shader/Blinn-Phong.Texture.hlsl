@@ -25,7 +25,7 @@ float4x4 uView;
 float4x4 uProjection;
 
 Texture2D uTexture;
-SamplerState uSampler;
+SamplerState uTexture_sampler;
 
 VS_OUTPUT VS(VS_INPUT input)
 {
@@ -61,7 +61,7 @@ PS_OUTPUT PS(PS_INPUT input)
 
     float3 result = ambient + diffuse + specular;
 
-    output.Color = float4(result, 1.0) * uTexture.Sample(uSampler, input.Texcoord);
+    output.Color = float4(result, 1.0) * uTexture.Sample(uTexture_sampler, input.Texcoord);
 
     return output;
 }

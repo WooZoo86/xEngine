@@ -44,6 +44,8 @@ class OpenGLGraphicsResourceManager: public GraphicsResourceManagerInterface {
 
   virtual void Destroy(ResourceID id) override;
 
+  virtual ShaderInfo QueryInfo(ResourceID id) override;
+
  private:
   OpenGLShaderPool shader_pool_;
   OpenGLTexturePool texture_pool_;

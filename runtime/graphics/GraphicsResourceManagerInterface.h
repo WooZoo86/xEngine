@@ -9,6 +9,8 @@
 #include "config/SamplerConfig.h"
 #include "config/UniformBufferConfig.h"
 
+#include "info/ShaderInfo.h"
+
 #include "resource/Resource.h"
 #include "resource/ResourceManager.h"
 
@@ -35,6 +37,8 @@ class GraphicsResourceManagerInterface: public ResourceManager {
   virtual ResourceID Create(const UniformBufferConfig &config) = 0;
 
   virtual void Destroy(ResourceID id) = 0;
+
+  virtual ShaderInfo QueryInfo(ResourceID id) = 0;
 };
 
 }

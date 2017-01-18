@@ -42,7 +42,19 @@ enum class CameraType {
   kOrthographic,
 };
 
+class Camera;
+
+PTR_DECLARE(Camera)
+
 class Camera : public Component {
+ public:
+  static CameraPtr main_camera() { return main_camera_; }
+
+  static void set_main_camera(CameraPtr camera) { main_camera_ = camera; }
+
+ private:
+  static CameraPtr main_camera_;
+
  public:
   CREATE_FUNC_DECLARE(Camera)
 
@@ -139,8 +151,6 @@ class Camera : public Component {
 
   glm::mat4 view_matrix_;
 };
-
-PTR_DECLARE(Camera)
 
 } // namespace xEngine
 

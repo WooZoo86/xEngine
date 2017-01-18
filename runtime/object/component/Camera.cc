@@ -6,6 +6,8 @@
 
 namespace xEngine {
 
+CameraPtr Camera::main_camera_;
+
 void Camera::Rotate(float32 yaw, float32 pitch) {
   auto eye_direction = target_ - position_;
   auto rotation = glm::rotate(glm::mat4(), glm::radians(yaw), glm::vec3(0.0f, 1.0f, 0.0f));

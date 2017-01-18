@@ -24,15 +24,15 @@ class Shader {
 
   void Finalize();
 
-  void Apply();
+  void Apply() const;
 
-  void UpdateResourceData(const eastl::string &name, DataPtr data);
+  void UpdateResourceData(const eastl::string &name, DataPtr data) const;
 
-  void UpdateResourceTexture(const eastl::string &name, ResourceID texture_id);
+  void UpdateResourceTexture(const eastl::string &name, ResourceID texture_id) const;
 
-  void UpdateResourceSampler(const eastl::string &name, ResourceID sampler_id);
+  void UpdateResourceSampler(const eastl::string &name, ResourceID sampler_id) const;
 
-  void UpdateResourceBlock(const eastl::string &name, ResourceID uniform_buffer_id);
+  void UpdateResourceBlock(const eastl::string &name, ResourceID uniform_buffer_id) const;
 
   PipelineConfig &pipeline_config() { return pipeline_config_; }
 
@@ -42,6 +42,7 @@ class Shader {
   ResourceID pipeline_id_{kInvalidResourceID};
   ShaderConfig shader_config_;
   PipelineConfig pipeline_config_;
+  ShaderInfo info_;
 };
 
 } // namespace xEngine

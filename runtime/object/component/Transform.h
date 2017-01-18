@@ -54,7 +54,7 @@ class Transform : public Component {
 
   glm::quat rotation_;
   glm::vec3 translation_;
-  glm::vec3 scale_;
+  glm::vec3 scale_{1.0f, 1.0f, 1.0f};
 };
 
 } // namespace xEngine

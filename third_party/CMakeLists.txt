@@ -4,6 +4,10 @@ add_subdirectory(spine-c)
 include_directories(mongoose)
 add_library(mongoose mongoose/mongoose.c)
 
+if(X_WINDOWS)
+    set_target_properties(mongoose PROPERTIES COMPILE_FLAGS "/wd4311 /wd4312")
+endif()
+
 include_directories(stb_image)
 add_library(stb_image stb_image/stb_image.c)
 

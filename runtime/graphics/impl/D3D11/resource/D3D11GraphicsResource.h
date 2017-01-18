@@ -10,73 +10,39 @@
 #include "graphics/config/SamplerConfig.h"
 #include "graphics/config/UniformBufferConfig.h"
 
+#include "graphics/info/ShaderInfo.h"
+
 #include "resource/Resource.h"
 
 #include <D3D11.h>
 #include <D3Dcompiler.h>
 
-#include <EASTL/hash_map.h>
-#include <EASTL/string.h>
-#include <EASTL/tuple.h>
-
 namespace xEngine {
 
 struct D3D11Shader : public Resource<ShaderConfig> {
 
-  struct UniformElementInfo {
-    size_t offset{0};
-    size_t size{0};
-  };
-
-  struct UniformBlockInfo {
-    size_t location{0};
-    size_t size{0};
-    eastl::hash_map<eastl::string, UniformElementInfo> elements;
-  };
+  ShaderInfo info;
 
   ID3D11VertexShader *vertex_shader{nullptr};
 
   ID3D11PixelShader *fragment_shader{nullptr};
 
-  UniformBlockInfo vertex_global_uniform_block_info;
-
   void *vertex_global_uniform_buffer{nullptr};
 
   ID3D11Buffer *vertex_global_uniform_block{nullptr};
-
-  UniformBlockInfo fragment_global_uniform_block_info;
 
   void *fragment_global_uniform_buffer{nullptr};
 
   ID3D11Buffer *fragment_global_uniform_block{nullptr};
 
-  eastl::hash_map<eastl::string, UniformBlockInfo> vertex_uniform_block_info;
-
-  eastl::hash_map<eastl::string, UniformBlockInfo> fragment_uniform_block_info;
-
-  eastl::hash_map<eastl::string, uint32> vertex_texture_index;
-
-  eastl::hash_map<eastl::string, uint32> vertex_sampler_index;
-
-  eastl::hash_map<eastl::string, uint32> fragment_texture_index;
-
-  eastl::hash_map<eastl::string, uint32> fragment_sampler_index;
-
   virtual void Reset() override {
+    info = ShaderInfo();
     vertex_shader = nullptr;
     fragment_shader = nullptr;
-    vertex_global_uniform_block_info = UniformBlockInfo();
     vertex_global_uniform_buffer = nullptr;
     vertex_global_uniform_block = nullptr;
-    fragment_global_uniform_block_info = UniformBlockInfo();
     fragment_global_uniform_buffer = nullptr;
     fragment_global_uniform_block = nullptr;
-    vertex_uniform_block_info.clear();
-    fragment_uniform_block_info.clear();
-    vertex_texture_index.clear();
-    vertex_sampler_index.clear();
-    fragment_texture_index.clear();
-    fragment_sampler_index.clear();
   }
 
 };
